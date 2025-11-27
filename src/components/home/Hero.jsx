@@ -20,7 +20,7 @@ const floatAnimation = `
 const Hero = () => {
   const images = [
     { url: "/images/image-one.jpg", alt: "Community 1" },
-    { url: "/images/image-two.jpg", alt: "Community 2" },
+    { url: "/images/image7.webp", alt: "Community 2" },
     { url: "/images/image-three.jpg", alt: "Community 3" },
     { url: "/images/image-four.jpg", alt: "Community 4" },
     { url: "/images/image-five.jpg", alt: "Community 5" }
