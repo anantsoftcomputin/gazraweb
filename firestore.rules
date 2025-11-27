@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Public read access for events, menu items, and initiatives
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /menuItems/{itemId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Cafe collections - public read, authenticated write
+    match /cafeFeatures/{featureId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /cafeTestimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /cafeSettings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /cafeInstagram/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /cafeMoments/{momentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /initiatives/{initiativeId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /gallery/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Form submissions - allow create for anyone, read/update/delete for authenticated users
+    match /contactMessages/{messageId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    match /volunteers/{volunteerId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    match /supportRequests/{requestId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    match /newsletter/{subscriberId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    // Skills courses - public read, authenticated write
+    match /skillsCourses/{courseId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Skills enrollments - allow create for anyone, read/update/delete for authenticated users
+    match /skillsEnrollments/{enrollmentId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    // Admin-only collections
+    match /admins/{adminId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
