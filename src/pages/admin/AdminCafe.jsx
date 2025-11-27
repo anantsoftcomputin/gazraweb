@@ -16,8 +16,8 @@ const AdminCafe = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [imagePreview, setImagePreview] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
   
   const { getDocuments, addDocument, updateDocument, deleteDocument } = useFirestore('menuItems');
   const { uploadFile, deleteFile } = useStorage();
@@ -28,7 +28,7 @@ const AdminCafe = () => {
     price: '',
     category: 'starters',
     spiceLevel: 'mild',
-    image: '',
+    images: [],
     tags: [],
     popular: false,
     recommended: false,
@@ -97,18 +97,38 @@ const AdminCafe = () => {
   }, [searchQuery, selectedCategory, menuItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
-        return;
-      }
-      setImageFile(file);
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Validate file sizes
+    const invalidFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+    if (invalidFiles.length > 0) {
+      alert('All images should be less than 5MB');
+      return;
+    }
+    
+    setImageFiles(prev => [...prev, ...files]);
+    
+    // Generate previews
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreviews(prev => [...prev, reader.result]);
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    
+    // Also remove from formData.images if it's an existing image URL
+    if (formData.images[index]) {
+      setFormData(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index)
+      }));
     }
   };
 
@@ -124,19 +144,24 @@ const AdminCafe = () => {
   const openModal = (item = null) => {
     if (item) {
       setEditingItem(item);
+      // Handle both old single image format and new multiple images format
+      const existingImages = item.images ? 
+        (Array.isArray(item.images) ? item.images : [item.images]) : 
+        (item.image ? [item.image] : []);
+      
       setFormData({
         name: item.name,
         description: item.description,
         price: item.price,
         category: item.category,
         spiceLevel: item.spiceLevel || 'mild',
-        image: item.image || '',
+        images: existingImages,
         tags: item.tags || [],
         popular: item.popular || false,
         recommended: item.recommended || false,
         available: item.available !== false
       });
-      setImagePreview(item.image || '');
+      setImagePreviews(existingImages.map(img => typeof img === 'string' ? img : img?.url).filter(Boolean));
     } else {
       setEditingItem(null);
       setFormData({
@@ -145,49 +170,53 @@ const AdminCafe = () => {
         price: '',
         category: 'starters',
         spiceLevel: 'mild',
-        image: '',
+        images: [],
         tags: [],
         popular: false,
         recommended: false,
         available: true
       });
-      setImagePreview('');
+      setImagePreviews([]);
     }
-    setImageFile(null);
+    setImageFiles([]);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
-    setImageFile(null);
-    setImagePreview('');
+    setImageFiles([]);
+    setImagePreviews([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      let imageUrl = formData.image;
+      let imageUrls = [...formData.images];
 
-      // Upload new image if selected
-      if (imageFile) {
-        const uploadedUrl = await uploadFile(imageFile, 'menu');
-        imageUrl = uploadedUrl;
-        
-        // Delete old image if updating
-        if (editingItem && editingItem.image) {
-          try {
-            await deleteFile(editingItem.image);
-          } catch (error) {
-            console.error('Error deleting old image:', error);
+      // Upload new images if selected
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          const uploadResult = await uploadFile(file, 'menu');
+          if (uploadResult.success) {
+            imageUrls.push(uploadResult.url);
+          } else {
+            throw new Error('Failed to upload one or more images');
           }
         }
       }
 
+      // Ensure all image URLs are strings
+      const finalImageUrls = imageUrls.map(img => 
+        typeof img === 'string' ? img : (img?.url || '')
+      ).filter(Boolean);
+
       const itemData = {
         ...formData,
-        image: imageUrl,
+        images: finalImageUrls,
+        // Keep backward compatibility with single image field
+        image: finalImageUrls[0] || '',
         price: formData.price.startsWith('₹') ? formData.price : `₹${formData.price}`
       };
 
@@ -325,7 +354,7 @@ const AdminCafe = () => {
                 <div className="relative h-48 bg-gray-200">
                   {item.image ? (
                     <img
-                      src={item.image}
+                      src={typeof item.image === 'string' ? item.image : item.image?.url}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
@@ -456,37 +485,46 @@ const AdminCafe = () => {
                 {/* Image Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dish Image
+                    Dish Images (Multiple)
                   </label>
-                  <div className="flex items-center gap-4">
-                    <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                  
+                  {/* Image Previews Grid */}
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-4 gap-3 mb-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
-                      )}
+                      ))}
                     </div>
-                    <div className="flex-1">
-                      <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                        <Upload className="w-5 h-5 mr-2" />
-                        Choose Image
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                      </label>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Recommended: 800x600px, max 5MB
-                      </p>
-                    </div>
+                  )}
+                  
+                  <div className="flex-1">
+                    <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                      <Upload className="w-5 h-5 mr-2" />
+                      Add Images
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Recommended: 1200x800px (landscape), max 5MB each. Can select multiple.
+                    </p>
                   </div>
                 </div>
 

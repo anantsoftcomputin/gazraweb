@@ -1,10 +1,150 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
   Coffee, Utensils, Leaf, ChefHat, Heart, Star, Clock, Sparkles, MapPin,
-  Instagram, ArrowRight, Volume2, VolumeX, PlayCircle, Phone
+  Instagram, ArrowRight, Volume2, VolumeX, PlayCircle, Phone, X, Flame, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+
+// Dish Image Carousel Component for card view
+const DishImageCarousel = ({ images, item }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const imageArray = images && images.length > 0 ? images : ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'];
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('DishImageCarousel - Item:', item.name);
+    console.log('DishImageCarousel - Images received:', images);
+    console.log('DishImageCarousel - Image array:', imageArray);
+  }, []);
+  
+  // Auto-slide effect
+  useEffect(() => {
+    if (imageArray.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % imageArray.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [imageArray.length]);
+  
+  return (
+    <div className="relative overflow-hidden h-48 flex-shrink-0">
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={`${item.id}-${currentIndex}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          src={imageArray[currentIndex]}
+          alt={item.name}
+          className="w-full h-full object-cover transition-transform duration-700 transform group-hover:scale-110"
+          loading="lazy"
+          onError={(e) => {
+            console.error('Image failed to load:', imageArray[currentIndex]);
+            e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+          }}
+        />
+      </AnimatePresence>
+      
+      {/* Badges */}
+      {(item.popular || item.recommended) && (
+        <div className={`absolute top-3 left-3 px-3 py-1.5 text-white text-xs rounded-full flex items-center backdrop-blur-sm ${item.popular ? 'bg-red-500/80' : 'bg-primary-500/80'}`}>
+          {item.popular ? <Heart className="w-3 h-3 mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
+          {item.popular ? 'Popular' : "Chef's Pick"}
+        </div>
+      )}
+      
+      {/* Image indicators */}
+      {imageArray.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+          {imageArray.map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 rounded-full transition-all ${
+                index === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    </div>
+  );
+};
+
+// Dish Modal Carousel Component with manual navigation (landscape)
+const DishModalCarousel = ({ dish }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const imageArray = (dish.images || [dish.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url).filter(Boolean);
+  const images = imageArray.length > 0 ? imageArray : ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200'];
+  
+  const goToNext = () => setCurrentIndex((prev) => (prev + 1) % images.length);
+  const goToPrev = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  
+  return (
+    <div className="relative h-[400px] bg-gray-100">
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={`modal-${dish.id}-${currentIndex}`}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ duration: 0.3 }}
+          src={images[currentIndex]}
+          alt={dish.name}
+          className="w-full h-full object-contain"
+          onError={(e) => {
+            console.error('Modal image failed to load:', images[currentIndex]);
+            e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200';
+          }}
+        />
+      </AnimatePresence>
+      
+      {/* Badges */}
+      <div className="absolute top-4 left-4 flex gap-2">
+        {dish.popular && (
+          <span className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-full flex items-center">
+            <Heart className="w-4 h-4 mr-1" />
+            Popular
+          </span>
+        )}
+        {dish.recommended && (
+          <span className="px-3 py-1.5 bg-primary-500 text-white text-sm rounded-full flex items-center">
+            <Sparkles className="w-4 h-4 mr-1" />
+            Chef's Pick
+          </span>
+        )}
+      </div>
+      
+      {/* Navigation arrows */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={goToPrev}
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700" />
+          </button>
+          
+          {/* Image counter */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-black/50 text-white text-sm rounded-full">
+            {currentIndex + 1} / {images.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const GazraCafe = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -15,6 +155,7 @@ const GazraCafe = () => {
   const [features, setFeatures] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDish, setSelectedDish] = useState(null);
   const videoRef = useRef(null);
   const { scrollY } = useScroll();
   const { getDocuments: getMoments } = useFirestore('cafeMoments');
@@ -274,7 +415,7 @@ const GazraCafe = () => {
                 <div className="flex items-center space-x-6 text-white/80 mt-8 text-sm sm:text-base">
                   <div className="flex items-center">
                     <MapPin className="w-5 h-5 mr-2 flex-shrink-0" />
-                    <span>123 Community Avenue</span>
+                    <span>Opposite Sursagar, MCSU, Vadodara</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="w-5 h-5 mr-2 flex-shrink-0" />
@@ -388,28 +529,18 @@ const GazraCafe = () => {
                     viewport={{ once: true, amount: 0.2 }} // Trigger slightly earlier
                     transition={{ delay: (index % 4) * 0.08 }} // Slightly faster delay
                     layout // Animate layout changes when filtering
-                    className="group relative flex flex-col" // Added flex flex-col for consistent height
+                    className="group relative flex flex-col cursor-pointer" // Added cursor-pointer
+                    onClick={() => setSelectedDish(item)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100/30 rounded-3xl transform group-hover:rotate-1 transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
                     <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl border border-gray-100 flex flex-col flex-grow">
-                      <div className="relative overflow-hidden h-48 flex-shrink-0">
-                        <img
-                          src={dishImages[item.name] || item.image || '/api/placeholder/400/300'} // Fallback chain
-                          alt={item.name}
-                          className="w-full h-full object-cover transition-transform duration-700 transform group-hover:scale-110"
-                          loading="lazy" // Lazy load images
-                        />
-                        {(item.popular || item.recommended) && (
-                          <div className={`absolute top-3 left-3 px-3 py-1.5 text-white text-xs rounded-full flex items-center backdrop-blur-sm ${item.popular ? 'bg-red-500/80' : 'bg-primary-500/80'}`}>
-                             {item.popular ? <Heart className="w-3 h-3 mr-1" /> : <Sparkles className="w-3 h-3 mr-1" /> }
-                             {item.popular ? 'Popular' : "Chef's Pick"}
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
+                      <DishImageCarousel 
+                        images={(item.images || [item.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url)} 
+                        item={item}
+                      />
 
-                      <div className="p-5 sm:p-6 flex flex-col flex-grow"> {/* Use flex-grow here */}
-                        <div className="flex justify-between items-start mb-2 gap-2"> {/* Use items-start */}
+                      <div className="p-5 sm:p-6 flex flex-col flex-grow min-h-[200px]"> {/* Added min-height */}
+                        <div className="flex justify-between items-start mb-3 gap-2">
                           <h3 className="text-md sm:text-lg font-semibold text-gray-800 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2">
                              {item.name}
                           </h3>
@@ -417,7 +548,7 @@ const GazraCafe = () => {
                              {item.price}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-3">{item.description}</p> {/* Use flex-grow here */}
+                        <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-4 leading-relaxed">{item.description}</p> {/* Increased to 4 lines with better spacing */}
 
                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100"> {/* Use mt-auto */}
                           <div className="flex flex-wrap gap-1.5">
@@ -630,7 +761,7 @@ const GazraCafe = () => {
 
            {/* Masonry-like grid */}
            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 auto-rows-[200px_300px]"> {/* Example fixed row heights */}
-              {(moments.length > 0 ? moments : instagramPosts).map((image, index) => (
+              {moments.length > 0 ? moments.map((image, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -656,7 +787,11 @@ const GazraCafe = () => {
                      </p>
                   </a>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="col-span-2 md:col-span-4 text-center py-12">
+                  <p className="text-gray-500">No moments available yet. Check back soon!</p>
+                </div>
+              )}
            </div>
 
            <div className="text-center mt-12">
@@ -829,6 +964,79 @@ const GazraCafe = () => {
            </motion.div>
          </div>
       </section>
+
+      {/* Dish Detail Modal */}
+      <AnimatePresence>
+        {selectedDish && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedDish(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedDish(null)}
+                className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all z-10"
+              >
+                <X className="w-6 h-6 text-gray-700" />
+              </button>
+
+              {/* Image Carousel - Landscape */}
+              <DishModalCarousel dish={selectedDish} />
+
+              {/* Content */}
+              <div className="p-8">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedDish.name}</h2>
+                    <div className="flex items-center gap-3">
+                      {selectedDish.spiceLevel && selectedDish.spiceLevel !== 'none' && (
+                        <div className="flex items-center gap-1">
+                          <Flame className={`w-4 h-4 ${
+                            selectedDish.spiceLevel === 'mild' ? 'text-green-500' :
+                            selectedDish.spiceLevel === 'medium' ? 'text-yellow-500' :
+                            selectedDish.spiceLevel === 'hot' ? 'text-orange-500' :
+                            'text-red-500'
+                          }`} />
+                          <span className="text-sm text-gray-600 capitalize">{selectedDish.spiceLevel}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-primary-600">{selectedDish.price}</div>
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-700 text-lg leading-relaxed mb-6">{selectedDish.description}</p>
+
+                {/* Tags */}
+                {selectedDish.tags && selectedDish.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedDish.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
