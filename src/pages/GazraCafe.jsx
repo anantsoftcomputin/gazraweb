@@ -11,9 +11,16 @@ const GazraCafe = () => {
   const [muted, setMuted] = useState(true);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [moments, setMoments] = useState([]);
+  const [menuItems, setMenuItems] = useState({ starters: [], mains: [], beverages: [] });
+  const [features, setFeatures] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const videoRef = useRef(null);
   const { scrollY } = useScroll();
-  const { getDocuments } = useFirestore('cafeMoments');
+  const { getDocuments: getMoments } = useFirestore('cafeMoments');
+  const { getDocuments: getMenuItems } = useFirestore('menuItems');
+  const { getDocuments: getFeatures } = useFirestore('cafeFeatures');
+  const { getDocuments: getTestimonials } = useFirestore('cafeTestimonials');
 
   // Framer Motion transformations for Hero parallax
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
@@ -53,14 +60,15 @@ const GazraCafe = () => {
     }
   }, []);
 
-  // Load moments from Firestore
+  // Load all data from Firestore
   useEffect(() => {
-    const loadMoments = async () => {
+    const loadAllData = async () => {
+      setLoading(true);
       try {
-        const result = await getDocuments();
-        if (result.success && result.data.length > 0) {
-          // Sort by date and take up to 8 moments
-          const sortedMoments = result.data
+        // Load moments
+        const momentsResult = await getMoments();
+        if (momentsResult.success && momentsResult.data.length > 0) {
+          const sortedMoments = momentsResult.data
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, 8)
             .map((moment, index) => ({
@@ -71,11 +79,36 @@ const GazraCafe = () => {
             }));
           setMoments(sortedMoments);
         }
+
+        // Load menu items
+        const menuResult = await getMenuItems();
+        if (menuResult.success && menuResult.data.length > 0) {
+          const categorizedMenu = {
+            starters: menuResult.data.filter(item => item.category === 'starters' && item.available !== false),
+            mains: menuResult.data.filter(item => item.category === 'mains' && item.available !== false),
+            beverages: menuResult.data.filter(item => item.category === 'beverages' && item.available !== false)
+          };
+          setMenuItems(categorizedMenu);
+        }
+
+        // Load features
+        const featuresResult = await getFeatures();
+        if (featuresResult.success && featuresResult.data.length > 0) {
+          setFeatures(featuresResult.data.filter(f => f.active !== false));
+        }
+
+        // Load testimonials
+        const testimonialsResult = await getTestimonials();
+        if (testimonialsResult.success && testimonialsResult.data.length > 0) {
+          setTestimonials(testimonialsResult.data.filter(t => t.active !== false));
+        }
       } catch (error) {
-        console.error('Error loading moments:', error);
+        console.error('Error loading cafe data:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    loadMoments();
+    loadAllData();
   }, []);
 
   // Helper to get spice level color
@@ -97,67 +130,20 @@ const GazraCafe = () => {
     { id: 'beverages', name: 'Drinks', icon: Coffee }
   ];
 
-  const menuItems = {
-    starters: [
-      { id: 1, name: 'Kothambir Wadi', description: 'Crispy fried coriander fritters - our signature starter', price: '₹180', spiceLevel: 'medium', popular: true, image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950', tags: ['Signature'] },
-      { id: 2, name: 'Sabudana Wada', description: 'Crispy sago patties served with special mint raita', price: '₹160', spiceLevel: 'mild', image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0', tags: ['Classic'] },
-      { id: 3, name: 'Vada Pav', description: 'Authentic Mumbai street style vada pav with special chutney', price: '₹120', spiceLevel: 'hot', popular: true, image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84', tags: ['Street Food'] },
-      { id: 4, name: 'Tam Tam', description: 'Our take on the city-famous bhusu', price: '₹150', spiceLevel: 'medium', image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0', tags: ['Special'] }, // Placeholder image
-      { id: 5, name: 'Gujju Mezze', description: 'Fusion thepla nachos served with thecha dip and salsa', price: '₹220', spiceLevel: 'hot', recommended: true, image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0', tags: ['Fusion'] } // Placeholder image
-    ],
-    mains: [
-      { id: 6, name: 'Zunka Bhakhar', description: 'Traditional maharashtrian delicacy with authentic flavors', price: '₹240', spiceLevel: 'hot', popular: true, image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', tags: ['Traditional'] }, // Placeholder image
-      { id: 7, name: 'Misal Pav', description: 'Spicy sprouts curry served with fresh pav', price: '₹180', spiceLevel: 'extra-hot', popular: true, image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', tags: ['Spicy'] }, // Placeholder image
-      { id: 8, name: 'Capdi u dhyu', description: 'Our special big cut vegetable Undhiyu preparation', price: '₹260', spiceLevel: 'medium', recommended: true, image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', tags: ['Seasonal'] } // Placeholder image
-    ],
-    beverages: [
-      { id: 9, name: 'Special Masala Chai', description: 'House blend of spiced tea', price: '₹80', image: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8', tags: ['Hot'] },
-      { id: 10, name: 'Artisanal Coffee', description: 'Freshly brewed specialty coffee', price: '₹120', image: 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d', tags: ['Premium'] }, // Placeholder image
-      { id: 11, name: 'Natural Mocktails', description: 'Refreshing beverages made with fresh ingredients', price: '₹150', image: 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d', tags: ['Fresh'] } // Placeholder image
-    ]
+  // Helper to get icon component from icon name string
+  const getIconComponent = (iconName) => {
+    const iconMap = {
+      'ChefHat': ChefHat,
+      'Leaf': Leaf,
+      'Coffee': Coffee,
+      'Heart': Heart,
+      'Utensils': Utensils,
+      'Star': Star,
+      'Clock': Clock,
+      'Sparkles': Sparkles
+    };
+    return iconMap[iconName] || Heart;
   };
-
-  // Using URLs directly from menuItems might be simpler, but this allows overrides/fallbacks
-  const dishImages = {
-    'Kothambir Wadi': 'https://images.unsplash.com/photo-1601050690597-df0568f70950',
-    'Sabudana Wada': 'https://images.unsplash.com/photo-1589302168068-964664d93dc0',
-    'Vada Pav': 'https://images.unsplash.com/photo-1606491956689-2ea866880c84',
-    'Zunka Bhakhar': 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', // Placeholder
-    'Misal Pav': 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', // Placeholder
-    'Capdi u dhyu': 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8', // Placeholder
-    'Special Masala Chai': 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8',
-    'Artisanal Coffee': 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d', // Placeholder
-    'Natural Mocktails': 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d', // Placeholder
-    'Tam Tam': 'https://images.unsplash.com/photo-1589302168068-964664d93dc0', // Placeholder
-    'Gujju Mezze': 'https://images.unsplash.com/photo-1589302168068-964664d93dc0', // Placeholder
-  };
-
-  // Testimonial Data
-   const testimonials = [
-     { name: 'Priya Sharma', role: 'Food Blogger', image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5', comment: "The Zunka Bhakhar took me right back to my grandmother's kitchen. Every bite tells a story of authentic Maharashtra.", rating: 5, dish: 'Zunka Bhakhar' },
-     { name: 'Rahul Mehta', role: 'Regular Customer', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d', comment: 'Best Vada Pav in the city! The special chutney makes all the difference. A must-visit for authentic street food lovers.', rating: 5, dish: 'Vada Pav' },
-     { name: 'Anita Patel', role: 'Food Critic', image: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604', comment: 'The fusion dishes are innovative yet respectful to tradition. The Gujju Mezze is a creative masterpiece!', rating: 5, dish: 'Gujju Mezze' }
-  ];
-
-   // Instagram Feed Data
-   const instagramPosts = [
-     { url: '/images/image11.jpg', span: 'row-span-2 col-span-1' }, // Tall
-     { url: 'https://images.unsplash.com/photo-1531968455001-5c5272a41129', span: 'row-span-1 col-span-1' }, // Square
-     { url: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187', span: 'row-span-1 col-span-1' }, // Square
-     { url: 'https://images.unsplash.com/photo-1482012792084-a0c3725f289f', span: 'row-span-2 col-span-1' }, // Tall
-     { url: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a', span: 'row-span-1 col-span-1' }, // Square
-     { url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93', span: 'row-span-1 col-span-1' }, // Square
-     { url: 'https://images.unsplash.com/photo-1511920170033-f8396924c348', span: 'row-span-1 col-span-1' }, // Square
-     { url: 'https://images.unsplash.com/photo-1523371683773-935ca36a4a3d', span: 'row-span-1 col-span-1' }  // Square
-   ];
-
-   // Feature Data
-   const features = [
-      { icon: ChefHat, title: 'Expert Chefs', description: 'Masters of traditional recipes' },
-      { icon: Leaf, title: 'Fresh Ingredients', description: 'Locally sourced produce' },
-      { icon: Coffee, title: 'Masala Chai with Love', description: 'Chai of India' },
-      { icon: Heart, title: 'Made with Love', description: 'Passion in every dish' }
-   ];
 
    // Stats Data
    const stats = [
@@ -167,6 +153,17 @@ const GazraCafe = () => {
       { number: '10k+', label: 'Happy Customers', icon: Heart }
    ];
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading cafe data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
@@ -509,9 +506,11 @@ const GazraCafe = () => {
               </p>
 
               <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">
-                {features.map((feature, index) => (
+                {features.map((feature, index) => {
+                  const IconComponent = getIconComponent(feature.icon);
+                  return (
                   <motion.div
-                    key={index}
+                    key={feature.id || index}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -519,14 +518,15 @@ const GazraCafe = () => {
                     className="group bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
                   >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-300">
-                      <feature.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <h3 className="text-md sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors duration-300">
                        {feature.title}
                     </h3>
                     <p className="text-sm text-gray-600">{feature.description}</p>
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           </div>
