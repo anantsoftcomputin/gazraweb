@@ -18,12 +18,14 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+import PhoneVerification from '../components/shared/PhoneVerification';
 
 const GazraSupportFund = () => {
   const [openSection, setOpenSection] = useState('');
   const [formStep, setFormStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1
     fullName: '',
@@ -70,6 +72,11 @@ const GazraSupportFund = () => {
   };
 
   const handleSubmit = async () => {
+    if (!phoneVerified) {
+      alert('Please verify your phone number before submitting.');
+      return;
+    }
+
     if (!formData.declaration) {
       alert('Please agree to the declaration before submitting.');
       return;
@@ -742,6 +749,15 @@ const GazraSupportFund = () => {
                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Enter your contact number"
                         required
+                      />
+                    </div>
+
+                    {/* Phone Verification */}
+                    <div className="md:col-span-2 border-2 border-primary-100 rounded-lg p-4 bg-primary-50/30">
+                      <PhoneVerification
+                        phoneNumber={formData.phoneNumber}
+                        onPhoneChange={(phone) => setFormData({ ...formData, phoneNumber: phone })}
+                        onVerified={() => setPhoneVerified(true)}
                       />
                     </div>
 

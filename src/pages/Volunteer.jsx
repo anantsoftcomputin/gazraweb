@@ -8,11 +8,13 @@ import {
   MessageSquare, Send
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+import PhoneVerification from '../components/shared/PhoneVerification';
 
 const VolunteerPage = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const { addDocument } = useFirestore('volunteers');
   
   const [formData, setFormData] = useState({
@@ -107,6 +109,12 @@ const VolunteerPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!phoneVerified) {
+      alert('Please verify your phone number before submitting.');
+      return;
+    }
+
     setSubmitting(true);
     
     try {
@@ -341,6 +349,15 @@ const VolunteerPage = () => {
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border-2 border-primary-100 focus:border-primary-500 focus:ring focus:ring-primary-200 transition-all duration-200"
                   placeholder="Your phone number"
+                />
+              </div>
+
+              {/* Phone Verification */}
+              <div className="border-2 border-primary-100 rounded-lg p-4 bg-primary-50/30">
+                <PhoneVerification
+                  phoneNumber={formData.phone}
+                  onPhoneChange={(phone) => setFormData({ ...formData, phone })}
+                  onVerified={() => setPhoneVerified(true)}
                 />
               </div>
 

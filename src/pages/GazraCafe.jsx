@@ -5,7 +5,7 @@ import {
   Instagram, ArrowRight, Volume2, VolumeX, PlayCircle, Phone, X, Flame, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
-import BookTable from '../components/cafe/BookTable';
+import FloatingBookingForm from '../components/cafe/FloatingBookingForm';
 
 // Dish Image Carousel Component for card view
 const DishImageCarousel = ({ images, item }) => {
@@ -959,10 +959,8 @@ const GazraCafe = () => {
          </div>
       </section>
 
-      {/* Book Table Section */}
-      <section className="bg-primary-50">
-        <BookTable />
-      </section>
+      {/* Floating Booking Form */}
+      <FloatingBookingForm />
 
       {/* Dish Detail Modal */}
       <AnimatePresence>

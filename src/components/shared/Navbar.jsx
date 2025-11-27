@@ -85,15 +85,19 @@ const Navbar = () => {
     { name: 'Menu', path: '/cafe', scrollTo: 'menu', icon: Utensils },
     { name: 'Moments', path: '/cafe', scrollTo: 'moments', icon: Camera },
     { name: 'Contact', path: '/contact', icon: Phone },
-    { name: 'Book Table', path: '/cafe', scrollTo: 'booking', icon: CalendarCheck }
+    { name: 'Book Table', action: 'openBooking', icon: CalendarCheck }
   ];
 
   // Determine which nav items to show
   const currentNavItems = location.pathname === '/cafe' ? cafeNavItems : mobileNavItems;
 
-  // Handle scroll to section for cafe nav
+  // Handle scroll to section for cafe nav or open booking
   const handleCafeNavClick = (item) => {
-    if (item.scrollTo && location.pathname === '/cafe') {
+    if (item.action === 'openBooking') {
+      // Trigger floating booking form
+      const event = new CustomEvent('openBookingForm');
+      window.dispatchEvent(event);
+    } else if (item.scrollTo && location.pathname === '/cafe') {
       setTimeout(() => {
         const element = document.getElementById(item.scrollTo);
         if (element) {
@@ -326,6 +330,15 @@ const Navbar = () => {
                 className={`flex flex-col items-center justify-center w-1/5 py-1
                   ${dropdownOpen === 'mobile-programs' ? 'text-primary-600' : 'text-neutral-600'}`}
                 onClick={() => toggleDropdown('mobile-programs')}
+              >
+                <item.icon size={20} className="mb-1" />
+                <span className="text-xs">{item.name}</span>
+              </button>
+            ) : item.action ? (
+              <button
+                key={index}
+                className="flex flex-col items-center justify-center w-1/5 py-1 text-neutral-600"
+                onClick={() => handleCafeNavClick(item)}
               >
                 <item.icon size={20} className="mb-1" />
                 <span className="text-xs">{item.name}</span>

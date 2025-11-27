@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Clock, Phone, Mail, User, Filter, Check, X, MessageSquare, Search } from 'lucide-react';
+import { Calendar, Users, Clock, Phone, Mail, User, Filter, Check, X, MessageSquare, Search, Send } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
+import { mockSendSMS } from '../../utils/smsService';
 
 const AdminCafeBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -83,6 +84,18 @@ const AdminCafeBookings = () => {
     try {
       const result = await updateDocument(bookingId, { status: newStatus });
       if (result.success) {
+        // Find the booking
+        const booking = bookings.find(b => b.id === bookingId);
+        
+        // Send SMS if confirmed
+        if (newStatus === 'confirmed' && booking) {
+          const message = `Your booking at Gazra Cafe is confirmed! We look forward to serving you on ${new Date(booking.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} at ${booking.time}. Please reach 10 minutes early to avoid waiting. To cancel, call us at least 30 minutes beforehand: 82003 06871`;
+          
+          mockSendSMS(booking.phone, message);
+          
+          alert('Booking confirmed! SMS sent to customer.');
+        }
+        
         setBookings(prev => 
           prev.map(booking => 
             booking.id === bookingId ? { ...booking, status: newStatus } : booking

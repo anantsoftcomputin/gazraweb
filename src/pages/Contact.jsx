@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import {
   MapPin, Mail, Phone, Clock, Send, MessageSquare, ArrowRight, Info
 } from 'lucide-react';
+import PhoneVerification from '../components/shared/PhoneVerification';
 
 // Simple Form Input Component (Optional, for cleaner form code)
 const FormInput = ({ id, label, type = 'text', placeholder, value, onChange }) => (
@@ -65,8 +66,9 @@ const ContactInfoCard = ({ icon, title, children, href }) => {
 
 // Main Contact Page Component
 const ContactPage = () => {
-  const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
-  const [isSubmitted, setIsSubmitted] = useState(false); // Basic submission state
+  const [formState, setFormState] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -75,13 +77,20 @@ const ContactPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!phoneVerified) {
+      alert('Please verify your phone number before submitting.');
+      return;
+    }
+
     // Basic simulation of form submission
     console.log("Form Data:", formState);
     setIsSubmitted(true);
     // Reset form after a delay
     setTimeout(() => {
-        setFormState({ name: '', email: '', subject: '', message: '' });
+        setFormState({ name: '', email: '', phone: '', subject: '', message: '' });
         setIsSubmitted(false);
+        setPhoneVerified(false);
     }, 3000);
     // In a real app, you would send this data to a server
   };
@@ -192,6 +201,17 @@ const ContactPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <FormInput id="name" label="Your Name" placeholder="John Doe" value={formState.name} onChange={handleInputChange} />
                   <FormInput id="email" label="Email Address" type="email" placeholder="john.doe@example.com" value={formState.email} onChange={handleInputChange} />
+                  <FormInput id="phone" label="Phone Number" type="tel" placeholder="9876543210" value={formState.phone} onChange={handleInputChange} />
+                  
+                  {/* Phone Verification */}
+                  <div className="border-2 border-primary-100 rounded-lg p-4 bg-primary-50/30">
+                    <PhoneVerification
+                      phoneNumber={formState.phone}
+                      onPhoneChange={(phone) => setFormState({ ...formState, phone })}
+                      onVerified={() => setPhoneVerified(true)}
+                    />
+                  </div>
+
                   <FormInput id="subject" label="Subject" placeholder="How can we help you?" value={formState.subject} onChange={handleInputChange} />
                   <FormTextarea id="message" label="Your Message" placeholder="Tell us more about your inquiry..." value={formState.message} onChange={handleInputChange} />
                   <motion.button

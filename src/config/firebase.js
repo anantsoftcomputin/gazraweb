@@ -23,6 +23,11 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase services
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const auth = getAuth(app);
+
+// Force reCAPTCHA v2 (not Enterprise) for Phone Auth
+if (typeof window !== 'undefined') {
+  auth.settings.appVerificationDisabledForTesting = false;
+}
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const realtimeDb = getDatabase(app);
