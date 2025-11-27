@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Calendar, Users, Coffee, FileText,
   Image, MessageSquare, Settings, LogOut, Menu, X,
-  TrendingUp, Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap
+  TrendingUp, Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -57,6 +57,7 @@ const AdminLayout = ({ children }) => {
     { icon: Star, label: 'Features', path: '/admin/cafe/features' },
     { icon: MessageSquare, label: 'Testimonials', path: '/admin/cafe/testimonials' },
     { icon: Image, label: 'Moments', path: '/admin/cafe/moments' },
+    { icon: CalendarCheck, label: 'Bookings', path: '/admin/cafe/bookings' },
     { icon: Clock, label: 'Settings', path: '/admin/cafe/settings' },
   ];
 

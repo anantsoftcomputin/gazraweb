@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -78,6 +78,30 @@ const Navbar = () => {
     { name: 'Events', path: '/events', icon: Calendar },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
+
+  // Cafe-specific mobile navigation items
+  const cafeNavItems = [
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'Menu', path: '/cafe', scrollTo: 'menu', icon: Utensils },
+    { name: 'Moments', path: '/cafe', scrollTo: 'moments', icon: Camera },
+    { name: 'Contact', path: '/contact', icon: Phone },
+    { name: 'Book Table', path: '/cafe', scrollTo: 'booking', icon: CalendarCheck }
+  ];
+
+  // Determine which nav items to show
+  const currentNavItems = location.pathname === '/cafe' ? cafeNavItems : mobileNavItems;
+
+  // Handle scroll to section for cafe nav
+  const handleCafeNavClick = (item) => {
+    if (item.scrollTo && location.pathname === '/cafe') {
+      setTimeout(() => {
+        const element = document.getElementById(item.scrollTo);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  };
 
   return (
     <>
@@ -295,7 +319,7 @@ const Navbar = () => {
       {/* Bottom Mobile Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white bg-opacity-95 backdrop-blur-md shadow-md border-t border-neutral-200 z-50">
         <div className="flex justify-around items-center h-16">
-          {mobileNavItems.map((item, index) => (
+          {currentNavItems.map((item, index) => (
             item.isDropdown ? (
               <button
                 key={index}
@@ -311,8 +335,11 @@ const Navbar = () => {
                 key={index}
                 to={item.path}
                 className={`flex flex-col items-center justify-center w-1/5 py-1
-                  ${location.pathname === item.path ? 'text-primary-600' : 'text-neutral-600'}`}
-                onClick={() => setIsMenuOpen(false)}
+                  ${(location.pathname === item.path && !item.scrollTo) || (location.pathname === '/cafe' && item.scrollTo) ? 'text-primary-600' : 'text-neutral-600'}`}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  handleCafeNavClick(item);
+                }}
               >
                 <item.icon size={20} className="mb-1" />
                 <span className="text-xs">{item.name}</span>

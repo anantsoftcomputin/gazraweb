@@ -23,6 +23,7 @@ import AdminCafeFeatures from './pages/admin/AdminCafeFeatures';
 import AdminCafeTestimonials from './pages/admin/AdminCafeTestimonials';
 import AdminCafeSettings from './pages/admin/AdminCafeSettings';
 import AdminCafeMoments from './pages/admin/AdminCafeMoments';
+import AdminCafeBookings from './pages/admin/AdminCafeBookings';
 import AdminVolunteers from './pages/admin/AdminVolunteers';
 import AdminMessages from './pages/admin/AdminMessages';
 import AdminNewsletter from './pages/admin/AdminNewsletter';
@@ -62,6 +63,7 @@ function App() {
         <Route path="/admin/cafe/testimonials" element={<AdminCafeTestimonials />} />
         <Route path="/admin/cafe/settings" element={<AdminCafeSettings />} />
         <Route path="/admin/cafe/moments" element={<AdminCafeMoments />} />
+        <Route path="/admin/cafe/bookings" element={<AdminCafeBookings />} />
         
         {/* Other Admin Routes */}
         <Route path="/admin/volunteers" element={<AdminVolunteers />} />

@@ -5,6 +5,7 @@ import {
   Instagram, ArrowRight, Volume2, VolumeX, PlayCircle, Phone, X, Flame, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+import BookTable from '../components/cafe/BookTable';
 
 // Dish Image Carousel Component for card view
 const DishImageCarousel = ({ images, item }) => {
@@ -732,7 +733,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Instagram Feed Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-primary-50/30">
+      <section id="moments" className="py-24 bg-gradient-to-b from-white to-primary-50/30">
          <div className="container mx-auto px-4">
            <div className="text-center mb-16">
               <motion.div
@@ -956,6 +957,11 @@ const GazraCafe = () => {
              </div>
            </motion.div>
          </div>
+      </section>
+
+      {/* Book Table Section */}
+      <section className="bg-primary-50">
+        <BookTable />
       </section>
 
       {/* Dish Detail Modal */}
