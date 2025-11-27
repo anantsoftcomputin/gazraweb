@@ -72,21 +72,21 @@ const BookTable = () => {
         return;
       }
 
-      // Create booking object
+      // Create booking object - simplified structure
       const bookingData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
         date: formData.date,
         time: formData.time,
-        partySize: formData.partySize,
-        specialRequests: formData.specialRequests || '',
-        status: 'pending',
-        bookingDate: formData.date,
-        bookingTime: formData.time
+        partySize: String(formData.partySize),
+        specialRequests: formData.specialRequests ? formData.specialRequests.trim() : '',
+        status: 'pending'
       };
 
+      console.log('Submitting booking data:', bookingData);
       const result = await addDocument(bookingData);
+      console.log('Booking result:', result);
 
       if (result.success) {
         setSubmitted(true);
@@ -105,11 +105,12 @@ const BookTable = () => {
           setSubmitted(false);
         }, 5000);
       } else {
-        setError('Failed to submit booking. Please try again.');
+        console.error('Booking failed:', result.error);
+        setError(result.error || 'Failed to submit booking. Please try again.');
       }
     } catch (err) {
-      console.error('Booking error:', err);
-      setError('An error occurred. Please try again.');
+      console.error('Booking error details:', err);
+      setError(`Error: ${err.message || 'An error occurred. Please try again.'}`);
     } finally {
       setSubmitting(false);
     }
