@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Users, MessageSquare, User, Mail, Phone, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Users, MessageSquare, User, Mail, Phone, CheckCircle, AlertCircle } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 
 const BookTable = () => {
@@ -16,14 +16,40 @@ const BookTable = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [closedDates, setClosedDates] = useState([]);
+  const [dateWarning, setDateWarning] = useState('');
 
   const { addDocument } = useFirestore('cafeBookings');
+  const { getDocuments: getClosedDates } = useFirestore('cafeClosedDates');
+
+  // Load closed dates
+  useEffect(() => {
+    const loadClosedDates = async () => {
+      const result = await getClosedDates();
+      if (result.success && result.data) {
+        setClosedDates(result.data.map(item => item.date));
+      }
+    };
+    loadClosedDates();
+  }, []);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Check if selected date is closed
+    if (name === 'date') {
+      const closedDate = closedDates.find(d => d === value);
+      if (closedDate) {
+        setDateWarning('⚠️ The cafe is closed on this date. Please select another date.');
+      } else {
+        setDateWarning('');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -39,11 +65,23 @@ const BookTable = () => {
         return;
       }
 
+      // Check if date is closed
+      if (closedDates.includes(formData.date)) {
+        setError('Sorry, the cafe is closed on the selected date. Please choose another date.');
+        setSubmitting(false);
+        return;
+      }
+
       // Create booking object
       const bookingData = {
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        partySize: formData.partySize,
+        specialRequests: formData.specialRequests || '',
         status: 'pending',
-        createdAt: new Date().toISOString(),
         bookingDate: formData.date,
         bookingTime: formData.time
       };
@@ -214,8 +252,16 @@ const BookTable = () => {
                 onChange={handleChange}
                 min={today}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                  dateWarning ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
               />
+              {dateWarning && (
+                <div className="mt-2 flex items-start gap-2 text-sm text-red-600">
+                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>{dateWarning}</span>
+                </div>
+              )}
             </div>
 
             {/* Time */}
@@ -248,8 +294,6 @@ const BookTable = () => {
                 <option value="8:00 PM">8:00 PM</option>
                 <option value="8:30 PM">8:30 PM</option>
                 <option value="9:00 PM">9:00 PM</option>
-                <option value="9:30 PM">9:30 PM</option>
-                <option value="10:00 PM">10:00 PM</option>
               </select>
             </div>
           </div>

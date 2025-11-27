@@ -58,6 +58,7 @@ const AdminLayout = ({ children }) => {
     { icon: MessageSquare, label: 'Testimonials', path: '/admin/cafe/testimonials' },
     { icon: Image, label: 'Moments', path: '/admin/cafe/moments' },
     { icon: CalendarCheck, label: 'Bookings', path: '/admin/cafe/bookings' },
+    { icon: Calendar, label: 'Closed Dates', path: '/admin/cafe/closed-dates' },
     { icon: Clock, label: 'Settings', path: '/admin/cafe/settings' },
   ];
 
