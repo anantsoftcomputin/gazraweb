@@ -1,6 +1,7 @@
 import React from 'react';
 import Hero from '../components/home/Hero';
 import QuickOverview from '../components/home/QuickOverview';
+import CafePreview from '../components/home/CafePreview';
 import EventsPreview from '../components/home/EventsPreview';
 import Newsletter from '../components/home/Newsletter';
 import FooterPreview from '../components/home/FooterPreview';
@@ -16,6 +17,11 @@ const Home = () => {
       {/* Quick Overview Section - White background */}
       <section className="bg-bg-primary-80">
         <QuickOverview />
+      </section>
+
+      {/* Cafe Preview Section - Primary light background */}
+      <section className="bg-primary-50">
+        <CafePreview />
       </section>
 
       {/* Events Preview Section - Primary background */}

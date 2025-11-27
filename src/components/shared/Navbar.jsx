@@ -74,7 +74,7 @@ const Navbar = () => {
   const mobileNavItems = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'About', path: '/about', icon: Info },
-    { name: 'Programs', path: null, icon: BookOpen, isDropdown: true },
+    { name: 'Initiatives', path: null, icon: BookOpen, isDropdown: true },
     { name: 'Events', path: '/events', icon: Calendar },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
@@ -301,10 +301,7 @@ const Navbar = () => {
                 key={index}
                 className={`flex flex-col items-center justify-center w-1/5 py-1
                   ${dropdownOpen === 'mobile-programs' ? 'text-primary-600' : 'text-neutral-600'}`}
-                onClick={() => {
-                  toggleDropdown('mobile-programs');
-                  setIsMenuOpen(true);
-                }}
+                onClick={() => toggleDropdown('mobile-programs')}
               >
                 <item.icon size={20} className="mb-1" />
                 <span className="text-xs">{item.name}</span>

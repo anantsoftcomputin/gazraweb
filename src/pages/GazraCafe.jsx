@@ -11,13 +11,6 @@ const DishImageCarousel = ({ images, item }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const imageArray = images && images.length > 0 ? images : ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'];
   
-  // Debug logging
-  useEffect(() => {
-    console.log('DishImageCarousel - Item:', item.name);
-    console.log('DishImageCarousel - Images received:', images);
-    console.log('DishImageCarousel - Image array:', imageArray);
-  }, []);
-  
   // Auto-slide effect
   useEffect(() => {
     if (imageArray.length <= 1) return;
