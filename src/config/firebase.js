@@ -27,6 +27,13 @@ export const auth = getAuth(app);
 // Force reCAPTCHA v2 (not Enterprise) for Phone Auth
 if (typeof window !== 'undefined') {
   auth.settings.appVerificationDisabledForTesting = false;
+  
+  // Enable localhost testing for development
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('Development mode: Configuring auth for localhost');
+    // This helps with localhost testing but should be disabled in production
+    auth.settings.appVerificationDisabledForTesting = import.meta.env.DEV;
+  }
 }
 export const db = getFirestore(app);
 export const storage = getStorage(app);

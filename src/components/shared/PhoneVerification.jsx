@@ -36,32 +36,56 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
     setError('');
 
     try {
-      // Initialize reCAPTCHA v2 when sending OTP
-      if (!window.recaptchaVerifier) {
+      // Clean up any existing reCAPTCHA first
+      if (window.recaptchaVerifier) {
         try {
-          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => {
-              console.log('reCAPTCHA solved successfully');
-            },
-            'expired-callback': () => {
-              console.log('reCAPTCHA expired');
-              setError('reCAPTCHA expired. Please try again.');
-              setLoading(false);
-            },
-            'error-callback': (error) => {
-              console.error('reCAPTCHA error:', error);
-              setError('reCAPTCHA verification failed. Please refresh the page.');
-              setLoading(false);
-            }
-          });
-          
-          // Render the reCAPTCHA widget
-          await window.recaptchaVerifier.render();
-          console.log('RecaptchaVerifier initialized and rendered successfully');
-        } catch (initError) {
-          console.error('Failed to initialize RecaptchaVerifier:', initError);
-          throw new Error('reCAPTCHA initialization failed. Please refresh the page.');
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        } catch (clearErr) {
+          console.log('Previous reCAPTCHA cleared');
+        }
+      }
+
+      // Wait a moment before creating new reCAPTCHA
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Initialize reCAPTCHA v2 when sending OTP
+      try {
+        // Use visible reCAPTCHA for development to avoid MALFORMED errors
+        const recaptchaSize = import.meta.env.DEV ? 'normal' : 'invisible';
+        
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: recaptchaSize,
+          callback: (token) => {
+            console.log('reCAPTCHA solved successfully, token:', token ? 'received' : 'none');
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired');
+            setError('reCAPTCHA expired. Please try again.');
+            setLoading(false);
+          },
+          'error-callback': (error) => {
+            console.error('reCAPTCHA error:', error);
+            setError('reCAPTCHA verification failed. Please refresh the page and try again.');
+            setLoading(false);
+          }
+        });
+        
+        // Render the reCAPTCHA widget
+        await window.recaptchaVerifier.render();
+        console.log('RecaptchaVerifier initialized and rendered successfully');
+        
+        // Wait a moment after rendering
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } catch (initError) {
+        console.error('Failed to initialize RecaptchaVerifier:', initError);
+        
+        // If it's a development environment and reCAPTCHA fails, provide helpful message
+        if (import.meta.env.DEV && initError.code === 'auth/invalid-app-credential') {
+          throw new Error('reCAPTCHA configuration issue. Please ensure your Firebase project has Phone Authentication enabled and reCAPTCHA v2 (not Enterprise) is configured. For localhost testing, add your domain to Firebase Console → Authentication → Settings → Authorized domains.');
+        } else {
+          throw new Error('reCAPTCHA initialization failed. Please refresh the page and try again.');
         }
       }
 
@@ -73,6 +97,11 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
       console.log('Sending OTP to:', formattedPhone);
       
       const appVerifier = window.recaptchaVerifier;
+      
+      if (!appVerifier) {
+        throw new Error('reCAPTCHA verifier not initialized');
+      }
+      
       const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       
       setConfirmationResult(result);
@@ -89,10 +118,12 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
       } else if (err.code === 'auth/too-many-requests') {
         errorMessage = 'Too many attempts. Please try again later.';
       } else if (err.code === 'auth/captcha-check-failed') {
-        errorMessage = 'reCAPTCHA verification failed. Please try again.';
+        errorMessage = 'reCAPTCHA verification failed. Please refresh the page and try again.';
+        console.error('reCAPTCHA MALFORMED error - this usually means reCAPTCHA was not properly initialized');
       } else if (err.code === 'auth/invalid-app-credential') {
-        errorMessage = 'Firebase reCAPTCHA configuration issue. Please ensure reCAPTCHA v2 (not Enterprise) is enabled in Firebase Console → Authentication → Settings.';
-        console.error('SOLUTION: Go to Firebase Console → Authentication → Settings → App Verification, and switch from Enterprise to Standard reCAPTCHA v2');
+        errorMessage = 'Firebase reCAPTCHA configuration issue. Please ensure reCAPTCHA v2 (not Enterprise) is enabled in Firebase Console → Authentication → Settings. For localhost, add localhost to Authorized domains.';
+        console.error('SOLUTION 1: Go to Firebase Console → Authentication → Settings → App Verification, and switch from Enterprise to Standard reCAPTCHA v2');
+        console.error('SOLUTION 2: Go to Firebase Console → Authentication → Settings → Authorized domains, and add localhost:5173 or localhost:3000');
       }
       
       setError(errorMessage);
@@ -206,6 +237,9 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
               )}
             </button>
           </div>
+          
+          {/* reCAPTCHA Container - positioned after send OTP button */}
+          <div id="recaptcha-container" className="flex justify-center mt-4"></div>
         </div>
       ) : (
         <div>

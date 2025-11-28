@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Clock, Phone, Mail, User, Filter, Check, X, MessageSquare, Search, Send } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
-import { mockSendSMS } from '../../utils/smsService';
+import { sendBookingConfirmationMessage } from '../../utils/smsService';
 
 const AdminCafeBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -89,11 +89,23 @@ const AdminCafeBookings = () => {
         
         // Send SMS if confirmed
         if (newStatus === 'confirmed' && booking) {
-          const message = `Your booking at Gazra Cafe is confirmed! We look forward to serving you on ${new Date(booking.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} at ${booking.time}. Please reach 10 minutes early to avoid waiting. To cancel, call us at least 30 minutes beforehand: 82003 06871`;
+          const bookingDetails = {
+            date: new Date(booking.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            time: booking.time
+          };
           
-          mockSendSMS(booking.phone, message);
+          // Send actual SMS using Firebase
+          const smsResult = await sendBookingConfirmationMessage(booking.phone, bookingDetails);
           
-          alert('Booking confirmed! SMS sent to customer.');
+          if (smsResult.success) {
+            if (smsResult.isMock) {
+              alert('Booking confirmed! SMS simulation completed (check console).');
+            } else {
+              alert('Booking confirmed! SMS sent to customer via Firebase.');
+            }
+          } else {
+            alert('Booking confirmed! However, SMS sending failed: ' + smsResult.error);
+          }
         }
         
         setBookings(prev => 
