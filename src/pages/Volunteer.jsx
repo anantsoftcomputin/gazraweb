@@ -5,9 +5,10 @@ import {
   Clock, ChefHat, Coffee,
   Sparkles, ArrowRight, 
   CheckCircle, MapPin,
-  MessageSquare, Send
+  MessageSquare, Send, Upload, FileText, Briefcase, X
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+import { useStorage } from '../hooks/useStorage';
 import PhoneVerification from '../components/shared/PhoneVerification';
 
 const VolunteerPage = () => {
@@ -15,16 +16,50 @@ const VolunteerPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeUploading, setResumeUploading] = useState(false);
   const { addDocument } = useFirestore('volunteers');
+  const { uploadFile } = useStorage();
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    interests: [],
-    availability: '',
-    message: ''
+    contributions: [],
+    otherContribution: '',
+    availability: [],
+    experienceLevel: '',
+    message: '',
+    resumeUrl: ''
   });
+
+  const contributionAreas = [
+    { id: 'community_outreach', label: 'Community & Outreach' },
+    { id: 'emotional_support', label: 'Emotional & Space Holding Support' },
+    { id: 'social_media', label: 'Social Media & Creative' },
+    { id: 'events_ground', label: 'Events & On-Ground Support' },
+    { id: 'administration', label: 'Administration & Coordination' },
+    { id: 'strategy_growth', label: 'Strategy, Partnerships & Growth' },
+    { id: 'research_documentation', label: 'Research & Documentation' },
+    { id: 'fundraising', label: 'Fundraising & Sponsorship' },
+    { id: 'technical_digital', label: 'Technical & Digital Support' },
+  ];
+
+  const availabilityOptions = [
+    { id: 'hours_2_3', label: '2–3 hours per week' },
+    { id: 'hours_4_6', label: '4–6 hours per week' },
+    { id: 'event_based', label: 'Event-based support only' },
+    { id: 'short_term', label: 'Short-term project commitment' },
+    { id: 'long_term', label: 'Long-term involvement' },
+    { id: 'flexible', label: 'Flexible / As needed' },
+  ];
+
+  const experienceLevels = [
+    { id: 'beginner', label: 'Beginner' },
+    { id: 'intermediate', label: 'Intermediate' },
+    { id: 'experienced', label: 'Experienced' },
+    { id: 'professional', label: 'Professional' },
+  ];
 
   const volunteerRoles = [
     {
@@ -107,6 +142,21 @@ const VolunteerPage = () => {
     }
   ];
 
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowed.includes(file.type)) {
+      alert('Please upload a PDF or Word document (.pdf, .doc, .docx)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be under 5 MB');
+      return;
+    }
+    setResumeFile(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -118,8 +168,19 @@ const VolunteerPage = () => {
     setSubmitting(true);
     
     try {
+      let resumeUrl = '';
+      if (resumeFile) {
+        setResumeUploading(true);
+        const uploadResult = await uploadFile(resumeFile, 'volunteer-resumes');
+        setResumeUploading(false);
+        if (uploadResult.success) {
+          resumeUrl = uploadResult.url;
+        }
+      }
+
       await addDocument({
         ...formData,
+        resumeUrl,
         selectedRole: selectedRole || 'Not specified',
         status: 'pending'
       });
@@ -129,11 +190,15 @@ const VolunteerPage = () => {
         name: '',
         email: '',
         phone: '',
-        interests: [],
-        availability: '',
-        message: ''
+        contributions: [],
+        otherContribution: '',
+        availability: [],
+        experienceLevel: '',
+        message: '',
+        resumeUrl: ''
       });
       setSelectedRole(null);
+      setResumeFile(null);
       
       // Reset success message after 5 seconds
       setTimeout(() => setSubmitted(false), 5000);
@@ -142,6 +207,7 @@ const VolunteerPage = () => {
       alert('Failed to submit application. Please try again.');
     } finally {
       setSubmitting(false);
+      setResumeUploading(false);
     }
   };
 
@@ -339,19 +405,6 @@ const VolunteerPage = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border-2 border-primary-100 focus:border-primary-500 focus:ring focus:ring-primary-200 transition-all duration-200"
-                  placeholder="Your phone number"
-                />
-              </div>
-
               {/* Phone Verification */}
               <div className="border-2 border-primary-100 rounded-lg p-4 bg-primary-50/30">
                 <PhoneVerification
@@ -361,46 +414,135 @@ const VolunteerPage = () => {
                 />
               </div>
 
+              {/* Contribution Areas */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Areas of Interest
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  As a Gajra Volunteer, I Can Contribute In
+                  <span className="text-gray-400 font-normal ml-1">(select all that apply)</span>
                 </label>
-                <div className="grid grid-cols-2 gap-4">
-                  {volunteerRoles.map((role) => (
-                    <label key={role.id} className="flex items-center space-x-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {contributionAreas.map((area) => (
+                    <label key={area.id} className="flex items-center space-x-3 cursor-pointer group">
                       <input
                         type="checkbox"
-                        checked={formData.interests.includes(role.id)}
+                        checked={formData.contributions.includes(area.id)}
                         onChange={(e) => {
-                          const newInterests = e.target.checked
-                            ? [...formData.interests, role.id]
-                            : formData.interests.filter(i => i !== role.id);
-                          setFormData({ ...formData, interests: newInterests });
+                          const updated = e.target.checked
+                            ? [...formData.contributions, area.id]
+                            : formData.contributions.filter(i => i !== area.id);
+                          setFormData({ ...formData, contributions: updated });
                         }}
-                        className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
                       />
-                      <span className="text-gray-700">{role.title}</span>
+                      <span className="text-sm text-gray-700 group-hover:text-primary-600 transition-colors">{area.label}</span>
+                    </label>
+                  ))}
+                  {/* Other option */}
+                  <label className="flex items-center space-x-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={formData.contributions.includes('other')}
+                      onChange={(e) => {
+                        const updated = e.target.checked
+                          ? [...formData.contributions, 'other']
+                          : formData.contributions.filter(i => i !== 'other');
+                        setFormData({ ...formData, contributions: updated, otherContribution: e.target.checked ? formData.otherContribution : '' });
+                      }}
+                      className="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700 group-hover:text-primary-600 transition-colors">Other</span>
+                  </label>
+                </div>
+                {formData.contributions.includes('other') && (
+                  <input
+                    type="text"
+                    value={formData.otherContribution}
+                    onChange={(e) => setFormData({ ...formData, otherContribution: e.target.value })}
+                    placeholder="Please specify..."
+                    className="mt-3 w-full px-4 py-2 rounded-lg border-2 border-primary-100 focus:border-primary-500 focus:ring focus:ring-primary-200 transition-all duration-200 text-sm"
+                  />
+                )}
+              </div>
+
+              {/* Availability */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  ⏳ Availability
+                  <span className="text-gray-400 font-normal ml-1">(select all that apply)</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {availabilityOptions.map((option) => (
+                    <label key={option.id} className="flex items-center space-x-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={formData.availability.includes(option.id)}
+                        onChange={(e) => {
+                          const updated = e.target.checked
+                            ? [...formData.availability, option.id]
+                            : formData.availability.filter(i => i !== option.id);
+                          setFormData({ ...formData, availability: updated });
+                        }}
+                        className="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-700 group-hover:text-primary-600 transition-colors">{option.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
+              {/* Experience Level */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  🎯 Experience Level
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {experienceLevels.map((level) => (
+                    <label key={level.id} className="flex items-center space-x-3 cursor-pointer group">
+                      <input
+                        type="radio"
+                        name="experienceLevel"
+                        value={level.id}
+                        checked={formData.experienceLevel === level.id}
+                        onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
+                        className="w-4 h-4 border-primary-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-700 group-hover:text-primary-600 transition-colors">{level.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Resume Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Availability
+                  Resume / CV
+                  <span className="text-gray-400 font-normal ml-1">(Optional — PDF or Word, max 5 MB)</span>
                 </label>
-                <select
-                  value={formData.availability}
-                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border-2 border-primary-100 focus:border-primary-500 focus:ring focus:ring-primary-200 transition-all duration-200"
-                >
-                  <option value="">Select availability</option>
-                  <option value="weekdays">Weekdays</option>
-                  <option value="weekends">Weekends</option>
-                  <option value="evenings">Evenings</option>
-                  <option value="mornings">Mornings</option>
-                  <option value="flexible">Flexible</option>
-                </select>
+                {!resumeFile ? (
+                  <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-primary-200 rounded-lg cursor-pointer bg-primary-50/30 hover:bg-primary-50 transition-colors duration-200 group">
+                    <Upload className="w-6 h-6 text-primary-400 group-hover:text-primary-600 mb-2 transition-colors" />
+                    <span className="text-sm text-gray-500 group-hover:text-primary-600 transition-colors">Click to upload resume</span>
+                    <span className="text-xs text-gray-400 mt-1">.pdf, .doc, .docx</span>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={handleResumeChange}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-primary-50 border-2 border-primary-200 rounded-lg">
+                    <FileText className="w-5 h-5 text-primary-600 flex-shrink-0" />
+                    <span className="text-sm text-primary-800 font-medium flex-1 truncate">{resumeFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setResumeFile(null)}
+                      className="p-1 hover:bg-primary-100 rounded transition-colors"
+                    >
+                      <X className="w-4 h-4 text-primary-600" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -439,7 +581,7 @@ const VolunteerPage = () => {
                 {submitting ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Submitting...
+                    {resumeUploading ? 'Uploading Resume...' : 'Submitting...'}
                   </>
                 ) : (
                   <>
