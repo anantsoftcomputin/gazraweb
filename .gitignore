@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
 dist
 dist-ssr
 *.local
@@ -34,3 +35,6 @@ dist-ssr
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+
+# Local Netlify folder
+.netlify

@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from '../lib/routerCompat';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Calendar, Users, Coffee, FileText,
-  Image, MessageSquare, Settings, LogOut, Menu, X,
-  TrendingUp, Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck
+  LayoutDashboard, Calendar, Users, Coffee,
+  Image, MessageSquare, LogOut, Menu, X,
+  Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck, Home, MapPinned, QrCode
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { db } from '../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -18,13 +21,20 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const unsubscribe = monitorAuthState((user) => {
+    const unsubscribe = monitorAuthState(async (user) => {
       if (!user) {
+        navigate('/admin/login');
+        return;
+      }
+
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (!adminDoc.exists()) {
+        await logout();
         navigate('/admin/login');
       }
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-expand cafe menu if on a cafe route
   useEffect(() => {
@@ -44,6 +54,8 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
     { icon: Calendar, label: 'Events', path: '/admin/events' },
+    { icon: MapPinned, label: 'Event Locations', path: '/admin/events/locations' },
+    { icon: QrCode, label: 'Event Check-In', path: '/admin/events/check-in' },
     { icon: Users, label: 'Volunteers', path: '/admin/volunteers' },
     { icon: Heart, label: 'Support Requests', path: '/admin/support-requests' },
     { icon: Mail, label: 'Newsletter', path: '/admin/newsletter' },
@@ -87,6 +99,16 @@ const AdminLayout = ({ children }) => {
             className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <Menu className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="px-4 pt-4">
+          <button
+            onClick={() => navigate('/')}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600 transition-colors text-left"
+          >
+            <Home className="w-5 h-5 flex-shrink-0" />
+            {sidebarOpen && <span className="text-sm font-medium">View Website</span>}
           </button>
         </div>
 
@@ -222,6 +244,17 @@ const AdminLayout = ({ children }) => {
             </div>
 
             <nav className="p-4 space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 140px)' }}>
+              <button
+                onClick={() => {
+                  navigate('/');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+              >
+                <Home className="w-5 h-5" />
+                <span className="text-sm font-medium">View Website</span>
+              </button>
+
               {menuItems.map((item) => (
                 <button
                   key={item.path}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../lib/routerCompat';
 import { Facebook, Twitter, Instagram, Linkedin, Heart } from 'lucide-react';
 
 const Footer = () => {

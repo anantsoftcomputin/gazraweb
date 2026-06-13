@@ -4,13 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "next dev",
+    "build": "next build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "npm run build && firebase deploy --only hosting",
+    "preview": "next start",
+    "deploy": "npm run build",
     "deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
-    "deploy:all": "npm run build && firebase deploy"
+    "deploy:all": "npm run build && firebase deploy --only functions,firestore:rules,firestore:indexes,storage,database",
+    "start": "next start",
+    "deploy:hosting": "echo \"Next.js hosting target is not configured yet. Use Firebase App Hosting or another SSR deployment target.\" && exit 1"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -21,25 +23,25 @@
     "@tailwindcss/typography": "^0.5.15",
     "firebase": "^12.6.0",
     "framer-motion": "^11.11.11",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.454.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.5.0",
-    "react-router-dom": "^6.27.0"
+    "next": "^16.2.9",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@playwright/test": "^1.60.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.13.0",
     "eslint-plugin-react": "^7.37.1",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.13",
     "globals": "^15.11.0",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.14",
-    "vite": "^5.4.9"
+    "tailwindcss": "^3.4.14"
   }
 }

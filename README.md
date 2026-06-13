@@ -15,16 +15,16 @@ A comprehensive web platform for Gazra, an initiative by Shri Maharani Chimnabai
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18 + Vite
+- **Frontend**: Next.js 16 + React 19
 - **Styling**: Tailwind CSS with custom design system
 - **Animation**: Framer Motion
-- **Backend**: Firebase (Firestore, Authentication, Storage, Hosting)
-- **Routing**: React Router DOM
+- **Backend**: Firebase (Firestore, Authentication, Storage, Realtime Database, Functions)
+- **Routing**: Next.js App Router
 - **Icons**: Lucide React, React Icons, Heroicons
 
 ## 📋 Prerequisites
 
-- Node.js 16+ and npm
+- Node.js 22+ and npm
 - Firebase account
 - Firebase CLI (`npm install -g firebase-tools`)
 
@@ -70,7 +70,8 @@ firebase init
 Select:
 - Firestore
 - Storage
-- Hosting
+- Realtime Database
+- Functions
 
 #### Deploy Firestore Rules and Indexes
 
@@ -93,7 +94,7 @@ In Firebase Console:
 npm run dev
 ```
 
-Visit `http://localhost:5173`
+Visit `http://localhost:3000`
 
 ### 7. Build for Production
 
@@ -101,11 +102,9 @@ Visit `http://localhost:5173`
 npm run build
 ```
 
-### 8. Deploy to Firebase Hosting
+### 8. Frontend Deployment
 
-```bash
-firebase deploy --only hosting
-```
+The frontend is a Next.js app and is intended for Netlify. Firebase remains configured for backend services only.
 
 ## 📁 Project Structure
 
@@ -116,8 +115,8 @@ new-gazra/
 │   │   ├── home/          # Home page sections
 │   │   ├── about/         # About page components
 │   │   └── shared/        # Reusable components (Navbar, etc.)
-│   ├── pages/
-│   │   ├── admin/         # Admin portal pages
+│   ├── views/
+│   │   ├── admin/         # Admin portal views
 │   │   ├── Home.jsx
 │   │   ├── About.jsx
 │   │   ├── Events.jsx
@@ -193,18 +192,17 @@ Fully responsive design with:
 
 ## 🌐 Deployment
 
-### Firebase Hosting
+### Frontend
 
 ```bash
 npm run build
-firebase deploy
 ```
 
-Your site will be live at: `https://gazraweb-33d32.web.app`
+The frontend is a Next.js app intended for Netlify. Netlify supports modern Next.js apps through its OpenNext adapter, including App Router and SSR. Do not deploy the frontend through Firebase Hosting or shared hosting.
 
-### Custom Domain
+### Firebase Backend
 
-Configure in Firebase Console > Hosting > Add custom domain
+Firebase remains responsible for Authentication, Firestore, Storage, Realtime Database, and Functions.
 
 ## 📧 Contact
 

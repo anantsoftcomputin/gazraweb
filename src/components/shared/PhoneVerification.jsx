@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from 'react';
 import { Phone, Check, AlertCircle, Loader } from 'lucide-react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 
 const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
-  const [verificationId, setVerificationId] = useState(null);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +41,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
         try {
           window.recaptchaVerifier.clear();
           window.recaptchaVerifier = null;
-        } catch (clearErr) {
+        } catch {
           console.log('Previous reCAPTCHA cleared');
         }
       }
@@ -52,7 +52,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
       // Initialize reCAPTCHA v2 when sending OTP
       try {
         // Use visible reCAPTCHA for development to avoid MALFORMED errors
-        const recaptchaSize = import.meta.env.DEV ? 'normal' : 'invisible';
+        const recaptchaSize = process.env.NODE_ENV === 'development' ? 'normal' : 'invisible';
         
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: recaptchaSize,
@@ -82,7 +82,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
         console.error('Failed to initialize RecaptchaVerifier:', initError);
         
         // If it's a development environment and reCAPTCHA fails, provide helpful message
-        if (import.meta.env.DEV && initError.code === 'auth/invalid-app-credential') {
+        if (process.env.NODE_ENV === 'development' && initError.code === 'auth/invalid-app-credential') {
           throw new Error('reCAPTCHA configuration issue. Please ensure your Firebase project has Phone Authentication enabled and reCAPTCHA v2 (not Enterprise) is configured. For localhost testing, add your domain to Firebase Console → Authentication → Settings → Authorized domains.');
         } else {
           throw new Error('reCAPTCHA initialization failed. Please refresh the page and try again.');
@@ -123,7 +123,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
       } else if (err.code === 'auth/invalid-app-credential') {
         errorMessage = 'Firebase reCAPTCHA configuration issue. Please ensure reCAPTCHA v2 (not Enterprise) is enabled in Firebase Console → Authentication → Settings. For localhost, add localhost to Authorized domains.';
         console.error('SOLUTION 1: Go to Firebase Console → Authentication → Settings → App Verification, and switch from Enterprise to Standard reCAPTCHA v2');
-        console.error('SOLUTION 2: Go to Firebase Console → Authentication → Settings → Authorized domains, and add localhost:5173 or localhost:3000');
+        console.error('SOLUTION 2: Go to Firebase Console → Authentication → Settings → Authorized domains, and add localhost:3000');
       }
       
       setError(errorMessage);
@@ -193,9 +193,6 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
 
   return (
     <div className="space-y-4">
-      {/* reCAPTCHA container */}
-      <div id="recaptcha-container"></div>
-
       {/* Phone Number Input */}
       {!otpSent ? (
         <div>

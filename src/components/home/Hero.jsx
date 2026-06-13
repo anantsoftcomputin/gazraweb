@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Sparkles, Coffee, Wallet, Smartphone, Briefcase } from 'lucide-react'; // Removed unused BookOpen
 
 // Add custom animation keyframes

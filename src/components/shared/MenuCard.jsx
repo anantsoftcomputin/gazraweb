@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, X, Leaf, Clock, Flame, ChefHat } from 'lucide-react';
 
 const MenuCard = () => {
   const [selectedItem, setSelectedItem] = useState(null);
+  const fallbackDishImage = '/images/food-image.webp';
+  const dishImages = {
+    'Kothambir Wadi': '/images/food-1.png'
+  };
 
   // Enhanced menu items with additional details
   const menuItems = {
@@ -52,7 +56,7 @@ const MenuCard = () => {
   return (
     <>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {Object.entries(menuItems).map(([category, items]) =>
+        {Object.entries(menuItems).map(([, items]) =>
           items.map((item) => (
             <motion.div
               key={item.id}
@@ -65,7 +69,7 @@ const MenuCard = () => {
               <div className="relative bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
                 <div className="relative overflow-hidden h-48">
                   <img
-                    src={dishImages[item.name] || '/api/placeholder/400/300'}
+	                    src={dishImages[item.name] || fallbackDishImage}
                     alt={item.name}
                     className="w-full h-full object-cover transition-transform duration-500 transform group-hover:scale-105"
                   />
@@ -78,7 +82,7 @@ const MenuCard = () => {
                   {item.recommended && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-primary-500 text-white text-xs rounded-full flex items-center">
                       <Sparkles className="w-4 h-4 mr-1" />
-                      Chef's Pick
+	                      Chef&apos;s Pick
                     </div>
                   )}
                 </div>
@@ -138,7 +142,7 @@ const MenuCard = () => {
               {/* Modal Header with Image */}
               <div className="relative h-64">
                 <img
-                  src={dishImages[selectedItem.name] || '/api/placeholder/800/400'}
+	                  src={dishImages[selectedItem.name] || fallbackDishImage}
                   alt={selectedItem.name}
                   className="w-full h-full object-cover"
                 />

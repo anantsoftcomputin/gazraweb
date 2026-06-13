@@ -8,6 +8,19 @@
 - Email: [Your admin email]
 - Password: [Your secure password]
 
+**Firebase Admin Access Requirement:**
+Each admin user must also have a Firestore document at `admins/{USER_UID}`. The document can be minimal, for example:
+
+```json
+{
+  "email": "admin@example.com",
+  "role": "admin",
+  "active": true
+}
+```
+
+Without this document, Firebase Auth login may succeed but the admin portal will reject access.
+
 ---
 
 ## Dashboard Overview

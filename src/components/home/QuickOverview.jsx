@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Sparkles, Heart, Coffee, Users } from 'lucide-react';
 
 const QuickOverview = () => {

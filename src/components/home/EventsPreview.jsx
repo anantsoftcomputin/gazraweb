@@ -1,6 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
+import { Link } from '../../lib/routerCompat';
 import { Calendar, Clock, MapPin, ArrowRight, Users, Tag, ExternalLink } from 'lucide-react';
+import { useFirestore } from '../../hooks/useFirestore';
+import { formatEventDate, getEventCategory, getUpcomingEvents } from '../../utils/eventUtils';
 
 const EventCard = ({ event }) => (
   <div className="group relative bg-white rounded-2xl overflow-hidden shadow-medium hover:shadow-hard transition-all duration-500 border border-neutral-100">
@@ -8,7 +11,7 @@ const EventCard = ({ event }) => (
     <div className="absolute top-4 left-4 z-10">
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-primary-600 shadow-soft">
         <Tag className="w-3 h-3 mr-1" />
-        {event.category}
+        {getEventCategory(event.category)?.name || event.category || 'Event'}
       </span>
     </div>
     
@@ -37,7 +40,7 @@ const EventCard = ({ event }) => (
         <div className="space-y-3">
           <div className="flex items-center text-sm text-neutral-600">
             <Calendar className="w-4 h-4 mr-2 text-primary-500" />
-            {event.date}
+            {formatEventDate(event)}
           </div>
           <div className="flex items-center text-sm text-neutral-600">
             <Clock className="w-4 h-4 mr-2 text-primary-500" />
@@ -47,11 +50,11 @@ const EventCard = ({ event }) => (
         <div className="space-y-3">
           <div className="flex items-center text-sm text-neutral-600">
             <MapPin className="w-4 h-4 mr-2 text-primary-500" />
-            {event.location}
+            {event.location || 'Location TBA'}
           </div>
           <div className="flex items-center text-sm text-neutral-600">
             <Users className="w-4 h-4 mr-2 text-primary-500" />
-            {event.capacity}
+            {event.capacity || 'Open'}
           </div>
         </div>
       </div>
@@ -86,42 +89,25 @@ const EventCard = ({ event }) => (
 );
 
 const EventsPreview = () => {
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "SAM-AAJ",
-      category: "Theater & Dance",
-      date: "Thursday, 10th April",
-      time: "8:00 PM Onwards",
-      location: "Hosted by GAZRA",
-      capacity: "Limited Seats",
-      image: "/images/samaaj.png",
-      description: "Join us for a groundbreaking dance-theater production that challenges norms and celebrates authenticity. Two Gujarati men confront their deepest insecurities and societal expectations while navigating love and self-discovery. A powerful blend of dance, poetry, and original music by Shivansh Jindal.",
-      externalLink: "https://in.bookmyshow.com/events/sam-aaj/ET00436340"
-    },
-    {
-      id: 2,
-      title: "Gazra Resource Workshop",
-      category: "Workshop",
-      date: "April 1st, 2025",
-      time: "4:00 PM To 6:00 PM",
-      location: "Gazra Cafe",
-      capacity: "50 spots",
-      image: "/images/sweekar.png",
-      description: "Calling all professionals committed to equality! Join us to create a holistic support network for Women and the LGBTQIA+ community through the Resources initiative."
-    },
-    {
-      id: 3,
-      title: "Art Therapy Session",
-      category: "Therapy",
-      date: "June 25, 2024",
-      time: "3:00 PM",
-      location: "Gazra Studio",
-      capacity: "30 spots",
-      image: "/images/art-therapy.png",
-      description: "Express yourself through art in our therapeutic creative session led by professional art therapists."
-    }
-  ];
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { getDocuments } = useFirestore('events');
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true);
+        const result = await getDocuments();
+        if (result.success) {
+          setUpcomingEvents(getUpcomingEvents(result.data, 3));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   return (
     <section 
@@ -148,9 +134,20 @@ const EventsPreview = () => {
 
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {upcomingEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+          {loading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-96 bg-white/80 rounded-2xl shadow-medium animate-pulse" />
+            ))
+          ) : upcomingEvents.length > 0 ? (
+            upcomingEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))
+          ) : (
+            <div className="md:col-span-2 lg:col-span-3 bg-white rounded-2xl shadow-medium border border-neutral-100 p-8 text-center">
+              <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+              <p className="text-neutral-600">No upcoming events yet. Check back soon.</p>
+            </div>
+          )}
         </div>
 
         {/* View All Button */}

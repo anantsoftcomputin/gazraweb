@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck } from 'lucide-react';
+import { Link, useLocation } from '../../lib/routerCompat';
+import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck, Shield } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -146,6 +146,12 @@ const Navbar = () => {
                 >
                   Contribute to a Cause
                 </Link>
+                <Link
+                  to="/admin/login"
+                  className="hidden md:inline text-white hover:text-primary-200 transition-colors duration-300"
+                >
+                  Admin
+                </Link>
               </div>
             </div>
           </div>
@@ -238,13 +244,21 @@ const Navbar = () => {
               </div>
 
               {/* Mobile Menu Button - Only visible on medium screens, hidden on small screens where bottom nav is used */}
-              <button 
-                className="lg:hidden md:block hidden p-2 rounded-lg hover:bg-neutral-100 
-                  transition-colors duration-300 text-neutral-600"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              <div className="lg:hidden md:flex hidden items-center gap-2">
+                <Link
+                  to="/admin/login"
+                  className="p-2 rounded-lg hover:bg-neutral-100 transition-colors duration-300 text-neutral-600"
+                  aria-label="Admin login"
+                >
+                  <Shield size={22} />
+                </Link>
+                <button 
+                  className="p-2 rounded-lg hover:bg-neutral-100 transition-colors duration-300 text-neutral-600"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -314,6 +328,17 @@ const Navbar = () => {
                     </Link>
                   )
                 ))}
+                <Link
+                  to="/admin/login"
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-primary-50 text-primary-600'
+                      : 'text-neutral-600 hover:bg-neutral-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin
+                </Link>
               </div>
             </div>
           </div>

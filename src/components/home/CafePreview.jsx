@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Coffee, ArrowRight, Heart, Sparkles, ChefHat, Clock, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../lib/routerCompat';
 import { useFirestore } from '../../hooks/useFirestore';
 
 const CafePreview = () => {

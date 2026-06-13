@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../lib/routerCompat';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Heart } from 'lucide-react';
 import Navbar from '../components/shared/Navbar';
 import FooterPreview from '../components/home/FooterPreview';

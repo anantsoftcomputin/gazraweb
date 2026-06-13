@@ -1,0 +1,76 @@
+'use client';
+
+import MainLayout from '../layouts/MainLayout';
+import Home from '../views/Home';
+import About from '../views/About';
+import InitiativesPage from '../views/Initiatives';
+import GazraCafe from '../views/GazraCafe';
+import EventsPage from '../views/Events';
+import EventDetail from '../views/EventDetail';
+import VolunteerPage from '../views/Volunteer';
+import Gallery from '../views/Gallery';
+import ContactPage from '../views/Contact';
+import MenuCard from '../components/shared/MenuCard';
+import EventCalendarPage from '../views/EventCalendarPage';
+import GazraSupportFund from '../views/GazraSupportFung';
+import GazraSkills from '../views/GazraSkills';
+
+import AdminLogin from '../views/admin/AdminLogin';
+import AdminDashboard from '../views/admin/AdminDashboard';
+import AdminEvents from '../views/admin/AdminEvents';
+import AdminEventLocations from '../views/admin/AdminEventLocations';
+import AdminEventCheckIn from '../views/admin/AdminEventCheckIn';
+import AdminCafe from '../views/admin/AdminCafe';
+import AdminCafeFeatures from '../views/admin/AdminCafeFeatures';
+import AdminCafeTestimonials from '../views/admin/AdminCafeTestimonials';
+import AdminCafeSettings from '../views/admin/AdminCafeSettings';
+import AdminCafeMoments from '../views/admin/AdminCafeMoments';
+import AdminCafeBookings from '../views/admin/AdminCafeBookings';
+import AdminCafeClosedDates from '../views/admin/AdminCafeClosedDates';
+import AdminVolunteers from '../views/admin/AdminVolunteers';
+import AdminMessages from '../views/admin/AdminMessages';
+import AdminNewsletter from '../views/admin/AdminNewsletter';
+import AdminSupportRequests from '../views/admin/AdminSupportRequests';
+import AdminGallery from '../views/admin/AdminGallery';
+import AdminInitiatives from '../views/admin/AdminInitiatives';
+import AdminSkillsCourses from '../views/admin/AdminSkillsCourses';
+import AdminSkillsEnrollments from '../views/admin/AdminSkillsEnrollments';
+
+function PublicPage({ children }) {
+  return <MainLayout>{children}</MainLayout>;
+}
+
+export const HomeClient = () => <PublicPage><Home /></PublicPage>;
+export const AboutClient = () => <PublicPage><About /></PublicPage>;
+export const InitiativesClient = () => <PublicPage><InitiativesPage /></PublicPage>;
+export const CafeClient = () => <PublicPage><GazraCafe /></PublicPage>;
+export const EventsClient = () => <PublicPage><EventsPage /></PublicPage>;
+export const EventDetailClient = () => <PublicPage><EventDetail /></PublicPage>;
+export const VolunteerClient = () => <PublicPage><VolunteerPage /></PublicPage>;
+export const GalleryClient = () => <PublicPage><Gallery /></PublicPage>;
+export const ContactClient = () => <PublicPage><ContactPage /></PublicPage>;
+export const MenuClient = () => <PublicPage><MenuCard /></PublicPage>;
+export const CalendarClient = () => <PublicPage><EventCalendarPage /></PublicPage>;
+export const SupportClient = () => <PublicPage><GazraSupportFund /></PublicPage>;
+export const SkillsClient = () => <PublicPage><GazraSkills /></PublicPage>;
+
+export const AdminLoginClient = () => <AdminLogin />;
+export const AdminDashboardClient = () => <AdminDashboard />;
+export const AdminEventsClient = () => <AdminEvents />;
+export const AdminEventLocationsClient = () => <AdminEventLocations />;
+export const AdminEventCheckInClient = () => <AdminEventCheckIn />;
+export const AdminCafeClient = () => <AdminCafe />;
+export const AdminCafeFeaturesClient = () => <AdminCafeFeatures />;
+export const AdminCafeTestimonialsClient = () => <AdminCafeTestimonials />;
+export const AdminCafeSettingsClient = () => <AdminCafeSettings />;
+export const AdminCafeMomentsClient = () => <AdminCafeMoments />;
+export const AdminCafeBookingsClient = () => <AdminCafeBookings />;
+export const AdminCafeClosedDatesClient = () => <AdminCafeClosedDates />;
+export const AdminVolunteersClient = () => <AdminVolunteers />;
+export const AdminMessagesClient = () => <AdminMessages />;
+export const AdminNewsletterClient = () => <AdminNewsletter />;
+export const AdminSupportRequestsClient = () => <AdminSupportRequests />;
+export const AdminGalleryClient = () => <AdminGallery />;
+export const AdminInitiativesClient = () => <AdminInitiatives />;
+export const AdminSkillsCoursesClient = () => <AdminSkillsCourses />;
+export const AdminSkillsEnrollmentsClient = () => <AdminSkillsEnrollments />;
