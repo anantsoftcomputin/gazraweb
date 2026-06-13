@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Edit, Trash2, Eye, Calendar, MapPin, Clock,
-  X, Save, QrCode, CheckCircle2, RotateCcw
+  X, Save, QrCode, CheckCircle2, Ban, AlertTriangle
 } from 'lucide-react';
 import { where } from 'firebase/firestore';
 import { useFirestore } from '../../hooks/useFirestore';
@@ -35,6 +35,9 @@ const AdminEvents = () => {
     externalLink: '',
     locationId: '',
     locationDetails: null,
+    status: 'approved',
+    approvalStatus: 'approved',
+    registrationCount: 0,
     featured: false,
     image: ''
   });
@@ -81,6 +84,11 @@ const AdminEvents = () => {
   };
 
   const setAttendance = async (rsvp, checkedIn) => {
+    if ((rsvp.status || 'confirmed') !== 'confirmed') {
+      alert('Cancelled RSVPs cannot be checked in.');
+      return;
+    }
+
     const result = await updateRsvp(rsvp.id, {
       checkedIn,
       attendanceStatus: checkedIn ? 'checked_in' : 'not_checked_in',
@@ -101,6 +109,60 @@ const AdminEvents = () => {
       )));
     } else {
       alert(result.error || 'Unable to update RSVP attendance.');
+    }
+  };
+
+  const cancelRegistration = async (rsvp) => {
+    const reason = window.prompt(`Cancel ${rsvp.name || rsvp.email || 'this registration'}? Reason shown in email:`, rsvp.cancellationReason || '');
+    if (reason === null) return;
+
+    const result = await updateRsvp(rsvp.id, {
+      status: 'cancelled',
+      attendanceStatus: 'cancelled',
+      checkedIn: false,
+      cancellationReason: reason,
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: 'admin'
+    });
+
+    if (result.success) {
+      setSelectedEventRsvps((prev) => prev.map((item) => item.id === rsvp.id ? {
+        ...item,
+        status: 'cancelled',
+        attendanceStatus: 'cancelled',
+        checkedIn: false,
+        cancellationReason: reason
+      } : item));
+      loadEvents();
+    } else {
+      alert(result.error || 'Unable to cancel this registration.');
+    }
+  };
+
+  const changeEventStatus = async (event, status) => {
+    const note = window.prompt(
+      status === 'cancelled'
+        ? `Cancel "${event.title}"? All confirmed RSVPs will receive cancellation emails. Add a note/reason:`
+        : status === 'not_approved'
+          ? `Mark "${event.title}" as not approved? Add a note/reason:`
+          : `Approve "${event.title}"? Optional note:`,
+      event.statusNote || event.rejectionReason || ''
+    );
+    if (note === null) return;
+
+    const result = await updateDocument(event.id, {
+      status,
+      approvalStatus: status === 'approved' ? 'approved' : status,
+      statusNote: note,
+      rejectionReason: status === 'not_approved' ? note : '',
+      cancelledAt: status === 'cancelled' ? new Date().toISOString() : '',
+      approvedAt: status === 'approved' ? new Date().toISOString() : event.approvedAt || ''
+    });
+
+    if (result.success) {
+      loadEvents();
+    } else {
+      alert(result.error || 'Unable to update event status.');
     }
   };
 
@@ -151,6 +213,7 @@ const AdminEvents = () => {
     e.preventDefault();
     const payload = {
       ...formData,
+      approvalStatus: formData.status === 'approved' ? 'approved' : formData.status,
       date: formData.dateIso ? formatEventDate({ dateIso: formData.dateIso }) : formData.date,
       month: getEventMonth({ dateIso: formData.dateIso })
     };
@@ -193,6 +256,9 @@ const AdminEvents = () => {
       externalLink: event.externalLink || '',
       locationId: event.locationId || event.locationDetails?.id || '',
       locationDetails: event.locationDetails || null,
+      status: event.status || 'approved',
+      approvalStatus: event.approvalStatus || event.status || 'approved',
+      registrationCount: event.registrationCount || 0,
       featured: event.featured || false,
       image: event.image || ''
     });
@@ -228,6 +294,9 @@ const AdminEvents = () => {
       externalLink: '',
       locationId: '',
       locationDetails: null,
+      status: 'approved',
+      approvalStatus: 'approved',
+      registrationCount: 0,
       featured: false,
       image: ''
     });
@@ -281,6 +350,14 @@ const AdminEvents = () => {
                         Featured
                       </span>
                     )}
+                    <span className={`px-2 py-1 text-xs rounded ${
+                      (event.status || 'approved') === 'approved' ? 'bg-green-100 text-green-700' :
+                        event.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          event.status === 'not_approved' ? 'bg-neutral-100 text-neutral-600' :
+                            'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {(event.status || 'approved').replace('_', ' ')}
+                    </span>
                   </div>
                   <p className="text-sm text-neutral-600 mb-4 line-clamp-2">{event.description}</p>
                   
@@ -296,6 +373,10 @@ const AdminEvents = () => {
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       {event.location || 'Location TBA'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      {Number(event.registrationCount || 0)} / {event.capacity || 'Open'} RSVPs
                     </div>
                   </div>
 
@@ -330,6 +411,26 @@ const AdminEvents = () => {
                       <Trash2 className="w-4 h-4" />
                       Delete
                     </button>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {(event.status || 'approved') !== 'approved' && (
+                      <button onClick={() => changeEventStatus(event, 'approved')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 hover:bg-green-100">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Approve
+                      </button>
+                    )}
+                    {(event.status || 'approved') === 'approved' && (
+                      <button onClick={() => changeEventStatus(event, 'not_approved')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-200">
+                        <Ban className="h-4 w-4" />
+                        Not Approved
+                      </button>
+                    )}
+                    {event.status !== 'cancelled' && (
+                      <button onClick={() => changeEventStatus(event, 'cancelled')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100">
+                        <AlertTriangle className="h-4 w-4" />
+                        Cancel Event
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -597,6 +698,21 @@ const AdminEvents = () => {
                   </label>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Publishing Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="approved">Approved - visible on website</option>
+                    <option value="pending_approval">Pending approval</option>
+                    <option value="not_approved">Not approved</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
                 <div className="flex items-center gap-4 pt-4">
                   <button
                     type="submit"
@@ -631,8 +747,10 @@ const AdminEvents = () => {
             >
               <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
                 <div>
-                  <h2 className="text-2xl font-bold text-neutral-800">RSVPs for {selectedEventForRsvps?.title}</h2>
-                  <p className="text-sm text-neutral-600">Showing the latest RSVPs for this event.</p>
+                  <h2 className="text-2xl font-bold text-neutral-800">Event Dashboard</h2>
+                  <p className="text-sm text-neutral-600">
+                    {selectedEventForRsvps?.title} · {selectedEventRsvps.filter((rsvp) => (rsvp.status || 'confirmed') === 'confirmed').length} active RSVP{selectedEventRsvps.filter((rsvp) => (rsvp.status || 'confirmed') === 'confirmed').length === 1 ? '' : 's'}
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowRsvpModal(false)}
@@ -647,50 +765,62 @@ const AdminEvents = () => {
                     <p className="text-neutral-600">No RSVPs found for this event yet.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {selectedEventRsvps.map((rsvp) => (
-                      <div key={rsvp.id} className="rounded-2xl border border-neutral-200 p-4 shadow-sm">
-                        <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
-                          <div>
-                            <p className="text-base font-semibold text-neutral-900">{rsvp.name || 'Anonymous'}</p>
-                            <p className="text-sm text-neutral-600">{rsvp.email}</p>
-                            <p className="text-sm text-neutral-600">{rsvp.phone}</p>
-                            {rsvp.rsvpId && <p className="mt-2 text-xs text-neutral-500">Ticket: {rsvp.rsvpId}</p>}
-                            {rsvp.qrToken && <p className="text-xs text-neutral-500 break-all">QR Token: {rsvp.qrToken}</p>}
-                          </div>
-                          <div className="space-y-3 text-left sm:text-right">
-                            <p className="text-sm text-neutral-500">Status: <span className="font-medium text-neutral-800">{rsvp.status || 'confirmed'}</span></p>
-                            <p className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${rsvp.checkedIn ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                              {rsvp.checkedIn ? 'Checked in' : 'Not checked in'}
-                            </p>
-                            {rsvp.createdAt?.seconds ? (
-                              <p className="text-sm text-neutral-500">{new Date(rsvp.createdAt.seconds * 1000).toLocaleString()}</p>
-                            ) : (
-                              <p className="text-sm text-neutral-500">{rsvp.createdAt || 'No date'}</p>
-                            )}
-                            <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
-                              {!rsvp.checkedIn ? (
-                                <button
-                                  onClick={() => setAttendance(rsvp, true)}
-                                  className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 hover:bg-green-100"
-                                >
-                                  <CheckCircle2 className="h-4 w-4" />
-                                  Mark Attended
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => setAttendance(rsvp, false)}
-                                  className="inline-flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-200"
-                                >
-                                  <RotateCcw className="h-4 w-4" />
-                                  Undo Check-In
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="overflow-x-auto rounded-xl border border-neutral-200">
+                    <table className="min-w-full divide-y divide-neutral-200 text-sm">
+                      <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+                        <tr>
+                          <th className="px-4 py-3">Participant</th>
+                          <th className="px-4 py-3">Contact</th>
+                          <th className="px-4 py-3">Ticket</th>
+                          <th className="px-4 py-3">Status</th>
+                          <th className="px-4 py-3">Registered</th>
+                          <th className="px-4 py-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100 bg-white">
+                        {selectedEventRsvps.map((rsvp) => (
+                          <tr key={rsvp.id}>
+                            <td className="px-4 py-3 font-medium text-neutral-900">{rsvp.name || 'Anonymous'}</td>
+                            <td className="px-4 py-3 text-neutral-600">
+                              <div>{rsvp.email}</div>
+                              <div className="text-xs">{rsvp.phone}</div>
+                            </td>
+                            <td className="px-4 py-3 text-xs text-neutral-500">{rsvp.rsvpId || rsvp.id}</td>
+                            <td className="px-4 py-3">
+                              <div className="space-y-1">
+                                <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${(rsvp.status || 'confirmed') === 'confirmed' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                                  {rsvp.status || 'confirmed'}
+                                </span>
+                                <div className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${rsvp.checkedIn ? 'bg-blue-50 text-blue-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                                  {rsvp.checkedIn ? 'Checked in' : 'Not checked in'}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-neutral-500">
+                              {rsvp.createdAt?.seconds ? new Date(rsvp.createdAt.seconds * 1000).toLocaleString() : (rsvp.createdAt || 'No date')}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex justify-end gap-2">
+                                {(rsvp.status || 'confirmed') === 'confirmed' && (!rsvp.checkedIn ? (
+                                  <button onClick={() => setAttendance(rsvp, true)} className="rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 hover:bg-green-100">
+                                    Attend
+                                  </button>
+                                ) : (
+                                  <button onClick={() => setAttendance(rsvp, false)} className="rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-200">
+                                    Undo
+                                  </button>
+                                ))}
+                                {(rsvp.status || 'confirmed') === 'confirmed' && (
+                                  <button onClick={() => cancelRegistration(rsvp)} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                    Cancel
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>

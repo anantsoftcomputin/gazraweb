@@ -60,6 +60,20 @@ const EventDetail = () => {
 
   const handleSubmitRsvp = async (submitEvent) => {
     submitEvent.preventDefault();
+    const capacityNumber = Number(String(event?.capacity || '').match(/\d+/)?.[0] || 0);
+    const registrationCount = Number(event?.registrationCount || 0);
+    const isFull = capacityNumber > 0 && registrationCount >= capacityNumber;
+
+    if ((event?.status || 'approved') !== 'approved') {
+      setFormMessage('RSVPs are not open for this event.');
+      return;
+    }
+
+    if (isFull) {
+      setFormMessage('This event is fully booked. RSVPs are now closed.');
+      return;
+    }
+
     setRsvpLoading(true);
     setFormErrors({});
 
@@ -110,6 +124,10 @@ const EventDetail = () => {
         reminderStatus: 'pending'
       });
       if (result.success) {
+        setEvent((prev) => prev ? {
+          ...prev,
+          registrationCount: Number(prev.registrationCount || 0) + 1
+        } : prev);
         window.localStorage.setItem(duplicateKey, 'true');
         setRsvpTicket({
           id: result.id,
@@ -177,6 +195,11 @@ const EventDetail = () => {
 
   const categoryInfo = EVENT_CATEGORIES.find(cat => cat.id === event.category);
   const categoryStyle = getEventCategoryStyle(event.category);
+  const capacityNumber = Number(String(event.capacity || '').match(/\d+/)?.[0] || 0);
+  const registrationCount = Number(event.registrationCount || 0);
+  const slotsLeft = capacityNumber ? Math.max(capacityNumber - registrationCount, 0) : null;
+  const isFull = capacityNumber > 0 && registrationCount >= capacityNumber;
+  const rsvpsOpen = (event.status || 'approved') === 'approved' && !isFull;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
@@ -303,10 +326,12 @@ const EventDetail = () => {
                       <Users className="w-5 h-5 text-secondary-600 mt-1 flex-shrink-0" />
                       <div>
                         <h3 className="font-semibold text-neutral-800 mb-1">Capacity & Price</h3>
-                        <p className="text-neutral-600 text-sm">{event.capacity}</p>
+                        <p className="text-neutral-600 text-sm">{capacityNumber ? `${registrationCount} / ${capacityNumber} registered` : event.capacity}</p>
                         <p className="text-primary-600 font-semibold mt-1">{event.price}</p>
-                        {event.ticketsLeft && (
-                          <p className="text-xs text-neutral-500 mt-1">{event.ticketsLeft}</p>
+                        {slotsLeft !== null && (
+                          <p className={`text-xs mt-1 ${isFull ? 'text-red-600 font-semibold' : 'text-neutral-500'}`}>
+                            {isFull ? 'Fully booked' : `${slotsLeft} slot${slotsLeft === 1 ? '' : 's'} still available`}
+                          </p>
                         )}
                         {event.locationDetails?.infrastructure?.length > 0 && (
                           <p className="text-xs text-neutral-500 mt-2">
@@ -481,10 +506,19 @@ const EventDetail = () => {
                   </div>
 
                   <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-soft">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="text-xl font-semibold text-neutral-900">RSVP for this Event</h3>
-                        <p className="text-sm text-neutral-600">Share your contact details and we will confirm your participation.</p>
+                        <p className="text-sm text-neutral-600">Register to receive your check-in QR code and event updates by email.</p>
+                        <div className="mt-4 grid gap-2 text-sm text-neutral-700 sm:grid-cols-2">
+                          <p><span className="font-medium">Date:</span> {formatEventDate(event)}</p>
+                          <p><span className="font-medium">Time:</span> {event.time || 'To be announced'}</p>
+                          <p><span className="font-medium">Venue:</span> {event.location || 'To be announced'}</p>
+                          <p><span className="font-medium">Organizer:</span> {event.organizer || 'Project Gazra'}</p>
+                        </div>
+                      </div>
+                      <div className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${isFull ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
+                        {slotsLeft === null ? 'Open RSVP' : isFull ? 'Fully booked' : `${slotsLeft} slots left`}
                       </div>
                     </div>
 
@@ -504,6 +538,12 @@ const EventDetail = () => {
                             <p className="mt-3 text-xs text-green-700">Ticket: {rsvpTicket.rsvpId}</p>
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {!rsvpsOpen && (
+                      <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-700">
+                        {isFull ? 'This event is fully booked. RSVPs are now closed.' : 'RSVPs are not open for this event.'}
                       </div>
                     )}
 
@@ -550,7 +590,7 @@ const EventDetail = () => {
                       <button
                         type="submit"
                         className="inline-flex items-center justify-center rounded-2xl bg-primary-600 px-5 py-3 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
-                        disabled={rsvpLoading || rsvpSubmitted}
+                        disabled={rsvpLoading || rsvpSubmitted || !rsvpsOpen}
                       >
                         {rsvpLoading ? 'Submitting...' : 'Confirm RSVP'}
                       </button>

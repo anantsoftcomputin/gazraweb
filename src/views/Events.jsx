@@ -37,7 +37,7 @@ const EventsPage = () => {
       setLoading(true);
       const result = await getDocuments();
       if (result.success) {
-        setEvents(sortEventsByDate(result.data));
+        setEvents(sortEventsByDate(result.data.filter((event) => (event.status || 'approved') === 'approved')));
       }
     } catch (error) {
       console.error('Error loading events:', error);
@@ -64,6 +64,9 @@ const EventsPage = () => {
   // Event Card Component
   const EventCard = ({ event }) => {
     const CategoryIcon = eventCategories.find(cat => cat.id === event.category)?.icon || Calendar;
+    const capacityNumber = Number(String(event.capacity || '').match(/\d+/)?.[0] || 0);
+    const registrationCount = Number(event.registrationCount || 0);
+    const isFull = capacityNumber > 0 && registrationCount >= capacityNumber;
 
     return (
       <motion.div
@@ -122,7 +125,7 @@ const EventsPage = () => {
                 </div>
                 <div className="flex items-center text-xs text-neutral-600">
                   <Users className="w-3 h-3 mr-2 text-primary-500 flex-shrink-0" />
-                  <span className="truncate">{event.capacity || "Open"}</span>
+                  <span className="truncate">{capacityNumber ? `${Math.max(capacityNumber - registrationCount, 0)} slots left` : (event.capacity || "Open")}</span>
                 </div>
               </div>
             </div>
@@ -130,14 +133,14 @@ const EventsPage = () => {
             {/* Action Button */}
             <div className="flex items-center justify-between pt-2">
               <span className="text-xs font-medium text-primary-600">
-                {event.price}
+                {isFull ? 'Fully booked' : event.price}
               </span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-3 py-1 bg-primary-50 text-primary-600 rounded-lg text-xs font-medium hover:bg-primary-100 transition-colors duration-300"
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-300 ${isFull ? 'bg-red-50 text-red-700' : 'bg-primary-50 text-primary-600 hover:bg-primary-100'}`}
               >
-                View Details
+                {isFull ? 'Fully Booked' : 'View Details'}
               </motion.button>
             </div>
           </div>
