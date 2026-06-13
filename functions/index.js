@@ -5,6 +5,7 @@ const { defineSecret } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
+const QRCode = require('qrcode');
 
 admin.initializeApp();
 
@@ -25,7 +26,8 @@ function getSmtpConfig() {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465,
     auth: user && pass ? { user, pass } : null,
     from: process.env.SMTP_FROM || `Project Gazra <${user}>`,
-    replyTo: process.env.SMTP_REPLY_TO || user
+    replyTo: process.env.SMTP_REPLY_TO || user,
+    adminEmail: process.env.EVENT_ADMIN_EMAIL || user
   };
 }
 
@@ -79,7 +81,7 @@ function checkInPayload(rsvp) {
 }
 
 function eventUrl(rsvp) {
-  const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://gazra.org';
+  const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://gazraweb.netlify.app';
   return rsvp.eventId ? `${baseUrl.replace(/\/$/, '')}/events/${encodeURIComponent(rsvp.eventId)}` : baseUrl;
 }
 
@@ -156,27 +158,42 @@ function tokenBlock(rsvp) {
   </div>`;
 }
 
-function confirmationHtml(rsvp) {
+function attendeeQrBlock(rsvp, qrCid) {
+  if (!qrCid) return tokenBlock(rsvp);
+
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0;">
+    <tr>
+      <td align="center" style="background:#f6f3ef;border:1px solid #eadfd1;border-radius:14px;padding:18px;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:#777;margin-bottom:12px;">Your check-in QR code</div>
+        <img src="cid:${escapeHtml(qrCid)}" width="220" height="220" alt="RSVP check-in QR code" style="display:block;width:220px;height:220px;border:8px solid #ffffff;border-radius:12px;background:#ffffff;" />
+        <div style="font-size:12px;color:#777;margin-top:12px;">Ticket ID: ${escapeHtml(rsvp.rsvpId || rsvp.id || '')}</div>
+      </td>
+    </tr>
+  </table>`;
+}
+
+function confirmationHtml(rsvp, options = {}) {
   return emailShell({
     eyebrow: 'RSVP Confirmed',
     title: `You are confirmed for ${rsvp.eventTitle || 'our event'}`,
     intro: `Hi ${rsvp.name || 'there'}, thank you for RSVPing. Your spot has been confirmed.`,
     body: `${detailsTable(rsvp)}
-      <p style="font-size:15px;line-height:1.6;color:#444;">Please keep your RSVP QR code ready at arrival. You can reopen the event page from the button below and show your ticket at check-in.</p>
-      ${tokenBlock(rsvp)}`,
+      <p style="font-size:15px;line-height:1.6;color:#444;">Please keep this RSVP QR code ready at arrival. The team will scan it at check-in.</p>
+      ${attendeeQrBlock(rsvp, options.qrCid)}`,
     ctaLabel: 'Open Event Page',
     ctaUrl: eventUrl(rsvp),
     footerNote: 'If your plans change, reply to this email so the Gazra team can update the event list.'
   });
 }
 
-function reminderHtml(rsvp) {
+function reminderHtml(rsvp, options = {}) {
   return emailShell({
     eyebrow: 'Event Reminder',
     title: `${rsvp.eventTitle || 'Your Gazra event'} is coming up`,
     intro: `Hi ${rsvp.name || 'there'}, this is a reminder for the event you RSVPed to.`,
     body: `${detailsTable(rsvp)}
-      <p style="font-size:15px;line-height:1.6;color:#444;">Please arrive a few minutes early and keep your RSVP QR code ready for a quick check-in.</p>`,
+      <p style="font-size:15px;line-height:1.6;color:#444;">Please arrive a few minutes early and keep this QR code ready for a quick check-in.</p>
+      ${attendeeQrBlock(rsvp, options.qrCid)}`,
     ctaLabel: 'View Event Details',
     ctaUrl: eventUrl(rsvp),
     footerNote: 'We look forward to seeing you there.'
@@ -202,16 +219,16 @@ function emailSubject(rsvp, type) {
   return `RSVP confirmed: ${rsvp.eventTitle || 'Project Gazra event'}`;
 }
 
-function emailHtml(rsvp, type) {
-  if (type === 'reminder') return reminderHtml(rsvp);
+function emailHtml(rsvp, type, options = {}) {
+  if (type === 'reminder') return reminderHtml(rsvp, options);
   if (type === 'checkin') return checkInHtml(rsvp);
-  return confirmationHtml(rsvp);
+  return confirmationHtml(rsvp, options);
 }
 
-async function queueEmail({ rsvp, type, status, error = '' }) {
+async function queueEmail({ rsvp, type, status, error = '', to = '' }) {
   await db.collection('mailQueue').add({
     type,
-    to: rsvp.email || '',
+    to: to || rsvp.email || '',
     eventId: rsvp.eventId || '',
     rsvpId: rsvp.rsvpId || '',
     runId: rsvp.runId || '',
@@ -220,6 +237,31 @@ async function queueEmail({ rsvp, type, status, error = '' }) {
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp()
   });
+}
+
+async function createQrAttachment(rsvp) {
+  const payload = checkInPayload(rsvp);
+  const buffer = await QRCode.toBuffer(payload, {
+    type: 'png',
+    errorCorrectionLevel: 'M',
+    margin: 2,
+    width: 440
+  });
+  const cid = `rsvp-${rsvp.rsvpId || rsvp.id || Date.now()}@gazra`;
+
+  return {
+    qrCid: cid,
+    attachment: {
+      filename: `gazra-rsvp-${rsvp.rsvpId || 'ticket'}.png`,
+      content: buffer,
+      contentType: 'image/png',
+      cid
+    }
+  };
+}
+
+function shouldAttachQr(type) {
+  return type === 'confirmation' || type === 'reminder';
 }
 
 async function sendRsvpEmail(rsvp, type) {
@@ -235,12 +277,14 @@ async function sendRsvpEmail(rsvp, type) {
 
   const config = getSmtpConfig();
   const subject = emailSubject(rsvp, type);
+  const qr = shouldAttachQr(type) ? await createQrAttachment(rsvp) : null;
   await createTransporter().sendMail({
     from: config.from,
     replyTo: config.replyTo,
     to: rsvp.email,
     subject,
-    html: emailHtml(rsvp, type),
+    html: emailHtml(rsvp, type, { qrCid: qr?.qrCid }),
+    attachments: qr ? [qr.attachment] : [],
     text: `${subject}
 
 Hi ${rsvp.name || 'there'},
@@ -251,12 +295,80 @@ Time: ${rsvp.eventTime || 'To be announced'}
 Location: ${rsvp.location || 'To be announced'}
 Ticket: ${rsvp.rsvpId || ''}
 Event page: ${eventUrl(rsvp)}
-QR payload: ${checkInPayload(rsvp)}
+Your QR code is attached as gazra-rsvp-${rsvp.rsvpId || 'ticket'}.png.
 
 Project Gazra`
   });
 
   await queueEmail({ rsvp, type, status: 'sent' });
+  return { sent: true, status: 'sent' };
+}
+
+function adminRsvpHtml(rsvp) {
+  return emailShell({
+    eyebrow: 'New RSVP',
+    title: `New RSVP for ${rsvp.eventTitle || 'Project Gazra event'}`,
+    intro: `${rsvp.name || 'Someone'} just RSVPed to an event.`,
+    body: `${detailsTable(rsvp)}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eadfd1;border-radius:12px;overflow:hidden;margin:18px 0;">
+        <tr>
+          <td style="width:120px;background:#faf8f5;padding:12px 14px;color:#666;font-size:13px;border-bottom:1px solid #f1e8dd;">Name</td>
+          <td style="background:#faf8f5;padding:12px 14px;color:#222;font-size:14px;border-bottom:1px solid #f1e8dd;"><strong>${escapeHtml(rsvp.name || 'Not provided')}</strong></td>
+        </tr>
+        <tr>
+          <td style="width:120px;background:#ffffff;padding:12px 14px;color:#666;font-size:13px;border-bottom:1px solid #f1e8dd;">Email</td>
+          <td style="background:#ffffff;padding:12px 14px;color:#222;font-size:14px;border-bottom:1px solid #f1e8dd;"><strong>${escapeHtml(rsvp.email || 'Not provided')}</strong></td>
+        </tr>
+        <tr>
+          <td style="width:120px;background:#faf8f5;padding:12px 14px;color:#666;font-size:13px;">Phone</td>
+          <td style="background:#faf8f5;padding:12px 14px;color:#222;font-size:14px;"><strong>${escapeHtml(rsvp.phone || 'Not provided')}</strong></td>
+        </tr>
+      </table>
+      <p style="font-size:15px;line-height:1.6;color:#444;">Open the admin RSVP list to review this participant or mark attendance during check-in.</p>`,
+    ctaLabel: 'Open Admin Events',
+    ctaUrl: `${(process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://gazraweb.netlify.app').replace(/\/$/, '')}/admin/events`,
+    footerNote: 'This admin notification was sent because a new event RSVP was created.'
+  });
+}
+
+async function sendAdminRsvpNotification(rsvp) {
+  if (!canSendEmail()) {
+    await queueEmail({ rsvp, type: 'admin_rsvp', status: 'pending_smtp_config', to: getSmtpConfig().adminEmail });
+    return { sent: false, status: 'pending_smtp_config' };
+  }
+
+  const config = getSmtpConfig();
+  const to = config.adminEmail;
+  if (!to) {
+    await queueEmail({ rsvp, type: 'admin_rsvp', status: 'skipped', error: 'Missing admin recipient email' });
+    return { sent: false, status: 'skipped' };
+  }
+
+  const subject = `New RSVP: ${rsvp.eventTitle || 'Project Gazra event'} - ${rsvp.name || rsvp.email || 'Guest'}`;
+  await createTransporter().sendMail({
+    from: config.from,
+    replyTo: rsvp.email || config.replyTo,
+    to,
+    subject,
+    html: adminRsvpHtml(rsvp),
+    text: `${subject}
+
+Event: ${rsvp.eventTitle || 'Project Gazra event'}
+Date: ${rsvp.eventDate || 'To be announced'}
+Time: ${rsvp.eventTime || 'To be announced'}
+Location: ${rsvp.location || 'To be announced'}
+
+Name: ${rsvp.name || 'Not provided'}
+Email: ${rsvp.email || 'Not provided'}
+Phone: ${rsvp.phone || 'Not provided'}
+Ticket: ${rsvp.rsvpId || ''}
+
+Admin: ${(process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://gazraweb.netlify.app').replace(/\/$/, '')}/admin/events
+
+Project Gazra`
+  });
+
+  await queueEmail({ rsvp, type: 'admin_rsvp', status: 'sent', to });
   return { sent: true, status: 'sent' };
 }
 
@@ -278,22 +390,37 @@ exports.onEventRsvpCreated = onDocumentCreated(
     const rsvp = event.data?.data();
     if (!rsvp) return;
 
+    const updates = {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
     try {
       const emailResult = await sendRsvpEmail(rsvp, 'confirmation');
-      await event.data.ref.update({
-        confirmationEmailStatus: emailResult.status,
-        confirmationEmailSentAt: emailResult.sent ? admin.firestore.FieldValue.serverTimestamp() : null,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+      updates.confirmationEmailStatus = emailResult.status;
+      updates.confirmationEmailSentAt = emailResult.sent ? admin.firestore.FieldValue.serverTimestamp() : null;
     } catch (error) {
       logger.error('RSVP confirmation email failed', { error: error.message, rsvpId: rsvp.rsvpId });
       await queueEmail({ rsvp, type: 'confirmation', status: 'failed', error: error.message });
-      await event.data.ref.update({
+      Object.assign(updates, {
         confirmationEmailStatus: 'failed',
-        confirmationEmailError: error.message,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        confirmationEmailError: error.message
       });
     }
+
+    try {
+      const adminEmailResult = await sendAdminRsvpNotification(rsvp);
+      updates.adminNotificationStatus = adminEmailResult.status;
+      updates.adminNotificationSentAt = adminEmailResult.sent ? admin.firestore.FieldValue.serverTimestamp() : null;
+    } catch (error) {
+      logger.error('Admin RSVP notification failed', { error: error.message, rsvpId: rsvp.rsvpId });
+      await queueEmail({ rsvp, type: 'admin_rsvp', status: 'failed', error: error.message, to: getSmtpConfig().adminEmail });
+      Object.assign(updates, {
+        adminNotificationStatus: 'failed',
+        adminNotificationError: error.message
+      });
+    }
+
+    await event.data.ref.update(updates);
   }
 );
 
