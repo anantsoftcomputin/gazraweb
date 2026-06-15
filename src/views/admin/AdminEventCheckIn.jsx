@@ -9,7 +9,8 @@ const scannerElementId = 'event-check-in-scanner';
 const emptyResult = {
   type: '',
   message: '',
-  rsvp: null
+  rsvp: null,
+  canConfirm: false
 };
 
 function extractToken(rawValue) {
@@ -34,6 +35,8 @@ const AdminEventCheckIn = () => {
   const [scannerError, setScannerError] = useState('');
   const [result, setResult] = useState(emptyResult);
   const [checking, setChecking] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const resultRef = useRef(null);
   const scannerRef = useRef(null);
   const manualInputRef = useRef(null);
   const lastScanRef = useRef('');
@@ -67,10 +70,17 @@ const AdminEventCheckIn = () => {
     throw lastError;
   };
 
-  const checkInByCode = async (rawCode = manualInputRef.current?.value || manualCode) => {
+  const revealResult = () => {
+    requestAnimationFrame(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  const lookupVisitorByCode = async (rawCode = manualInputRef.current?.value || manualCode) => {
     const qrToken = extractToken(rawCode);
     if (!qrToken) {
-      setResult({ type: 'error', message: 'Enter or scan a valid RSVP QR code.', rsvp: null });
+      setResult({ type: 'error', message: 'Enter or scan a valid RSVP QR code.', rsvp: null, canConfirm: false });
+      revealResult();
       return;
     }
 
@@ -80,7 +90,7 @@ const AdminEventCheckIn = () => {
       const snapshot = await getRsvpSnapshot(qrToken);
 
       if (snapshot.empty) {
-        setResult({ type: 'error', message: 'No RSVP found for this QR code.', rsvp: null });
+        setResult({ type: 'error', message: 'No RSVP found for this QR code.', rsvp: null, canConfirm: false });
         return;
       }
 
@@ -91,12 +101,33 @@ const AdminEventCheckIn = () => {
         setResult({
           type: 'warning',
           message: `${rsvp.name || 'This guest'} was already checked in.`,
-          rsvp
+          rsvp,
+          canConfirm: false
         });
         return;
       }
 
-      await updateDoc(doc(db, 'eventRsvps', rsvpDoc.id), {
+      setResult({
+        type: 'pending',
+        message: 'Visitor found. Verify the details before check-in.',
+        rsvp,
+        canConfirm: true
+      });
+    } catch (error) {
+      setResult({ type: 'error', message: error.message || 'Unable to find RSVP.', rsvp: null, canConfirm: false });
+    } finally {
+      setChecking(false);
+      revealResult();
+    }
+  };
+
+  const confirmVisitorCheckIn = async () => {
+    if (!result.rsvp?.id || result.rsvp.checkedIn) return;
+
+    setConfirming(true);
+    setScannerError('');
+    try {
+      await updateDoc(doc(db, 'eventRsvps', result.rsvp.id), {
         checkedIn: true,
         attendanceStatus: 'checked_in',
         checkedInAt: Timestamp.now(),
@@ -107,18 +138,20 @@ const AdminEventCheckIn = () => {
       setManualCode('');
       setResult({
         type: 'success',
-        message: `${rsvp.name || 'Guest'} checked in successfully.`,
+        message: `${result.rsvp.name || 'Guest'} checked in successfully. A thank-you email will be sent shortly.`,
         rsvp: {
-          ...rsvp,
+          ...result.rsvp,
           checkedIn: true,
           attendanceStatus: 'checked_in',
           checkedInAt: Timestamp.now()
-        }
+        },
+        canConfirm: false
       });
     } catch (error) {
-      setResult({ type: 'error', message: error.message || 'Unable to check in RSVP.', rsvp: null });
+      setResult({ type: 'error', message: error.message || 'Unable to check in RSVP.', rsvp: result.rsvp, canConfirm: true });
     } finally {
-      setChecking(false);
+      setConfirming(false);
+      revealResult();
     }
   };
 
@@ -174,9 +207,9 @@ const AdminEventCheckIn = () => {
           aspectRatio: 1
         },
         (decodedText) => {
-          if (decodedText === lastScanRef.current || checking) return;
+          if (decodedText === lastScanRef.current || checking || confirming) return;
           lastScanRef.current = decodedText;
-          checkInByCode(decodedText);
+          lookupVisitorByCode(decodedText);
         },
         () => {}
       );
@@ -219,6 +252,73 @@ const AdminEventCheckIn = () => {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr),minmax(360px,0.9fr)]">
+          {result.message && (
+            <section ref={resultRef} className={`xl:col-span-2 rounded-xl border p-5 shadow-sm ${
+              result.type === 'success'
+                ? 'border-green-200 bg-green-50'
+                : result.type === 'warning'
+                  ? 'border-yellow-200 bg-yellow-50'
+                  : result.type === 'pending'
+                    ? 'border-blue-200 bg-blue-50'
+                    : 'border-red-200 bg-red-50'
+            }`}>
+              <div className="flex items-start gap-3">
+                {result.type === 'success' ? (
+                  <CheckCircle2 className="mt-1 h-6 w-6 shrink-0 text-green-700" />
+                ) : result.type === 'warning' || result.type === 'pending' ? (
+                  <UserCheck className={`mt-1 h-6 w-6 shrink-0 ${result.type === 'pending' ? 'text-blue-700' : 'text-yellow-700'}`} />
+                ) : (
+                  <XCircle className="mt-1 h-6 w-6 shrink-0 text-red-700" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg font-semibold text-neutral-900">{result.message}</h2>
+                  {result.rsvp && (
+                    <div className="mt-4 grid gap-3 text-sm text-neutral-700 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="rounded-lg bg-white/70 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Visitor</p>
+                        <p className="mt-1 font-semibold text-neutral-900">{result.rsvp.name || 'Guest'}</p>
+                        <p className="truncate text-neutral-600">{result.rsvp.email}</p>
+                        <p className="text-neutral-600">{result.rsvp.phone}</p>
+                      </div>
+                      <div className="rounded-lg bg-white/70 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Event</p>
+                        <p className="mt-1 font-semibold text-neutral-900">{result.rsvp.eventTitle || result.rsvp.eventId}</p>
+                        <p className="text-neutral-600">{result.rsvp.eventDate || 'Date TBA'}</p>
+                        <p className="text-neutral-600">{result.rsvp.eventTime || 'Time TBA'}</p>
+                      </div>
+                      <div className="rounded-lg bg-white/70 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Ticket</p>
+                        <p className="mt-1 break-all font-semibold text-neutral-900">{result.rsvp.rsvpId || result.rsvp.id}</p>
+                        <p className="text-neutral-600">{result.rsvp.location || 'Location TBA'}</p>
+                      </div>
+                    </div>
+                  )}
+                  {result.canConfirm && (
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                      <button
+                        onClick={confirmVisitorCheckIn}
+                        disabled={confirming}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                      >
+                        <CheckCircle2 className="h-5 w-5" />
+                        {confirming ? 'Checking In...' : 'Confirm Check-In'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setResult(emptyResult);
+                          lastScanRef.current = '';
+                        }}
+                        className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                      >
+                        Scan Another
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-3">
               <div className="rounded-lg bg-primary-50 p-3 text-primary-600">
@@ -275,47 +375,15 @@ const AdminEventCheckIn = () => {
                   placeholder='{"type":"gazra-event-rsvp","eventId":"...","rsvpId":"...","qrToken":"..."}'
                 />
                 <button
-                  onClick={() => checkInByCode(manualInputRef.current?.value || manualCode)}
+                  onClick={() => lookupVisitorByCode(manualInputRef.current?.value || manualCode)}
                   disabled={checking}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-3 text-white transition-colors hover:bg-primary-600 disabled:opacity-50"
                 >
                   <Search className="h-5 w-5" />
-                  {checking ? 'Checking...' : 'Check In Guest'}
+                  {checking ? 'Finding...' : 'Find Visitor'}
                 </button>
               </div>
             </div>
-
-            {result.message && (
-              <div className={`rounded-xl border p-6 shadow-sm ${
-                result.type === 'success'
-                  ? 'border-green-200 bg-green-50'
-                  : result.type === 'warning'
-                    ? 'border-yellow-200 bg-yellow-50'
-                    : 'border-red-200 bg-red-50'
-              }`}>
-                <div className="flex items-start gap-3">
-                  {result.type === 'success' ? (
-                    <CheckCircle2 className="mt-1 h-6 w-6 text-green-700" />
-                  ) : result.type === 'warning' ? (
-                    <UserCheck className="mt-1 h-6 w-6 text-yellow-700" />
-                  ) : (
-                    <XCircle className="mt-1 h-6 w-6 text-red-700" />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-neutral-900">{result.message}</h3>
-                    {result.rsvp && (
-                      <div className="mt-3 space-y-1 text-sm text-neutral-700">
-                        <p><span className="font-medium">Event:</span> {result.rsvp.eventTitle || result.rsvp.eventId}</p>
-                        <p><span className="font-medium">Name:</span> {result.rsvp.name}</p>
-                        <p><span className="font-medium">Email:</span> {result.rsvp.email}</p>
-                        <p><span className="font-medium">Phone:</span> {result.rsvp.phone}</p>
-                        <p><span className="font-medium">Ticket:</span> {result.rsvp.rsvpId || result.rsvp.id}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </section>
         </div>
       </div>
