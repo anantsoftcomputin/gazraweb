@@ -101,6 +101,30 @@ export const formatEventDate = (event, options = {}) => {
   });
 };
 
+export const formatTimeForDisplay = (time) => {
+  if (!time) return '';
+  const [hours, minutes = '00'] = String(time).split(':');
+  const date = new Date();
+  date.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
+
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+};
+
+export const formatSlotTime = (slot) => {
+  if (!slot) return '';
+  const start = formatTimeForDisplay(slot.startTime);
+  const end = formatTimeForDisplay(slot.endTime);
+  return end ? `${start} - ${end}` : start;
+};
+
+export const formatLocationSlot = (slot) => {
+  if (!slot) return 'Select a slot';
+  return `${formatEventDate({ dateIso: slot.dateIso })} · ${formatSlotTime(slot)}`;
+};
+
 export const sortEventsByDate = (events) =>
   [...events].sort((a, b) => {
     const aDate = getEventDateIso(a);

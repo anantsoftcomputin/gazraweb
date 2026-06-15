@@ -20,6 +20,11 @@ service cloud.firestore {
     match /eventLocationBookings/{bookingId} {
       allow read, write: if isAdmin();
     }
+
+    match /eventLocationSlots/{slotId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     
     match /menuItems/{itemId} {
       allow read: if true;

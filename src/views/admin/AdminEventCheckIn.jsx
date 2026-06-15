@@ -30,6 +30,7 @@ function extractToken(rawValue) {
 const AdminEventCheckIn = () => {
   const [manualCode, setManualCode] = useState('');
   const [scannerActive, setScannerActive] = useState(false);
+  const [scannerStarting, setScannerStarting] = useState(false);
   const [scannerError, setScannerError] = useState('');
   const [result, setResult] = useState(emptyResult);
   const [checking, setChecking] = useState(false);
@@ -38,48 +39,14 @@ const AdminEventCheckIn = () => {
   const lastScanRef = useRef('');
 
   useEffect(() => {
-    if (!scannerActive) return undefined;
-    let mounted = true;
-
-    const startScanner = async () => {
-      try {
-        const { Html5QrcodeScanner } = await import('html5-qrcode');
-        if (!mounted) return;
-
-        const scanner = new Html5QrcodeScanner(
-          scannerElementId,
-          {
-            fps: 10,
-            qrbox: { width: 260, height: 260 },
-            rememberLastUsedCamera: true
-          },
-          false
-        );
-
-        scannerRef.current = scanner;
-        scanner.render(
-          (decodedText) => {
-            if (decodedText === lastScanRef.current || checking) return;
-            lastScanRef.current = decodedText;
-            checkInByCode(decodedText);
-          },
-          () => {}
-        );
-      } catch (error) {
-        setScannerError(error.message || 'Unable to start QR scanner.');
-      }
-    };
-
-    startScanner();
-
     return () => {
-      mounted = false;
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(() => {});
+        scannerRef.current.stop?.().catch(() => {});
+        scannerRef.current.clear?.().catch(() => {});
         scannerRef.current = null;
       }
     };
-  }, [scannerActive]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -156,8 +123,70 @@ const AdminEventCheckIn = () => {
   };
 
   const stopScanner = () => {
-    setScannerActive(false);
-    lastScanRef.current = '';
+    const stopActiveScanner = async () => {
+      if (scannerRef.current) {
+        await scannerRef.current.stop?.().catch(() => {});
+        await scannerRef.current.clear?.().catch(() => {});
+        scannerRef.current = null;
+      }
+      setScannerActive(false);
+      setScannerStarting(false);
+      setScannerError('');
+      lastScanRef.current = '';
+    };
+
+    stopActiveScanner();
+  };
+
+  const startScannerManually = async () => {
+    setScannerError('');
+    setScannerStarting(true);
+    setScannerActive(true);
+
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      if (!window.isSecureContext) {
+        throw new Error('Camera access requires HTTPS or localhost.');
+      }
+
+      const { Html5Qrcode } = await import('html5-qrcode');
+
+      if (scannerRef.current) {
+        await scannerRef.current.stop?.().catch(() => {});
+        await scannerRef.current.clear?.().catch(() => {});
+      }
+
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras.length) {
+        throw new Error('No camera was found on this device.');
+      }
+
+      const preferredCamera = cameras.find((camera) => /back|rear|environment/i.test(camera.label)) || cameras[0];
+      const scanner = new Html5Qrcode(scannerElementId);
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        preferredCamera.id,
+        {
+          fps: 10,
+          qrbox: { width: 260, height: 260 },
+          aspectRatio: 1
+        },
+        (decodedText) => {
+          if (decodedText === lastScanRef.current || checking) return;
+          lastScanRef.current = decodedText;
+          checkInByCode(decodedText);
+        },
+        () => {}
+      );
+
+      setScannerStarting(false);
+    } catch (error) {
+      setScannerStarting(false);
+      setScannerActive(false);
+      setScannerError(error.message || 'Unable to start QR scanner. Check camera permissions and try again.');
+    }
   };
 
   return (
@@ -171,11 +200,11 @@ const AdminEventCheckIn = () => {
           <div className="flex gap-2">
             {!scannerActive ? (
               <button
-                onClick={() => setScannerActive(true)}
+                onClick={startScannerManually}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
               >
                 <QrCode className="h-5 w-5" />
-                Start Scanner
+                Turn Camera On
               </button>
             ) : (
               <button
@@ -201,21 +230,33 @@ const AdminEventCheckIn = () => {
               </div>
             </div>
 
-            {scannerActive ? (
+            {scannerActive || scannerStarting ? (
               <div className="overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+                {scannerStarting && (
+                  <div className="mb-3 rounded-lg border border-primary-100 bg-primary-50 p-3 text-sm text-primary-700">
+                    Starting camera. Allow camera access if your browser asks.
+                  </div>
+                )}
                 <div id={scannerElementId} className="min-h-[320px]" />
               </div>
             ) : (
               <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 text-center">
                 <QrCode className="mb-3 h-12 w-12 text-neutral-300" />
-                <p className="font-medium text-neutral-700">Scanner is off</p>
-                <p className="mt-1 text-sm text-neutral-500">Start the scanner when you are ready to check guests in.</p>
+                <p className="font-medium text-neutral-700">Camera paused</p>
+                <p className="mt-1 text-sm text-neutral-500">Turn the camera on to scan guest QR codes.</p>
+                <button
+                  onClick={startScannerManually}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Turn Camera On
+                </button>
               </div>
             )}
 
             {scannerError && (
               <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-700">
-                {scannerError}
+                {scannerError} Use HTTPS or localhost, then allow camera access in the browser.
               </div>
             )}
           </section>

@@ -8,7 +8,7 @@ import { where } from 'firebase/firestore';
 import { useFirestore } from '../../hooks/useFirestore';
 import { useStorage } from '../../hooks/useStorage';
 import AdminLayout from '../../layouts/AdminLayout';
-import { EVENT_CATEGORIES, formatEventDate, getEventDateIso, getEventMonth, sortEventsByDate } from '../../utils/eventUtils';
+import { EVENT_CATEGORIES, formatEventDate, formatLocationSlot, getEventDateIso, getEventMonth, sortEventsByDate } from '../../utils/eventUtils';
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([]);
@@ -18,6 +18,7 @@ const AdminEvents = () => {
   const [selectedEventForRsvps, setSelectedEventForRsvps] = useState(null);
   const [showRsvpModal, setShowRsvpModal] = useState(false);
   const [locations, setLocations] = useState([]);
+  const [locationSlots, setLocationSlots] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -34,7 +35,9 @@ const AdminEvents = () => {
     rsvpDeadline: '',
     externalLink: '',
     locationId: '',
+    slotId: '',
     locationDetails: null,
+    slotDetails: null,
     status: 'approved',
     approvalStatus: 'approved',
     registrationCount: 0,
@@ -45,11 +48,13 @@ const AdminEvents = () => {
   const { getDocuments, addDocument, updateDocument, deleteDocument, loading } = useFirestore('events');
   const { getDocuments: getRsvps, updateDocument: updateRsvp } = useFirestore('eventRsvps');
   const { getDocuments: getLocations } = useFirestore('eventLocations');
+  const { getDocuments: getLocationSlots, updateDocument: updateLocationSlot } = useFirestore('eventLocationSlots');
   const { uploadFile, uploading } = useStorage();
 
   useEffect(() => {
     loadEvents();
     loadLocations();
+    loadLocationSlots();
   }, []);
 
   const loadEvents = async () => {
@@ -65,6 +70,22 @@ const AdminEvents = () => {
       setLocations(result.data.filter((location) => location.active !== false).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
     }
   };
+
+  const loadLocationSlots = async () => {
+    const result = await getLocationSlots();
+    if (result.success) {
+      setLocationSlots(result.data.sort((a, b) => `${a.dateIso || ''}${a.startTime || ''}`.localeCompare(`${b.dateIso || ''}${b.startTime || ''}`)));
+    }
+  };
+
+  const slotsForLocation = (locationId) =>
+    locationSlots.filter((slot) => slot.locationId === locationId);
+
+  const availableSlotsForLocation = (locationId) =>
+    slotsForLocation(locationId).filter((slot) => (
+      (slot.status || 'available') === 'available' ||
+      (editingEvent?.slotId && slot.id === editingEvent.slotId)
+    ));
 
   const viewEventRsvps = async (event) => {
     const rsvpResult = await getRsvps([
@@ -160,6 +181,14 @@ const AdminEvents = () => {
     });
 
     if (result.success) {
+      if (event.slotId) {
+        await updateLocationSlot(event.slotId, {
+          status: status === 'approved' ? 'booked' : 'available',
+          eventId: status === 'approved' ? event.id : '',
+          bookingId: status === 'approved' ? event.bookingId || '' : ''
+        });
+        await loadLocationSlots();
+      }
       loadEvents();
     } else {
       alert(result.error || 'Unable to update event status.');
@@ -175,12 +204,23 @@ const AdminEvents = () => {
 
     if (name === 'locationId') {
       const selectedLocation = locations.find((location) => location.id === value);
+      const selectedSlot = availableSlotsForLocation(value)[0];
       if (selectedLocation) {
         setFormData((prev) => ({
           ...prev,
           locationId: selectedLocation.id,
           location: selectedLocation.name,
-          capacity: selectedLocation.capacity ? String(selectedLocation.capacity) : prev.capacity,
+          slotId: selectedSlot?.id || '',
+          slotDetails: selectedSlot ? {
+            id: selectedSlot.id,
+            dateIso: selectedSlot.dateIso || '',
+            startTime: selectedSlot.startTime || '',
+            endTime: selectedSlot.endTime || '',
+            status: selectedSlot.status || 'available'
+          } : null,
+          dateIso: selectedSlot?.dateIso || prev.dateIso,
+          time: selectedSlot ? `${selectedSlot.startTime}${selectedSlot.endTime ? ` - ${selectedSlot.endTime}` : ''}` : prev.time,
+          capacity: selectedSlot?.capacity || (selectedLocation.capacity ? String(selectedLocation.capacity) : prev.capacity),
           locationDetails: {
             id: selectedLocation.id,
             name: selectedLocation.name || '',
@@ -194,7 +234,27 @@ const AdminEvents = () => {
           }
         }));
       } else {
-        setFormData((prev) => ({ ...prev, locationId: '', locationDetails: null }));
+        setFormData((prev) => ({ ...prev, locationId: '', slotId: '', locationDetails: null, slotDetails: null }));
+      }
+    }
+
+    if (name === 'slotId') {
+      const selectedSlot = locationSlots.find((slot) => slot.id === value);
+      if (selectedSlot) {
+        setFormData((prev) => ({
+          ...prev,
+          slotId: selectedSlot.id,
+          dateIso: selectedSlot.dateIso || prev.dateIso,
+          time: `${selectedSlot.startTime}${selectedSlot.endTime ? ` - ${selectedSlot.endTime}` : ''}`,
+          capacity: selectedSlot.capacity || prev.capacity,
+          slotDetails: {
+            id: selectedSlot.id,
+            dateIso: selectedSlot.dateIso || '',
+            startTime: selectedSlot.startTime || '',
+            endTime: selectedSlot.endTime || '',
+            status: selectedSlot.status || 'available'
+          }
+        }));
       }
     }
   };
@@ -211,16 +271,49 @@ const AdminEvents = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const selectedSlot = formData.slotId ? locationSlots.find((slot) => slot.id === formData.slotId) : null;
+    if (formData.locationId && !formData.slotId) {
+      alert('Select an available slot for this location, or use custom location text.');
+      return;
+    }
+    if (selectedSlot && (selectedSlot.status || 'available') !== 'available' && selectedSlot.id !== editingEvent?.slotId) {
+      alert('This slot is no longer available. Choose another slot.');
+      await loadLocationSlots();
+      return;
+    }
+
     const payload = {
       ...formData,
       approvalStatus: formData.status === 'approved' ? 'approved' : formData.status,
       date: formData.dateIso ? formatEventDate({ dateIso: formData.dateIso }) : formData.date,
-      month: getEventMonth({ dateIso: formData.dateIso })
+      month: getEventMonth({ dateIso: formData.dateIso }),
+      slotDetails: selectedSlot ? {
+        id: selectedSlot.id,
+        dateIso: selectedSlot.dateIso || '',
+        startTime: selectedSlot.startTime || '',
+        endTime: selectedSlot.endTime || '',
+        status: formData.status === 'approved' ? 'booked' : 'pending'
+      } : formData.slotDetails
     };
     
     if (editingEvent) {
       const result = await updateDocument(editingEvent.id, payload);
       if (result.success) {
+        if (editingEvent.slotId && editingEvent.slotId !== formData.slotId) {
+          await updateLocationSlot(editingEvent.slotId, {
+            status: 'available',
+            eventId: '',
+            bookingId: ''
+          });
+        }
+        if (formData.slotId) {
+          await updateLocationSlot(formData.slotId, {
+            status: formData.status === 'approved' ? 'booked' : 'pending',
+            eventId: editingEvent.id,
+            bookingId: ''
+          });
+          await loadLocationSlots();
+        }
         alert('Event updated successfully!');
         setShowModal(false);
         loadEvents();
@@ -229,6 +322,14 @@ const AdminEvents = () => {
     } else {
       const result = await addDocument(payload);
       if (result.success) {
+        if (formData.slotId) {
+          await updateLocationSlot(formData.slotId, {
+            status: formData.status === 'approved' ? 'booked' : 'pending',
+            eventId: result.id,
+            bookingId: ''
+          });
+          await loadLocationSlots();
+        }
         alert('Event created successfully!');
         setShowModal(false);
         loadEvents();
@@ -255,7 +356,9 @@ const AdminEvents = () => {
       rsvpDeadline: event.rsvpDeadline || '',
       externalLink: event.externalLink || '',
       locationId: event.locationId || event.locationDetails?.id || '',
+      slotId: event.slotId || event.slotDetails?.id || '',
       locationDetails: event.locationDetails || null,
+      slotDetails: event.slotDetails || null,
       status: event.status || 'approved',
       approvalStatus: event.approvalStatus || event.status || 'approved',
       registrationCount: event.registrationCount || 0,
@@ -267,8 +370,17 @@ const AdminEvents = () => {
 
   const handleDelete = async (eventId) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
+      const eventToDelete = events.find((event) => event.id === eventId);
       const result = await deleteDocument(eventId);
       if (result.success) {
+        if (eventToDelete?.slotId) {
+          await updateLocationSlot(eventToDelete.slotId, {
+            status: 'available',
+            eventId: '',
+            bookingId: ''
+          });
+          await loadLocationSlots();
+        }
         alert('Event deleted successfully!');
         loadEvents();
       }
@@ -293,7 +405,9 @@ const AdminEvents = () => {
       rsvpDeadline: '',
       externalLink: '',
       locationId: '',
+      slotId: '',
       locationDetails: null,
+      slotDetails: null,
       status: 'approved',
       approvalStatus: 'approved',
       registrationCount: 0,
@@ -626,6 +740,34 @@ const AdminEvents = () => {
                       {formData.locationDetails.infrastructure?.length > 0 && (
                         <p className="mt-2 text-xs text-neutral-600">
                           Infrastructure: {formData.locationDetails.infrastructure.join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {formData.locationId && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Location Slot</label>
+                      <select
+                        name="slotId"
+                        value={formData.slotId}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        required
+                      >
+                        <option value="">Select an available slot</option>
+                        {availableSlotsForLocation(formData.locationId).map((slot) => (
+                          <option key={slot.id} value={slot.id}>
+                            {formatLocationSlot(slot)} {slot.capacity ? `(${slot.capacity})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {formData.slotId ? (
+                        <p className="mt-2 text-xs text-neutral-500">
+                          Date and time will follow this master calendar slot.
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-red-600">
+                          No available slots found. Create slots from Events &gt; Locations.
                         </p>
                       )}
                     </div>
