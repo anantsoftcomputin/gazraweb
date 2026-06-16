@@ -3,10 +3,12 @@ import { useParams, useNavigate } from '../lib/routerCompat';
 import { motion } from 'framer-motion';
 import {
   Calendar, Clock, MapPin, Users, Share2,
-  ArrowLeft, ExternalLink, Phone, Briefcase, MessageSquare
+  ArrowLeft, ExternalLink, Phone, Briefcase, MessageSquare, Mail, CheckCircle2
 } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaWhatsapp } from 'react-icons/fa';
 import QRCode from 'qrcode';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import app from '../config/firebase';
 import { useFirestore } from '../hooks/useFirestore';
 import { EVENT_CATEGORIES, formatEventDate, getEventCategoryStyle } from '../utils/eventUtils';
 
@@ -24,8 +26,18 @@ const EventDetail = () => {
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [rsvpTicket, setRsvpTicket] = useState(null);
   const [eventQr, setEventQr] = useState('');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [emailOtpLoading, setEmailOtpLoading] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailVerification, setEmailVerification] = useState({
+    verificationId: '',
+    verificationToken: '',
+    email: ''
+  });
   const { getDocument } = useFirestore('events');
   const { addDocument: addRsvp } = useFirestore('eventRsvps');
+  const functions = getFunctions(app, 'us-central1');
 
   useEffect(() => {
     loadEvent();
@@ -53,10 +65,108 @@ const EventDetail = () => {
   };
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phonePattern = /^\+?[1-9]\d{9,14}$/;
 
   const validateEmail = (value) => emailPattern.test(value.trim());
-  const validatePhone = (value) => phonePattern.test(value.trim());
+  const getIndianPhoneDigits = (value) => {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits.startsWith('91') && digits.length > 10
+      ? digits.slice(2, 12)
+      : digits.slice(0, 10);
+  };
+  const formatIndianPhone = (value) => {
+    const digits = getIndianPhoneDigits(value);
+    return digits.length === 10 ? `+91${digits}` : '';
+  };
+  const validatePhone = (value) => getIndianPhoneDigits(value).length === 10;
+
+  const resetEmailVerification = (nextEmail = email) => {
+    setEmailVerified(false);
+    setEmailOtpSent(false);
+    setEmailOtp('');
+    setEmailVerification({
+      verificationId: '',
+      verificationToken: '',
+      email: nextEmail.trim().toLowerCase()
+    });
+  };
+
+  const sendEmailOtp = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const errors = {};
+    if (!name.trim()) errors.name = 'Enter your full name before sending OTP';
+    if (!validateEmail(email)) errors.email = 'Enter a valid email address';
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors((prev) => ({ ...prev, ...errors }));
+      return;
+    }
+
+    setEmailOtpLoading(true);
+    setFormMessage('');
+    setFormErrors({});
+
+    try {
+      const sendOtp = httpsCallable(functions, 'sendRsvpEmailOtp');
+      const response = await sendOtp({
+        email: normalizedEmail,
+        name: name.trim(),
+        eventId: id,
+        eventTitle: event?.title || ''
+      });
+
+      setEmailVerification({
+        verificationId: response.data.verificationId,
+        verificationToken: '',
+        email: normalizedEmail
+      });
+      setEmailOtpSent(true);
+      setEmailVerified(false);
+      setEmailOtp('');
+      setFormMessage('Verification code sent to your email. It expires in 10 minutes.');
+    } catch (error) {
+      setFormMessage(error.message || 'Unable to send email verification code.');
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const verifyEmailOtp = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!emailVerification.verificationId || emailVerification.email !== normalizedEmail) {
+      setFormMessage('Send a new verification code for this email address.');
+      resetEmailVerification(normalizedEmail);
+      return;
+    }
+
+    if (!/^\d{6}$/.test(emailOtp.trim())) {
+      setFormErrors((prev) => ({ ...prev, emailOtp: 'Enter the 6-digit code' }));
+      return;
+    }
+
+    setEmailOtpLoading(true);
+    setFormErrors({});
+    setFormMessage('');
+
+    try {
+      const verifyOtp = httpsCallable(functions, 'verifyRsvpEmailOtp');
+      const response = await verifyOtp({
+        email: normalizedEmail,
+        code: emailOtp.trim(),
+        verificationId: emailVerification.verificationId
+      });
+
+      setEmailVerified(true);
+      setEmailVerification((prev) => ({
+        ...prev,
+        verificationToken: response.data.verificationToken
+      }));
+      setFormMessage('Email verified. You can now confirm your RSVP.');
+    } catch (error) {
+      setFormMessage(error.message || 'Invalid verification code. Please try again.');
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
 
   const handleSubmitRsvp = async (submitEvent) => {
     submitEvent.preventDefault();
@@ -80,7 +190,10 @@ const EventDetail = () => {
     const errors = {};
     if (!name.trim()) errors.name = 'Enter your full name';
     if (!validateEmail(email)) errors.email = 'Enter a valid email address';
-    if (!validatePhone(phone)) errors.phone = 'Enter a valid phone number including country code';
+    if (!validatePhone(phone)) errors.phone = 'Enter a valid 10-digit phone number';
+    if (!emailVerified || emailVerification.email !== email.trim().toLowerCase()) {
+      errors.emailOtp = 'Verify your email address before confirming RSVP';
+    }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -117,7 +230,11 @@ const EventDetail = () => {
         locationId: event.locationId || '',
         name: name.trim(),
         email: email.trim(),
-        phone: phone.trim(),
+        phone: formatIndianPhone(phone),
+        emailVerified: true,
+        emailVerifiedAt: new Date().toISOString(),
+        emailVerificationId: emailVerification.verificationId,
+        emailVerificationToken: emailVerification.verificationToken,
         status: 'confirmed',
         attendanceStatus: 'not_checked_in',
         checkedIn: false,
@@ -567,32 +684,106 @@ const EventDetail = () => {
                           id="email"
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            resetEmailVerification(e.target.value);
+                          }}
                           className="w-full rounded-2xl border border-neutral-200 px-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
                           placeholder="name@example.com"
+                          disabled={emailVerified}
                         />
                         {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
                       </div>
 
+                      <div className={`rounded-2xl border p-4 ${emailVerified ? 'border-green-200 bg-green-50' : 'border-neutral-200 bg-neutral-50'}`}>
+                        {emailVerified ? (
+                          <div className="flex items-start gap-3">
+                            <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-700" />
+                            <div>
+                              <p className="font-semibold text-green-900">Email verified</p>
+                              <p className="text-sm text-green-700">{emailVerification.email}</p>
+                              <button
+                                type="button"
+                                onClick={() => resetEmailVerification(email)}
+                                className="mt-2 text-sm font-semibold text-green-800 underline"
+                              >
+                                Use a different email
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <Mail className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary-600" />
+                              <div>
+                                <p className="font-semibold text-neutral-900">Verify your email</p>
+                                <p className="text-sm text-neutral-600">We will send a 6-digit code before confirming your RSVP.</p>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col gap-3 sm:flex-row">
+                              <button
+                                type="button"
+                                onClick={sendEmailOtp}
+                                disabled={emailOtpLoading || !validateEmail(email)}
+                                className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50"
+                              >
+                                {emailOtpLoading && !emailOtpSent ? 'Sending...' : emailOtpSent ? 'Resend Code' : 'Send Code'}
+                              </button>
+
+                              {emailOtpSent && (
+                                <div className="flex flex-1 gap-2">
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={emailOtp}
+                                    onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    className="min-w-0 flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-sm tracking-[0.3em] outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="000000"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={verifyEmailOtp}
+                                    disabled={emailOtpLoading || emailOtp.length !== 6}
+                                    className="rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                                  >
+                                    {emailOtpLoading ? 'Checking...' : 'Verify'}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {formErrors.emailOtp && <p className="text-sm text-red-600">{formErrors.emailOtp}</p>}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="grid gap-2">
                         <label htmlFor="phone" className="text-sm font-medium text-neutral-700">Phone Number</label>
-                        <input
-                          id="phone"
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-2xl border border-neutral-200 px-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
-                          placeholder="+919876543210"
-                        />
+                        <div className="flex rounded-2xl border border-neutral-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100">
+                          <span className="inline-flex items-center rounded-l-2xl border-r border-neutral-200 bg-neutral-50 px-4 text-sm font-semibold text-neutral-700">
+                            +91
+                          </span>
+                          <input
+                            id="phone"
+                            type="tel"
+                            inputMode="numeric"
+                            value={phone}
+                            onChange={(e) => setPhone(getIndianPhoneDigits(e.target.value))}
+                            className="min-w-0 flex-1 rounded-r-2xl border-0 px-4 py-3 outline-none focus:ring-0"
+                            placeholder="9876543210"
+                            maxLength={10}
+                          />
+                        </div>
                         {formErrors.phone && <p className="text-sm text-red-600">{formErrors.phone}</p>}
                       </div>
 
                       <button
                         type="submit"
                         className="inline-flex items-center justify-center rounded-2xl bg-primary-600 px-5 py-3 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
-                        disabled={rsvpLoading || rsvpSubmitted || !rsvpsOpen}
+                        disabled={rsvpLoading || rsvpSubmitted || !rsvpsOpen || !emailVerified}
                       >
-                        {rsvpLoading ? 'Submitting...' : 'Confirm RSVP'}
+                        {rsvpLoading ? 'Submitting...' : emailVerified ? 'Confirm RSVP' : 'Verify Email to RSVP'}
                       </button>
                     </form>
                   </div>

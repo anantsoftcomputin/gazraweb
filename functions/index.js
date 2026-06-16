@@ -1,4 +1,4 @@
-const { onRequest } = require('firebase-functions/v2/https');
+const { onRequest, onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret } = require('firebase-functions/params');
@@ -6,6 +6,7 @@ const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
+const crypto = require('crypto');
 
 admin.initializeApp();
 
@@ -14,6 +15,7 @@ const region = 'us-central1';
 const smtpPassword = defineSecret('SMTP_PASS');
 
 const emailSecrets = [smtpPassword];
+const otpTtlMs = 10 * 60 * 1000;
 
 function getSmtpConfig() {
   const port = Number(process.env.SMTP_PORT || 465);
@@ -53,6 +55,65 @@ function escapeHtml(value = '') {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function normalizeEmail(email = '') {
+  return String(email).trim().toLowerCase();
+}
+
+function createOtpCode() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+function hashOtp({ email, code, verificationId }) {
+  return crypto
+    .createHash('sha256')
+    .update(`${normalizeEmail(email)}:${verificationId}:${code}`)
+    .digest('hex');
+}
+
+function otpHtml({ name, code, eventTitle }) {
+  return emailShell({
+    eyebrow: 'Email Verification',
+    title: 'Your RSVP verification code',
+    intro: `Hi ${name || 'there'}, use this code to verify your email for ${eventTitle || 'the event'}.`,
+    body: `<div style="background:#f6f3ef;border:1px solid #eadfd1;border-radius:14px;padding:22px;text-align:center;margin:18px 0;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:10px;">One-time code</div>
+        <div style="font-size:36px;letter-spacing:8px;font-weight:bold;color:#134e4a;">${escapeHtml(code)}</div>
+        <div style="font-size:13px;color:#777;margin-top:12px;">This code expires in 10 minutes.</div>
+      </div>
+      <p style="font-size:15px;line-height:1.6;color:#444;">If you did not request this RSVP verification, you can ignore this email.</p>`,
+    ctaLabel: 'Open Gazra',
+    ctaUrl: process.env.SITE_URL || 'https://gazra.org',
+    footerNote: 'For your security, do not share this code with anyone.'
+  });
+}
+
+async function sendOtpEmail({ email, name, code, eventTitle }) {
+  if (!canSendEmail()) {
+    throw new HttpsError('failed-precondition', 'Email delivery is not configured yet.');
+  }
+
+  const config = getSmtpConfig();
+  const subject = `Your Gazra RSVP verification code: ${code}`;
+  await createTransporter().sendMail({
+    from: config.from,
+    replyTo: config.replyTo,
+    to: email,
+    subject,
+    html: otpHtml({ name, code, eventTitle }),
+    text: `${subject}
+
+Hi ${name || 'there'},
+
+Use this code to verify your email for ${eventTitle || 'the event'}:
+
+${code}
+
+This code expires in 10 minutes.
+
+Project Gazra`
+  });
 }
 
 function eventDateTime(rsvp) {
@@ -484,6 +545,148 @@ exports.health = onRequest({ region }, (request, response) => {
     service: 'gazra-functions'
   });
 });
+
+exports.sendRsvpEmailOtp = onCall(
+  { region, secrets: emailSecrets },
+  async (request) => {
+    const email = normalizeEmail(request.data?.email);
+    const name = String(request.data?.name || '').trim().slice(0, 120);
+    const eventId = String(request.data?.eventId || '').trim();
+    const eventTitle = String(request.data?.eventTitle || '').trim().slice(0, 180);
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    }
+
+    const recentSnapshot = await db.collection('emailOtpVerifications')
+      .where('email', '==', email)
+      .where('status', '==', 'pending')
+      .limit(5)
+      .get();
+
+    const now = Date.now();
+    const recentAttempts = recentSnapshot.docs.filter((docSnap) => {
+      const createdAt = docSnap.data().createdAt?.toMillis?.() || 0;
+      return now - createdAt < 60 * 1000;
+    });
+
+    if (recentAttempts.length >= 2) {
+      throw new HttpsError('resource-exhausted', 'Please wait a minute before requesting another OTP.');
+    }
+
+    const code = createOtpCode();
+    const verificationRef = db.collection('emailOtpVerifications').doc();
+    const expiresAt = admin.firestore.Timestamp.fromMillis(now + otpTtlMs);
+
+    await verificationRef.set({
+      email,
+      name,
+      eventId,
+      eventTitle,
+      codeHash: hashOtp({ email, code, verificationId: verificationRef.id }),
+      status: 'pending',
+      attempts: 0,
+      expiresAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    try {
+      await sendOtpEmail({ email, name, code, eventTitle });
+      await verificationRef.update({
+        emailStatus: 'sent',
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (error) {
+      await verificationRef.update({
+        status: 'failed',
+        emailStatus: 'failed',
+        error: error.message,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      logger.error('RSVP email OTP failed', { error: error.message, email, eventId });
+      throw new HttpsError('internal', error.message || 'Unable to send verification email.');
+    }
+
+    return {
+      verificationId: verificationRef.id,
+      expiresAt: expiresAt.toMillis()
+    };
+  }
+);
+
+exports.verifyRsvpEmailOtp = onCall(
+  { region },
+  async (request) => {
+    const email = normalizeEmail(request.data?.email);
+    const code = String(request.data?.code || '').trim();
+    const verificationId = String(request.data?.verificationId || '').trim();
+
+    if (!verificationId || !/^\d{6}$/.test(code) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new HttpsError('invalid-argument', 'Enter the 6-digit verification code.');
+    }
+
+    const verificationRef = db.collection('emailOtpVerifications').doc(verificationId);
+    const result = await db.runTransaction(async (transaction) => {
+      const verificationDoc = await transaction.get(verificationRef);
+
+      if (!verificationDoc.exists) {
+        throw new HttpsError('not-found', 'Verification code not found. Request a new OTP.');
+      }
+
+      const verification = verificationDoc.data();
+      if (verification.email !== email) {
+        throw new HttpsError('permission-denied', 'This code does not match the email address.');
+      }
+
+      if (verification.status !== 'pending') {
+        throw new HttpsError('failed-precondition', 'This code is no longer active. Request a new OTP.');
+      }
+
+      if ((verification.expiresAt?.toMillis?.() || 0) < Date.now()) {
+        transaction.update(verificationRef, {
+          status: 'expired',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        throw new HttpsError('deadline-exceeded', 'This code has expired. Request a new OTP.');
+      }
+
+      if (Number(verification.attempts || 0) >= 5) {
+        transaction.update(verificationRef, {
+          status: 'locked',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        throw new HttpsError('resource-exhausted', 'Too many incorrect attempts. Request a new OTP.');
+      }
+
+      const expectedHash = hashOtp({ email, code, verificationId });
+      if (verification.codeHash !== expectedHash) {
+        transaction.update(verificationRef, {
+          attempts: admin.firestore.FieldValue.increment(1),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        throw new HttpsError('unauthenticated', 'Invalid verification code.');
+      }
+
+      const verificationToken = crypto.randomBytes(24).toString('hex');
+      transaction.update(verificationRef, {
+        status: 'verified',
+        verificationToken,
+        verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      return { verificationToken };
+    });
+
+    return {
+      verified: true,
+      verificationId,
+      verificationToken: result.verificationToken
+    };
+  }
+);
 
 exports.onEventRsvpCreated = onDocumentCreated(
   { region, document: 'eventRsvps/{rsvpDocId}', secrets: emailSecrets },
