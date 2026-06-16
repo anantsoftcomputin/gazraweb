@@ -699,12 +699,18 @@ const GazraCafe = () => {
                 {/* <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-secondary-50 rounded-2xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300 -z-10"></div> */}
                 <div className="relative bg-white/80 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-lg border border-white/60 h-full flex flex-col"> {/* Added flex */}
                   <div className="flex items-center mb-4 sm:mb-6">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover mr-4 border-2 border-white shadow-md flex-shrink-0"
-                      loading="lazy"
-                    />
+                    {testimonial.image ? (
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover mr-4 border-2 border-white shadow-md flex-shrink-0"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-sm font-bold text-primary-700 shadow-md sm:h-14 sm:w-14 sm:text-base">
+                        {(testimonial.name || 'G').trim().charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-bold text-gray-900">{testimonial.name}</h3>
                       <p className="text-sm text-gray-600">{testimonial.role}</p>

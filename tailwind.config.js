@@ -7,54 +7,56 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary color - Warm beige (#f5f0e7)
+        // Primary color - marigold / aged brass from the Gazra newspaper reference
         primary: {
-          DEFAULT: '#E6D7B9',
-          50: '#FFFEFA',
-          100: '#F5F0E7', // Original color
-          200: '#EAE0D0',
-          300: '#DFCFB9',
-          400: '#E6D7B9',
-          500: '#D1BCA0',
-          600: '#BCA687',
-          700: '#A89172',
-          800: '#8D7A5E',
-          900: '#72634C',
+          DEFAULT: '#B8792C',
+          50: '#FFF8E8',
+          100: '#F6E7C4',
+          200: '#EACB88',
+          300: '#DDAA56',
+          400: '#C98A34',
+          500: '#B8792C',
+          600: '#9E5D22',
+          700: '#7B421C',
+          800: '#5E321A',
+          900: '#3E2314',
         },
-        // Secondary color - Complementary earthy green
+        // Secondary color - heritage green accent
         secondary: {
-          DEFAULT: '#5C7A64',
-          50: '#EDF2EE',
-          100: '#DBE5DD',
-          200: '#B7CCBB',
-          300: '#93B399',
-          400: '#6F9977',
-          500: '#5C7A64',
-          600: '#4A6250',
-          700: '#394B3C',
-          800: '#273328',
-          900: '#161C16',
+          DEFAULT: '#2F6B45',
+          50: '#EDF7EF',
+          100: '#D5EAD8',
+          200: '#A8D0AE',
+          300: '#75B381',
+          400: '#4E905E',
+          500: '#2F6B45',
+          600: '#28573B',
+          700: '#214630',
+          800: '#1B3527',
+          900: '#13241B',
         },
-        // Neutral colors with warm undertones
+        // Neutral colors - warm paper through letterpress ink
         neutral: {
-          DEFAULT: '#6B7067',
-          50: '#F7F7F5',
-          100: '#EEEFEC',
-          200: '#DDDED9',
-          300: '#CCCDC6',
-          400: '#9A9C94',
-          500: '#6B7067',
-          600: '#555A52',
-          700: '#40443E',
-          800: '#2A2D29',
-          900: '#151715',
+          DEFAULT: '#6D604F',
+          50: '#FBF4E7',
+          100: '#F1E4CB',
+          200: '#DECBA7',
+          300: '#C7AD7F',
+          400: '#A3865E',
+          500: '#6D604F',
+          600: '#574B3E',
+          700: '#41372E',
+          800: '#29231E',
+          900: '#171311',
         },
-        // Accent colors - Muted natural palette
+        // Accent colors - textile red, leafy green, marigold, and printed ink
         accent: {
-          terracotta: '#CB7762', // Warm earthy accent
-          sage: '#88A096',      // Muted green
-          ochre: '#D6A656',     // Warm yellow
-          slate: '#5A6E7F',     // Blue-gray
+          terracotta: '#9F2F28',
+          sage: '#4E7A45',
+          ochre: '#D9A13A',
+          slate: '#28312B',
+          indigo: '#25405D',
+          rose: '#B5483A',
         }
       },
       fontFamily: {
@@ -64,12 +66,12 @@ export default {
         serif: ['Merriweather', 'Georgia', 'serif'],
       },
       boxShadow: {
-        'soft': '0px 2px 4px rgba(114, 99, 76, 0.04), 0px 4px 6px rgba(114, 99, 76, 0.05)',
-        'medium': '0px 4px 6px rgba(114, 99, 76, 0.06), 0px 8px 16px rgba(114, 99, 76, 0.07)',
-        'hard': '0px 10px 20px rgba(114, 99, 76, 0.07), 0px 20px 40px rgba(114, 99, 76, 0.1)',
-        'inner': 'inset 0px 2px 4px rgba(114, 99, 76, 0.05)',
-        'colored': '0px 4px 12px rgba(230, 215, 185, 0.15)', // Using primary color
-        'glow': '0px 0px 20px rgba(230, 215, 185, 0.2)', // Subtle primary color glow
+        'soft': '0px 2px 4px rgba(62, 35, 20, 0.05), 0px 4px 6px rgba(62, 35, 20, 0.06)',
+        'medium': '0px 4px 6px rgba(62, 35, 20, 0.07), 0px 8px 16px rgba(62, 35, 20, 0.08)',
+        'hard': '0px 10px 20px rgba(62, 35, 20, 0.08), 0px 20px 40px rgba(62, 35, 20, 0.12)',
+        'inner': 'inset 0px 2px 4px rgba(62, 35, 20, 0.06)',
+        'colored': '0px 4px 14px rgba(184, 121, 44, 0.2)',
+        'glow': '0px 0px 24px rgba(217, 161, 58, 0.24)',
       },
       borderRadius: {
         '4xl': '2rem',

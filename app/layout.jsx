@@ -13,6 +13,14 @@ export const metadata = {
     url: '/',
     siteName: 'Project Gazra',
     type: 'website'
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/logo.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/logo.svg'
   }
 };
 

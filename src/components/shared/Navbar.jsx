@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from '../../lib/routerCompat';
-import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck, Shield } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck, Shield, Mail } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -109,18 +109,18 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white bg-opacity-90 backdrop-blur-sm">
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-primary-800/10 bg-[rgba(251,244,231,0.50)] shadow-[0_10px_30px_rgba(45,33,20,0.10)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(251,244,231,0.42)]">
         {/* Top Bar */}
-        <div className="bg-primary-800 bg-opacity-90 text-white py-1.5">
+        <div className="bg-primary-900/70 text-white py-1.5 backdrop-blur-md">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center text-sm">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <span>📧</span>
+                  <Mail size={14} />
                   <span className="hidden sm:inline">info@mcsu.in</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span>📞</span>
+                  <Phone size={14} />
                   <span className="hidden sm:inline">82003 06871</span>
                 </span>
               </div>
@@ -158,7 +158,7 @@ const Navbar = () => {
         </div>
 
         {/* Main Navigation */}
-        <div className="border-b border-neutral-200 shadow-soft bg-white bg-opacity-85 backdrop-blur-sm">
+        <div className="border-b border-primary-800/10 bg-[rgba(251,244,231,0.46)] backdrop-blur-xl">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
               {/* Logo with image */}
@@ -168,7 +168,7 @@ const Navbar = () => {
                   alt="Gazra Logo" 
                   className="h-11 w-auto mr-2"
                 />
-                <span className="text-2xl font-bold text-primary-600">Project Gazra</span>
+                <span className="text-2xl font-bold text-primary-700">Project Gazra</span>
               </Link>
 
               {/* Desktop Navigation */}
@@ -191,7 +191,7 @@ const Navbar = () => {
                       </button>
                       
                       {dropdownOpen === item.name && (
-                        <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-medium border border-neutral-100 py-2 z-20">
+                        <div className="heritage-paper absolute left-0 mt-0 w-56 rounded-lg shadow-medium border border-primary-800/10 py-2 z-20 backdrop-blur-xl">
                           {item.submenu.map((subItem, subIndex) => (
                             subItem.isExternal ? (
                               <a
@@ -247,13 +247,13 @@ const Navbar = () => {
               <div className="lg:hidden md:flex hidden items-center gap-2">
                 <Link
                   to="/admin/login"
-                  className="p-2 rounded-lg hover:bg-neutral-100 transition-colors duration-300 text-neutral-600"
+                  className="p-2 rounded-lg hover:bg-primary-100/70 transition-colors duration-300 text-neutral-700"
                   aria-label="Admin login"
                 >
                   <Shield size={22} />
                 </Link>
                 <button 
-                  className="p-2 rounded-lg hover:bg-neutral-100 transition-colors duration-300 text-neutral-600"
+                  className="p-2 rounded-lg hover:bg-primary-100/70 transition-colors duration-300 text-neutral-700"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                   {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -261,11 +261,12 @@ const Navbar = () => {
               </div>
             </div>
           </div>
+          <div className="heritage-textile h-2" />
         </div>
 
         {/* Mobile Navigation Dropdown */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-neutral-200">
+          <div className="heritage-paper lg:hidden border-b border-primary-800/10 backdrop-blur-xl">
             <div className="container mx-auto px-4 py-4">
               <div className="flex flex-col space-y-2">
                 {navigationItems.map((item, index) => (
@@ -345,8 +346,11 @@ const Navbar = () => {
         )}
       </nav>
 
+      {/* Spacer to keep page content below the fixed translucent navbar */}
+      <div className="h-[103px]" aria-hidden="true" />
+
       {/* Bottom Mobile Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white bg-opacity-95 backdrop-blur-md shadow-md border-t border-neutral-200 z-50">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[rgba(251,244,231,0.86)] backdrop-blur-xl shadow-md border-t border-primary-800/10 z-50">
         <div className="flex justify-around items-center h-16">
           {currentNavItems.map((item, index) => (
             item.isDropdown ? (
@@ -388,7 +392,7 @@ const Navbar = () => {
 
         {/* Mobile Program Dropdown - Appears from bottom */}
         {dropdownOpen === 'mobile-programs' && (
-          <div className="absolute bottom-16 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg py-4 px-4 rounded-t-xl">
+          <div className="heritage-paper absolute bottom-16 left-0 right-0 border-t border-primary-800/10 shadow-lg py-4 px-4 rounded-t-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-primary-700">Our Programs</h3>
               <button 
