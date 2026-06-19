@@ -169,8 +169,6 @@ const EventsPage = () => {
                autoPlay muted loop playsInline>
           <source src="/video/event.mp4" type="video/mp4" />
         </video>
-        <img src="/images/image-four.jpg" alt=""
-             className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/25" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 

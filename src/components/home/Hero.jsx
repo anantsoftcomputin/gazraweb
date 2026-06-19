@@ -1,8 +1,18 @@
+import { useState, useEffect } from 'react';
 import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper } from 'lucide-react';
 import ParrotDecor from '../shared/ParrotDecor';
 
 const Hero = () => {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mq.matches);
+    const handler = (e) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
   const serviceButtons = [
     { icon: Smartphone, title: "Gazra Mitra", url: "https://mitra.gazra.org", isExternal: true },
     { icon: Wallet, title: "Gazra Support Fund", url: "/gazra-support" },
@@ -11,24 +21,31 @@ const Hero = () => {
   ];
 
   return (
-    <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950">
+    <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950 -mt-[134px] lg:mt-0">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Mobile/tablet: static image — YouTube iframe audio-only bug on mobile browsers */}
-        <img
-          src="/images/image7.webp"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-center md:hidden"
-        />
-        {/* Desktop (768px+): muted ambient video — mute=1 required for browser autoplay policy */}
-        <iframe
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.18] hidden md:block"
-          src="https://www.youtube.com/embed/0Dv_G_SzTmk?start=68&autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&loop=1&playlist=0Dv_G_SzTmk&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0"
-          title="Project Gazra community video"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          referrerPolicy="strict-origin-when-cross-origin"
-          aria-hidden="true"
-        />
+        {isDesktop ? (
+          /* Desktop (768px+): muted ambient video — mute=1 required for browser autoplay policy */
+          <iframe
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.18]"
+            src="https://www.youtube.com/embed/0Dv_G_SzTmk?start=68&autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&loop=1&playlist=0Dv_G_SzTmk&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0"
+            title="Project Gazra community video"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+            aria-hidden="true"
+          />
+        ) : (
+          /* Mobile/tablet: local video via <video> tag — supports playsInline for mobile autoplay */
+          <video
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          >
+            <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
+          </video>
+        )}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(184,121,44,0.18),transparent_28rem),linear-gradient(90deg,rgba(23,19,17,0.94)_0%,rgba(23,19,17,0.70)_46%,rgba(23,19,17,0.28)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
@@ -54,16 +71,16 @@ const Hero = () => {
       />
 
       {/* Main content */}
-      <div className="relative flex min-h-[86vh] w-full items-center px-4 py-12 sm:px-8 lg:px-12 xl:px-16 lg:py-16">
-        <div className="max-w-3xl space-y-6">
+      <div className="relative flex min-h-[86vh] w-full items-end pt-[160px] pb-10 px-4 sm:px-8 sm:pt-[160px] sm:pb-12 lg:items-center lg:px-12 xl:px-16 lg:pt-16 lg:pb-16">
+        <div className="max-w-3xl space-y-4 md:space-y-6">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 rounded border border-primary-200/40 bg-[rgba(251,244,231,0.88)] px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent-terracotta shadow-lg backdrop-blur-md">
               <Newspaper className="w-3.5 h-3.5" />
               Shri Maharani Chimnabai Stree Udyogalaya
             </div>
 
-            {/* Logos side by side */}
-            <div className="flex space-x-4 items-center">
+            {/* Logos side by side — hidden on mobile to keep video visible */}
+            <div className="hidden sm:flex space-x-4 items-center">
               <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
                 <img src="https://gazra.org/logo.png" alt="Gazra Logo" className="w-full h-full object-contain"/>
               </div>
@@ -94,8 +111,8 @@ const Hero = () => {
               </Link>
             </div>
 
-            {/* Service Buttons Section */}
-            <div className="pt-6">
+            {/* Service Buttons Section — hidden on mobile to keep video visible */}
+            <div className="hidden md:block pt-6">
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
                 Our Initiatives
               </h3>

@@ -378,10 +378,9 @@ const Navbar = () => {
                     strokeWidth={isActive ? 2.5 : 1.8}
                     className={`transition-colors duration-200 ${isActive ? 'text-white' : 'text-neutral-500'}`}
                   />
-                  {/* Label visible only for active item; text-transparent keeps layout stable */}
                   <span
                     className={`text-[9px] font-bold mt-0.5 leading-none whitespace-nowrap transition-colors duration-200 ${
-                      isActive ? 'text-white' : 'text-transparent'
+                      isActive ? 'text-white' : 'text-neutral-400'
                     }`}
                   >
                     {item.name}
