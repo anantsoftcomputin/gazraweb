@@ -174,3 +174,89 @@ body {
     -0.38rem 0 0 -0.2rem currentColor,
     0.38rem 0 0 -0.2rem currentColor;
 }
+
+/* ─── Folk-art motif helpers ─────────────────────────────────────────────── */
+
+/*
+ * Subtle folk diamond tile — used as a section background texture.
+ * Combines with a base colour via the --folk-bg CSS var or an inline background.
+ */
+.gazra-folk-bg {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='28'%3E%3Cpolygon points='30,1 59,14 30,27 1,14' fill='none' stroke='rgba(159%2C47%2C40%2C0.12)' stroke-width='1.2'/%3E%3Ccircle cx='30' cy='14' r='2' fill='rgba(184%2C121%2C44%2C0.18)'/%3E%3C%2Fsvg%3E"),
+    radial-gradient(circle at 15% 15%, rgba(184,121,44,0.07), transparent 22rem),
+    var(--gazra-paper);
+  background-size: 60px 28px, auto, auto;
+}
+
+/*
+ * Folk chain border — thin horizontal decorative line with repeating diamonds.
+ * Add as a ::before / ::after or a standalone <div>.
+ */
+.gazra-folk-chain {
+  height: 8px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='8'%3E%3Cpolygon points='14,1 27,4 14,7 1,4' fill='none' stroke='%23B8792C' stroke-width='0.9'/%3E%3Ccircle cx='14' cy='4' r='1.5' fill='%23B8792C'/%3E%3C%2Fsvg%3E");
+  background-size: 28px 8px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.6;
+}
+
+/*
+ * Parrot-motif repeating side panel — thin strip with staggered parrots
+ * (purely CSS, minimal; for decorative vertical rails).
+ */
+.gazra-parrot-rail {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='48'%3E%3Ccircle cx='12' cy='10' r='6' fill='%232F6B45' opacity='0.18'/%3E%3Cellipse cx='10' cy='22' rx='6' ry='9' fill='%232F6B45' opacity='0.14'/%3E%3C%2Fsvg%3E");
+  background-size: 24px 48px;
+  background-repeat: repeat-y;
+}
+
+/*
+ * Section heading accent — small inline folk flower before a heading.
+ * Usage: <h2 class="gazra-heading-flower"> … </h2>
+ */
+.gazra-heading-flower::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.45em;
+  vertical-align: middle;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='4'  r='3' fill='%239F2F28'/%3E%3Ccircle cx='10' cy='16' r='3' fill='%239F2F28'/%3E%3Ccircle cx='4'  cy='10' r='3' fill='%239F2F28'/%3E%3Ccircle cx='16' cy='10' r='3' fill='%239F2F28'/%3E%3Ccircle cx='10' cy='10' r='3.5' fill='%23D9A13A'/%3E%3C%2Fsvg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.75;
+}
+
+/*
+ * Toran colour-stripe — 3-colour textile band (terracotta / marigold / green).
+ * Thicker than heritage-textile; used above major section breaks.
+ */
+.gazra-toran-stripe {
+  height: 6px;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      #9F2F28 0px  12px,
+      #D9A13A 12px 24px,
+      #2F6B45 24px 36px,
+      #D9A13A 36px 48px
+    );
+  background-size: 48px 6px;
+  background-repeat: repeat-x;
+}
+
+/* Gentle bobbing animation for decorative parrot accents on mobile */
+@keyframes gazra-parrot-bob {
+  0%, 100% { transform: translateY(0px); }
+  45%       { transform: translateY(-9px); }
+  55%       { transform: translateY(-9px); }
+}
+.gazra-parrot-bob {
+  animation: gazra-parrot-bob 3.8s ease-in-out infinite;
+  will-change: transform;
+}

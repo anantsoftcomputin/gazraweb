@@ -846,77 +846,69 @@ const GazraSkills = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-primary-50/30 to-white">
+    <div className="min-h-screen bg-[var(--gazra-paper)]">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-[800px] h-[800px] -top-[400px] -left-[400px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
-          <div className="absolute w-[800px] h-[800px] -bottom-[400px] -right-[400px] bg-accent-terracotta/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
-        </div>
+      <section className="relative overflow-hidden bg-neutral-950 min-h-[70vh] flex items-center">
+        <img src="/images/skill1.webp" alt=""
+             className="absolute inset-0 w-full h-full object-cover opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/60 to-neutral-950/10" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 container mx-auto px-4 sm:px-8 py-16 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <span className="inline-flex items-center px-3 py-1.5 bg-white/80 backdrop-blur-sm border-2 border-primary-100 rounded-full text-primary-600 text-sm font-medium">
-                <Award className="w-4 h-4 mr-2" strokeWidth={3} />
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
+                        className="space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/40
+                              bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
+                              text-accent-terracotta shadow-lg backdrop-blur-md">
+                <Award className="w-3.5 h-3.5" />
                 Gazra Skills Development
-              </span>
+              </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
-                <span className="block text-neutral-900">Empowering</span>
-                <span className="block mt-2 bg-gradient-to-r from-primary-600 to-accent-terracotta bg-clip-text text-transparent">
-                  Through Practical
-                </span>
-                <span className="block mt-2 text-neutral-900">Skills Training</span>
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-white
+                             drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+                Empowering
+                <span className="block text-primary-300">Through Practical</span>
+                Skills Training
               </h1>
 
-              <p className="text-xl text-neutral-600 max-w-2xl">
+              <p className="text-primary-100/80 text-lg leading-relaxed max-w-lg">
                 Develop marketable skills and build a sustainable livelihood with our industry-focused
                 training programs designed for economic independence and professional growth.
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-4">
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#courses"
-                  className="inline-flex items-center px-6 py-3 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  Explore Our Courses
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.a>
-
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#apply"
-                  className="inline-flex items-center px-6 py-3 border-2 border-primary-200 text-primary-600 rounded-xl hover:bg-primary-50 hover:-translate-y-0.5 transition-all duration-300"
-                >
+              <div className="flex flex-wrap gap-4">
+                <a href="#courses"
+                   className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
+                              font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors duration-200">
+                  Explore Courses
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a href="#apply"
+                   className="inline-flex items-center gap-2 border-2 border-primary-100/60
+                              bg-neutral-950/20 hover:bg-primary-600 text-primary-50 hover:text-white
+                              font-semibold px-6 py-3 rounded-lg backdrop-blur-md transition-all duration-200">
                   Apply Now
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.a>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-accent-ochre/20 rounded-3xl transform rotate-3"></div>
-              <div className="relative rounded-3xl shadow-lg overflow-hidden w-full h-auto aspect-w-16 aspect-h-10">
-                <video
-                  src="/video/skill.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
+            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, delay: 0.15 }}
+                        className="relative hidden lg:block">
+              <div className="absolute -inset-2 rounded-lg opacity-30"
+                   style={{ background: 'linear-gradient(135deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+              <div className="relative rounded-lg overflow-hidden shadow-2xl border-2 border-[var(--gazra-paper)]">
+                <video src="/video/skill.mp4" autoPlay loop muted playsInline
+                       className="w-full h-full object-cover max-h-80" />
               </div>
-              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Our Approach Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-primary-50 border border-primary-100 rounded-full text-primary-600 text-sm font-medium mb-4">
@@ -931,33 +923,39 @@ const GazraSkills = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl shadow-soft border border-primary-100/50 p-6 hover:shadow-medium transition-all duration-300">
-              <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mb-6">
-                <Users className="w-7 h-7 text-primary-600" />
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+              <div className="w-12 h-12 rounded bg-primary-600 flex items-center justify-center mb-5">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">Inclusive Learning</h3>
-              <p className="text-neutral-600 mb-4">
+              <div className="h-[2px] w-0 group-hover:w-full mb-4 transition-all duration-500 rounded"
+                   style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+              <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Inclusive Learning</h3>
+              <p className="text-neutral-600 text-sm leading-relaxed">
                 Our programs are designed to be accessible to everyone, with special focus on creating supportive
                 learning environments for the LGBTQIA+ community and women facing barriers to employment.
               </p>
             </div>
-            <div className="bg-white rounded-2xl shadow-soft border border-primary-100/50 p-6 hover:shadow-medium transition-all duration-300">
-              <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mb-6">
-                <Briefcase className="w-7 h-7 text-primary-600" />
+            <div className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+              <div className="w-12 h-12 rounded bg-secondary-600 flex items-center justify-center mb-5">
+                <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">Industry Partnerships</h3>
-              <p className="text-neutral-600 mb-4">
+              <div className="h-[2px] w-0 group-hover:w-full mb-4 transition-all duration-500 rounded"
+                   style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+              <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Industry Partnerships</h3>
+              <p className="text-neutral-600 text-sm leading-relaxed">
                 We collaborate with businesses and industry experts to ensure our curriculum meets current market
-                needs, and to create pathways to employment for our graduates through our network of partners.
+                needs, creating pathways to employment for our graduates through our network of partners.
               </p>
             </div>
-            <div className="bg-white rounded-2xl shadow-soft border border-primary-100/50 p-6 hover:shadow-medium transition-all duration-300">
-              <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mb-6">
-                <Award className="w-7 h-7 text-primary-600" />
+            <div className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+              <div className="w-12 h-12 rounded bg-accent-terracotta flex items-center justify-center mb-5">
+                <Award className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">Holistic Support</h3>
-              <p className="text-neutral-600 mb-4">
+              <div className="h-[2px] w-0 group-hover:w-full mb-4 transition-all duration-500 rounded"
+                   style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+              <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Holistic Support</h3>
+              <p className="text-neutral-600 text-sm leading-relaxed">
                 Beyond technical skills, we provide mentorship, confidence-building, and ongoing support
                 to help our students succeed professionally and personally in their chosen paths.
               </p>
@@ -967,7 +965,7 @@ const GazraSkills = () => {
       </section>
 
       {/* Courses Section */}
-      <section id="courses" className="py-16 bg-gradient-to-b from-white to-primary-50/50">
+      <section id="courses" className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-primary-50 border border-primary-100 rounded-full text-primary-600 text-sm font-medium mb-4">
@@ -1000,7 +998,7 @@ const GazraSkills = () => {
       </section>
 
       {/* Success Stories */}
-      <section className="py-16 bg-primary-50/50">
+      <section className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-white border border-primary-100 rounded-full text-primary-600 text-sm font-medium mb-4">
@@ -1030,7 +1028,7 @@ const GazraSkills = () => {
       </section>
 
       {/* Application Form Section */}
-      <section id="apply" className="py-20 bg-white">
+      <section id="apply" className="py-20 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -1277,7 +1275,7 @@ const GazraSkills = () => {
       </section>
 
       {/* Contact & FAQ Section */}
-      <section className="py-16 bg-primary-50/50">
+      <section className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-start">

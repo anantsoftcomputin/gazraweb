@@ -3,6 +3,7 @@ import { Link, useLocation } from '../../lib/routerCompat';
 import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Utensils, Camera, Phone, CalendarCheck, Shield, Mail } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
+import ToranBorder from './ToranBorder';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -261,7 +262,7 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-          <div className="heritage-textile h-2" />
+          <ToranBorder />
         </div>
 
         {/* Mobile Navigation Dropdown */}
@@ -346,101 +347,141 @@ const Navbar = () => {
         )}
       </nav>
 
-      {/* Spacer to keep page content below the fixed translucent navbar */}
-      <div className="h-[103px]" aria-hidden="true" />
+      {/* Spacer: top-bar (~32px) + nav-row (64px) + toran-stripe (36px) + border (~2px) */}
+      <div className="h-[134px]" aria-hidden="true" />
 
-      {/* Bottom Mobile Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[rgba(251,244,231,0.86)] backdrop-blur-xl shadow-md border-t border-primary-800/10 z-50">
-        <div className="flex justify-around items-center h-16">
-          {currentNavItems.map((item, index) => (
-            item.isDropdown ? (
-              <button
-                key={index}
-                className={`flex flex-col items-center justify-center w-1/5 py-1
-                  ${dropdownOpen === 'mobile-programs' ? 'text-primary-600' : 'text-neutral-600'}`}
-                onClick={() => toggleDropdown('mobile-programs')}
-              >
-                <item.icon size={20} className="mb-1" />
-                <span className="text-xs">{item.name}</span>
-              </button>
-            ) : item.action ? (
-              <button
-                key={index}
-                className="flex flex-col items-center justify-center w-1/5 py-1 text-neutral-600"
-                onClick={() => handleCafeNavClick(item)}
-              >
-                <item.icon size={20} className="mb-1" />
-                <span className="text-xs">{item.name}</span>
-              </button>
-            ) : (
-              <Link
-                key={index}
-                to={item.path}
-                className={`flex flex-col items-center justify-center w-1/5 py-1
-                  ${(location.pathname === item.path && !item.scrollTo) || (location.pathname === '/cafe' && item.scrollTo) ? 'text-primary-600' : 'text-neutral-600'}`}
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  handleCafeNavClick(item);
-                }}
-              >
-                <item.icon size={20} className="mb-1" />
-                <span className="text-xs">{item.name}</span>
-              </Link>
-            )
-          ))}
+      {/* ── Bottom mobile navigation — floating folk-art pill ─────── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col-reverse gap-2 px-3 pb-3">
+
+        {/* Floating nav pill */}
+        <div className="relative rounded-2xl overflow-hidden bg-[rgba(251,244,231,0.97)] backdrop-blur-xl border border-[rgba(184,121,44,0.18)] shadow-[0_8px_32px_rgba(45,33,20,0.22)]">
+          {/* Mini toran stripe — brand textile at the crown of the pill */}
+          <div
+            className="h-[3px] w-full"
+            style={{ background: 'linear-gradient(90deg, #9F2F28 0%, #D9A13A 20%, #2F6B45 40%, #D9A13A 60%, #9F2F28 80%, #D9A13A 100%)' }}
+          />
+          {/* Nav items */}
+          <div className="flex h-[54px]">
+            {currentNavItems.map((item, index) => {
+              const isActive =
+                (item.path && location.pathname === item.path && !item.scrollTo) ||
+                (item.isDropdown && dropdownOpen === 'mobile-programs') ||
+                (location.pathname === '/cafe' && item.scrollTo && item.name !== 'Home');
+
+              const innerContent = (
+                <>
+                  {isActive && (
+                    <span className="absolute inset-x-0.5 inset-y-0.5 rounded-xl bg-primary-600 -z-10" />
+                  )}
+                  <item.icon
+                    size={17}
+                    strokeWidth={isActive ? 2.5 : 1.8}
+                    className={`transition-colors duration-200 ${isActive ? 'text-white' : 'text-neutral-500'}`}
+                  />
+                  {/* Label visible only for active item; text-transparent keeps layout stable */}
+                  <span
+                    className={`text-[9px] font-bold mt-0.5 leading-none whitespace-nowrap transition-colors duration-200 ${
+                      isActive ? 'text-white' : 'text-transparent'
+                    }`}
+                  >
+                    {item.name}
+                  </span>
+                </>
+              );
+
+              const cls = 'relative flex flex-col items-center justify-center flex-1 h-full py-2 select-none';
+
+              if (item.isDropdown) {
+                return (
+                  <button key={index} className={cls} onClick={() => toggleDropdown('mobile-programs')}>
+                    {innerContent}
+                  </button>
+                );
+              }
+              if (item.action) {
+                return (
+                  <button key={index} className={cls} onClick={() => handleCafeNavClick(item)}>
+                    {innerContent}
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className={cls}
+                  onClick={() => { setIsMenuOpen(false); handleCafeNavClick(item); }}
+                >
+                  {innerContent}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Mobile Program Dropdown - Appears from bottom */}
+        {/* Programs sheet — appears above the pill (flex-col-reverse stacks upward) */}
         {dropdownOpen === 'mobile-programs' && (
-          <div className="heritage-paper absolute bottom-16 left-0 right-0 border-t border-primary-800/10 shadow-lg py-4 px-4 rounded-t-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-primary-700">Our Programs</h3>
-              <button 
-                onClick={() => setDropdownOpen(null)}
-                className="text-neutral-500 p-1"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {navigationItems.find(item => item.name === 'Our Programs')?.submenu.map((subItem, subIndex) => (
-                subItem.isExternal ? (
-                  <a
-                    key={subIndex}
-                    href={subItem.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 p-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600"
-                    onClick={() => setDropdownOpen(null)}
-                  >
-                    {subItem.name === 'Gazra Connect' && <BookOpen size={16} />}
-                    {subItem.name === 'Gazra Support Fund' && <Heart size={16} />}
-                    {subItem.name === 'Gazra Cafe' && <Coffee size={16} />}
-                    {subItem.name === 'Gazra Skill Hub' && <BookOpen size={16} />}
-                    <span className="text-sm">{subItem.name}</span>
-                  </a>
-                ) : (
-                  <Link
-                    key={subIndex}
-                    to={subItem.path}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600"
-                    onClick={() => setDropdownOpen(null)}
-                  >
-                    {subItem.name === 'Gazra Mitra' && <BookOpen size={16} />}
-                    {subItem.name === 'Gazra Support Fund' && <Heart size={16} />}
-                    {subItem.name === 'Gazra Cafe' && <Coffee size={16} />}
-                    {subItem.name === 'Gazra Skill Hub' && <BookOpen size={16} />}
-                    <span className="text-sm">{subItem.name}</span>
-                  </Link>
-                )
-              ))}
+          <div className="heritage-paper rounded-2xl border border-[rgba(184,121,44,0.22)] shadow-[0_-8px_24px_rgba(45,33,20,0.14)] overflow-hidden">
+            {/* Sheet toran stripe */}
+            <div
+              className="h-[3px]"
+              style={{ background: 'linear-gradient(90deg, #9F2F28 0%, #D9A13A 25%, #2F6B45 50%, #D9A13A 75%, #9F2F28 100%)' }}
+            />
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-display font-black text-base text-primary-800">Our Programs</h3>
+                <button
+                  onClick={() => setDropdownOpen(null)}
+                  className="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-primary-50 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="gazra-folk-chain mb-3" />
+              <div className="grid grid-cols-2 gap-2">
+                {navigationItems.find(item => item.name === 'Our Programs')?.submenu.map((subItem, subIndex) => (
+                  subItem.isExternal ? (
+                    <a
+                      key={subIndex}
+                      href={subItem.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(184,121,44,0.06)] border border-[rgba(184,121,44,0.12)] hover:bg-primary-50 hover:border-primary-400 transition-all"
+                      onClick={() => setDropdownOpen(null)}
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
+                        {subItem.name === 'Gazra Mitra' && <BookOpen size={14} />}
+                        {subItem.name === 'Gazra Support Fund' && <Heart size={14} />}
+                        {subItem.name === 'Gazra Cafe' && <Coffee size={14} />}
+                        {subItem.name === 'Gazra Skill Hub' && <BookOpen size={14} />}
+                      </div>
+                      <span className="text-xs font-bold text-neutral-800 leading-snug">{subItem.name}</span>
+                    </a>
+                  ) : (
+                    <Link
+                      key={subIndex}
+                      to={subItem.path}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(184,121,44,0.06)] border border-[rgba(184,121,44,0.12)] hover:bg-primary-50 hover:border-primary-400 transition-all"
+                      onClick={() => setDropdownOpen(null)}
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
+                        {subItem.name === 'Gazra Mitra' && <BookOpen size={14} />}
+                        {subItem.name === 'Gazra Support Fund' && <Heart size={14} />}
+                        {subItem.name === 'Gazra Cafe' && <Coffee size={14} />}
+                        {subItem.name === 'Gazra Skill Hub' && <BookOpen size={14} />}
+                      </div>
+                      <span className="text-xs font-bold text-neutral-800 leading-snug">{subItem.name}</span>
+                    </Link>
+                  )
+                ))}
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Spacer to prevent content from being hidden behind bottom nav on mobile */}
-      <div className="lg:hidden h-16"></div>
+      {/* Spacer — accounts for floating pill height (3px stripe + 54px nav + 12px bottom gap) */}
+      <div className="lg:hidden h-[72px]" aria-hidden="true" />
     </>
   );
 };

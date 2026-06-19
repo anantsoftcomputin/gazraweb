@@ -6,7 +6,7 @@ import { useFirestore } from '../../hooks/useFirestore';
 import { formatEventDate, getEventCategory, getUpcomingEvents } from '../../utils/eventUtils';
 
 const EventCard = ({ event }) => (
-  <div className="group relative bg-white rounded-2xl overflow-hidden shadow-medium hover:shadow-hard transition-all duration-500 border border-neutral-100">
+  <div className="group relative bg-[var(--gazra-paper)] rounded-lg overflow-hidden border border-[rgba(184,121,44,0.18)] hover:shadow-xl hover:border-primary-300/50 transition-all duration-400">
     {/* Event Tag */}
     <div className="absolute top-4 left-4 z-10">
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-primary-600 shadow-soft">
@@ -36,7 +36,7 @@ const EventCard = ({ event }) => (
       </div>
 
       {/* Event Details */}
-      <div className="grid grid-cols-2 gap-4 py-4 border-t border-neutral-100">
+      <div className="grid grid-cols-2 gap-4 py-4 border-t border-[rgba(184,121,44,0.12)]">
         <div className="space-y-3">
           <div className="flex items-center text-sm text-neutral-600">
             <Calendar className="w-4 h-4 mr-2 text-primary-500" />
@@ -124,10 +124,11 @@ const EventsPreview = () => {
             <Calendar className="w-4 h-4 mr-2" />
             Upcoming Events
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent mb-6 px-4 py-2 bg-white/80 rounded-lg inline-block">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-5
+                         drop-shadow-[0_4px_16px_rgba(0,0,0,0.55)] px-4 py-2 bg-[rgba(251,244,231,0.12)] rounded-lg inline-block backdrop-blur-sm">
             Join Our Community Events
           </h2>
-          <p className="text-xl text-neutral-700 bg-white/80 p-4 rounded-lg">
+          <p className="text-base sm:text-lg text-white/85 bg-[rgba(251,244,231,0.12)] backdrop-blur-sm p-4 rounded-lg">
             Connect, learn, and grow with our diverse community through these carefully curated events.
           </p>
         </div>
@@ -143,7 +144,7 @@ const EventsPreview = () => {
               <EventCard key={event.id} event={event} />
             ))
           ) : (
-            <div className="md:col-span-2 lg:col-span-3 bg-white rounded-2xl shadow-medium border border-neutral-100 p-8 text-center">
+            <div className="md:col-span-2 lg:col-span-3 bg-[rgba(251,244,231,0.85)] rounded-lg border border-[rgba(184,121,44,0.2)] p-8 text-center backdrop-blur-md">
               <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
               <p className="text-neutral-600">No upcoming events yet. Check back soon.</p>
             </div>

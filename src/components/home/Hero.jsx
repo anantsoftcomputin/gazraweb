@@ -1,5 +1,6 @@
 import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper } from 'lucide-react';
+import ParrotDecor from '../shared/ParrotDecor';
 
 const Hero = () => {
   const serviceButtons = [
@@ -12,9 +13,17 @@ const Hero = () => {
   return (
     <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950">
       <div className="absolute inset-0 overflow-hidden">
+        {/* Mobile/tablet: static image — YouTube iframe audio-only bug on mobile browsers */}
+        <img
+          src="/images/image7.webp"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover object-center md:hidden"
+        />
+        {/* Desktop (768px+): muted ambient video — mute=1 required for browser autoplay policy */}
         <iframe
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.18]"
-          src="https://www.youtube.com/embed/0Dv_G_SzTmk?start=68&autoplay=1&mute=0&controls=0&disablekb=1&fs=0&playsinline=1&loop=1&playlist=0Dv_G_SzTmk&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.18] hidden md:block"
+          src="https://www.youtube.com/embed/0Dv_G_SzTmk?start=68&autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&loop=1&playlist=0Dv_G_SzTmk&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0"
           title="Project Gazra community video"
           allow="autoplay; encrypted-media; picture-in-picture"
           referrerPolicy="strict-origin-when-cross-origin"
@@ -24,7 +33,25 @@ const Hero = () => {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>
-      <div className="heritage-rule h-2" />
+
+      {/* Mobile parrot — visible on phones/small tablets, larger screens use the MainLayout parrots */}
+      <div className="absolute top-10 right-3 z-20 md:hidden gazra-parrot-bob">
+        <ParrotDecor size={52} flip={false} opacity={0.58} />
+      </div>
+
+      {/* Desktop parrots — pair of parrots at the right side of the hero */}
+      <ParrotDecor
+        size={72}
+        flip={false}
+        opacity={0.72}
+        className="absolute bottom-28 right-6 z-20 hidden lg:block"
+      />
+      <ParrotDecor
+        size={56}
+        flip={true}
+        opacity={0.55}
+        className="absolute bottom-36 right-24 z-20 hidden xl:block"
+      />
 
       {/* Main content */}
       <div className="relative flex min-h-[86vh] w-full items-center px-4 py-12 sm:px-8 lg:px-12 xl:px-16 lg:py-16">
@@ -36,17 +63,17 @@ const Hero = () => {
             </div>
 
             {/* Logos side by side */}
-            <div className="flex space-x-6 items-center">
-              <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
+            <div className="flex space-x-4 items-center">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
                 <img src="https://gazra.org/logo.png" alt="Gazra Logo" className="w-full h-full object-contain"/>
               </div>
-              <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
                 <img src="https://i0.wp.com/mcsu.in/wp-content/uploads/2022/07/Logo.png?w=512&ssl=1" alt="MCSU Logo" className="w-full h-full object-contain"/>
               </div>
             </div>
 
             {/* Main heading */}
-            <h1 className="font-display text-4xl lg:text-5xl xl:text-7xl font-black leading-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]">
+            <h1 className="font-display text-5xl lg:text-5xl xl:text-7xl font-black leading-[1.08] text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]">
               The Gazra Project
             </h1>
 

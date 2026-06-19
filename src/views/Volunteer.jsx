@@ -212,62 +212,65 @@ const VolunteerPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
+    <div className="min-h-screen bg-[var(--gazra-paper)]">
       {/* Hero Section */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-secondary-500/10" />
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-[500px] h-[500px] -top-[250px] -left-[250px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
-          <div className="absolute w-[500px] h-[500px] -bottom-[250px] -right-[250px] bg-secondary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
-        </div>
+      <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-neutral-950">
+        <img src="/images/image7.webp" alt=""
+             className="absolute inset-0 w-full h-full object-cover opacity-35" />
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/65 to-neutral-950/30" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
-        <div className="relative container mx-auto px-4">
+        <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
+            transition={{ duration: 0.65 }}
+            className="max-w-2xl"
           >
-            <span className="inline-flex items-center px-3 py-1.5 bg-white border-2 border-primary-200 rounded-full text-primary-700 text-sm font-medium mb-6">
-              <Heart className="w-4 h-4 mr-2" />
+            <div className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded border border-primary-200/40
+                            bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
+                            text-accent-terracotta shadow-lg backdrop-blur-md">
+              <Heart className="w-3.5 h-3.5" />
               Join Our Community
-            </span>
-            <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">
+            </div>
+            <h1 className="font-display text-5xl sm:text-6xl font-black text-white leading-tight
+                           drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)] mb-5">
               Make a
-              <span className="block mt-2 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-                Difference Together
-              </span>
+              <span className="block text-primary-300">Difference</span>
+              Together
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-primary-100/80 text-lg leading-relaxed mb-8">
               Become part of our mission to create welcoming spaces and meaningful connections in our community.
             </p>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors duration-200"
+            <button
+              onClick={() => document.querySelector('#volunteer-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
+                         font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors duration-200"
             >
               Get Started
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </motion.button>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </motion.div>
         </div>
       </section>
 
       {/* Impact Stats */}
-      <section className="py-16 bg-white">
+      <section className="py-14 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="gazra-folk-chain max-w-xs mx-auto mb-10" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {impactStats.map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
+                transition={{ delay: index * 0.09 }}
+                className="text-center bg-white border border-[rgba(184,121,44,0.18)] rounded-lg p-5 shadow-sm"
               >
-                <div className="text-4xl font-bold text-primary-600 mb-2">{stat.number}</div>
-                <div className="text-gray-600">{stat.label}</div>
+                <div className="font-display text-3xl sm:text-4xl font-black text-primary-600 mb-1">{stat.number}</div>
+                <div className="text-sm text-neutral-500">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -275,35 +278,40 @@ const VolunteerPage = () => {
       </section>
 
       {/* Volunteer Roles */}
-      <section className="py-16">
+      <section className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/60
+                            bg-primary-50 text-xs font-bold uppercase tracking-wide text-primary-700 mb-4">
+              Volunteer Roles
+            </div>
+            <h2 className="font-display text-3xl font-bold text-neutral-900 mb-3">
               Find Your Role
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-neutral-600 max-w-2xl mx-auto text-sm">
               Whether you have a few hours or a regular commitment, there's a perfect role for everyone at Gazra.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {volunteerRoles.map((role, index) => (
               <motion.div
                 key={role.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={`group relative bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-                  selectedRole === role.id ? 'ring-2 ring-primary-500' : ''
-                }`}
+                transition={{ delay: index * 0.09 }}
+                className={`group relative bg-[var(--gazra-paper)] rounded-lg p-6 border transition-all duration-300 cursor-pointer
+                  ${selectedRole === role.id
+                    ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
+                    : 'border-[rgba(184,121,44,0.18)] hover:shadow-md hover:border-primary-300/50'}`}
                 onClick={() => setSelectedRole(role.id)}
               >
-                <div className="w-12 h-12 mb-4 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-100 transition-colors duration-300">
+                <div className="w-12 h-12 mb-4 bg-primary-600 rounded flex items-center justify-center text-white">
                   <role.icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{role.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{role.description}</p>
+                <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">{role.title}</h3>
+                <p className="text-neutral-600 text-sm mb-4 leading-relaxed">{role.description}</p>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
@@ -318,7 +326,7 @@ const VolunteerPage = () => {
 
                 <div className="space-y-2">
                   {role.responsibilities.map((responsibility, idx) => (
-                    <div key={idx} className="flex items-start text-sm text-gray-600">
+                    <div key={idx} className="flex items-start text-sm text-neutral-600">
                       <CheckCircle className="w-4 h-4 mr-2 text-primary-500 shrink-0 mt-0.5" />
                       <span>{responsibility}</span>
                     </div>
@@ -331,26 +339,30 @@ const VolunteerPage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-primary-50/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8">
+      <section className="py-14 bg-neutral-900 relative overflow-hidden">
+        <img src="/images/image9.webp" alt=""
+             className="absolute inset-0 w-full h-full object-cover opacity-15" />
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-950/80 to-neutral-900/70" />
+        <div className="relative z-10 container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="font-display text-2xl font-bold text-white">Voices from the Community</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-xl p-6 shadow-sm relative"
+                className="bg-[rgba(251,244,231,0.08)] backdrop-blur-md border border-primary-200/20 rounded-lg p-7 relative"
               >
-                <div className="absolute top-6 right-6 text-primary-500/20">
-                  <MessageSquare className="w-12 h-12" />
+                <div className="absolute top-5 right-5 text-primary-300/20">
+                  <MessageSquare className="w-10 h-10" />
                 </div>
-                <p className="text-gray-600 mb-6 relative text-lg italic">"{testimonial.quote}"</p>
-                <div className="flex items-center">
-                  <div>
-                    <div className="font-medium text-gray-900">{testimonial.author}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role} • {testimonial.duration}</div>
-                  </div>
+                <p className="text-primary-100/85 mb-5 text-base italic leading-relaxed">"{testimonial.quote}"</p>
+                <div>
+                  <div className="font-semibold text-white text-sm">{testimonial.author}</div>
+                  <div className="text-xs text-primary-200/60 mt-0.5">{testimonial.role} · {testimonial.duration}</div>
                 </div>
               </motion.div>
             ))}
@@ -359,14 +371,18 @@ const VolunteerPage = () => {
       </section>
 
       {/* Application Form */}
-      <section className="py-16">
+      <section id="volunteer-form" className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/60
+                              bg-primary-50 text-xs font-bold uppercase tracking-wide text-primary-700 mb-4">
+                Apply Now
+              </div>
+              <h2 className="font-display text-3xl font-bold text-neutral-900 mb-3">
                 Join Our Team
               </h2>
-              <p className="text-gray-600">
+              <p className="text-neutral-600 text-sm">
                 Ready to make a difference? Fill out the form below and we'll get back to you soon.
               </p>
             </div>
@@ -376,8 +392,12 @@ const VolunteerPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               onSubmit={handleSubmit}
-              className="space-y-6 bg-white rounded-xl p-8 shadow-sm"
+              className="space-y-6 bg-white border border-[rgba(184,121,44,0.18)] rounded-lg overflow-hidden shadow-lg"
             >
+              {/* Toran top stripe */}
+              <div className="h-[4px]"
+                   style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
+              <div className="px-7 sm:px-8 pb-8 pt-2 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -590,13 +610,14 @@ const VolunteerPage = () => {
                   </>
                 )}
               </motion.button>
+              </div>
             </motion.form>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-primary-50/30">
+      <section className="py-16 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
@@ -632,10 +653,10 @@ const VolunteerPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="bg-white rounded-xl p-6 shadow-sm"
+                  className="bg-white border border-[rgba(184,121,44,0.15)] rounded-lg p-6 shadow-sm"
                 >
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
+                  <h3 className="font-display text-base font-bold text-neutral-900 mb-2">{faq.question}</h3>
+                  <p className="text-neutral-600 text-sm leading-relaxed">{faq.answer}</p>
                 </motion.div>
               ))}
             </div>
@@ -644,66 +665,53 @@ const VolunteerPage = () => {
       </section>
 
       {/* Community Call-to-Action */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-500 to-secondary-500 text-white"
-          >
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-600/20 to-secondary-600/20" />
-            </div>
-            <div className="relative px-8 py-12 md:py-16 text-center">
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                Join Our Community Today
-              </h2>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Be part of something bigger. Together, we can create meaningful change and strengthen our community.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-white text-primary-600 rounded-xl hover:bg-primary-50 transition-colors duration-200"
-                >
-                  Start Volunteering
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-transparent border-2 border-white text-white rounded-xl hover:bg-white/10 transition-colors duration-200"
-                >
-                  Learn More
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
+      <section className="py-16 bg-primary-600 relative overflow-hidden">
+        <div className="absolute inset-0 gazra-jaali opacity-20" />
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="gazra-folk-chain max-w-xs mx-auto mb-7" />
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-white mb-4">
+            Join Our Community Today
+          </h2>
+          <p className="text-primary-100/80 mb-8 max-w-xl mx-auto leading-relaxed">
+            Be part of something bigger. Together, we can create meaningful change and strengthen our community.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => document.querySelector('#volunteer-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-primary-700
+                         font-bold rounded-lg hover:bg-primary-50 transition-colors duration-200 shadow-lg">
+              Start Volunteering
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <a href="/about"
+               className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-primary-100/60
+                          text-primary-50 font-semibold rounded-lg hover:bg-primary-700 transition-colors duration-200">
+              Learn More
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="gazra-folk-chain max-w-xs mx-auto mt-7" />
         </div>
       </section>
 
       {/* Contact Information */}
-      <section className="py-16 bg-white">
+      <section className="py-12 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl font-display font-bold text-gray-900 mb-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="font-display text-xl font-bold text-neutral-900 mb-2">
               Have Questions?
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-neutral-600 mb-6 text-sm">
               Our volunteer coordinator is here to help you get started on your journey with us.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <div className="flex items-center">
-                <MapPin className="w-5 h-5 text-primary-600 mr-2" />
-                <span className="text-gray-600">123 Community Avenue, City</span>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary-600" />
+                <span className="text-neutral-600 text-sm">Opp. Sursagar, Mandvi, Vadodara</span>
               </div>
-              <div className="flex items-center">
-                <MessageSquare className="w-5 h-5 text-primary-600 mr-2" />
-                <a href="mailto:volunteer@gazra.org" className="text-primary-600 hover:text-primary-700">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary-600" />
+                <a href="mailto:volunteer@gazra.org" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
                   volunteer@gazra.org
                 </a>
               </div>

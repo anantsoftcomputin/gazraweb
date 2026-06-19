@@ -126,76 +126,75 @@ const GazraSupportFund = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-primary-50/30 to-white">
+    <div className="min-h-screen bg-[var(--gazra-paper)]">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-[800px] h-[800px] -top-[400px] -left-[400px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
-          <div className="absolute w-[800px] h-[800px] -bottom-[400px] -right-[400px] bg-accent-terracotta/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
-        </div>
+      <section className="relative overflow-hidden bg-neutral-950 min-h-[80vh] flex items-center">
+        <img src="/images/image7.webp" alt=""
+             className="absolute inset-0 w-full h-full object-cover opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/97 via-neutral-950/70 to-neutral-950/30" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <span className="inline-flex items-center px-3 py-1.5 bg-white/80 backdrop-blur-sm border-2 border-primary-100 rounded-full text-primary-600 text-sm font-medium">
-                <Heart className="w-4 h-4 mr-2" strokeWidth={3} />
+            <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+                        className="space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/40
+                              bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
+                              text-accent-terracotta shadow-lg backdrop-blur-md">
+                <Heart className="w-3.5 h-3.5" />
                 Gazra Support Fund
-              </span>
+              </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
-                <span className="block text-neutral-900">Empowering</span>
-                <span className="block mt-2 bg-gradient-to-r from-primary-600 to-accent-terracotta bg-clip-text text-transparent">
-                  Journeys of Authentic
-                </span>
-                <span className="block mt-2 text-neutral-900">Self-Expression</span>
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-white
+                             drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+                Empowering
+                <span className="block text-primary-300">Journeys of Authentic</span>
+                Self-Expression
               </h1>
 
-              <p className="text-xl text-neutral-600 max-w-2xl">
-                An initiative by Shri Maharani Chimnabai Stree Udyogalaya providing financial support for education, medical treatments, gender-affirming surgeries, mental health services, and legal aid to the LGBTQIA+ community and women in need.
+              <p className="text-primary-100/80 text-base sm:text-lg leading-relaxed max-w-lg">
+                An initiative by Shri Maharani Chimnabai Stree Udyogalaya providing financial support for education,
+                medical treatments, gender-affirming surgeries, mental health services, and legal aid.
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-4">
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#apply"
-                  className="inline-flex items-center px-6 py-3 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300"
-                >
+              <div className="flex flex-wrap gap-4">
+                <a href="#apply"
+                   className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
+                              font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors duration-200">
                   Apply for Support
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.a>
-
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#eligibility"
-                  className="inline-flex items-center px-6 py-3 border-2 border-primary-200 text-primary-600 rounded-xl hover:bg-primary-50 hover:-translate-y-0.5 transition-all duration-300"
-                >
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a href="#eligibility"
+                   className="inline-flex items-center gap-2 border-2 border-primary-100/60
+                              bg-neutral-950/20 hover:bg-primary-600 text-primary-50 hover:text-white
+                              font-semibold px-6 py-3 rounded-lg backdrop-blur-md transition-all duration-200">
                   Check Eligibility
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </motion.a>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-accent-ochre/20 rounded-3xl transform rotate-3"></div>
-              <img
-                src="/images/image7.webp"
-                alt="Gazra Support Fund"
-                className="relative rounded-3xl shadow-lg object-cover w-full h-[500px]"
-              />
-              <div className="absolute -bottom-6 right-8 p-4 bg-white rounded-xl shadow-medium border border-primary-100 max-w-xs">
-                <p className="text-sm font-medium text-neutral-800">
+            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.15 }}
+                        className="relative hidden lg:block">
+              <div className="absolute -inset-2 rounded-lg opacity-30"
+                   style={{ background: 'linear-gradient(135deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+              <img src="/images/image9.webp" alt="Gazra Support Fund"
+                   className="relative rounded-lg shadow-2xl object-cover w-full h-[420px] border-2 border-[var(--gazra-paper)]" />
+              <div className="absolute bottom-4 right-4 max-w-xs bg-[rgba(251,244,231,0.95)] backdrop-blur-md
+                              rounded-lg p-4 border border-[rgba(184,121,44,0.25)] shadow-lg">
+                <div className="h-[2px] mb-3"
+                     style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45)' }} />
+                <p className="text-xs font-medium text-neutral-800 italic">
                   "Everyone deserves the chance to live with Freedom and without Subjugation. We're here to help make that possible."
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Support Areas Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-primary-50 border border-primary-100 rounded-full text-primary-600 text-sm font-medium mb-4">
@@ -406,7 +405,7 @@ const GazraSupportFund = () => {
       </section>
 
       {/* Eligibility & Application Process */}
-      <section id="eligibility" className="py-20 bg-gradient-to-b from-white to-primary-50/50">
+      <section id="eligibility" className="py-20 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-primary-50 border border-primary-100 rounded-full text-primary-600 text-sm font-medium mb-4">
@@ -664,7 +663,7 @@ const GazraSupportFund = () => {
       </section>
 
       {/* Application Form Section */}
-      <section id="apply" className="py-20 bg-primary-50/50">
+      <section id="apply" className="py-20 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">

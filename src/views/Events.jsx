@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "../lib/routerCompat";
+import { Link } from "../lib/routerCompat";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Music, Coffee, Users,
@@ -20,128 +21,126 @@ const EventsPage = () => {
   const { getDocuments } = useFirestore('events');
 
   const eventCategories = [
-    { id: "all", name: "All Events", icon: Calendar, color: "bg-primary-500" },
-    { id: "theater", name: "Theater & Dance", icon: Music, color: "bg-accent-terracotta" },
-    { id: "workshop", name: "Workshops", icon: Coffee, color: "bg-accent-sage" },
-    { id: "therapy", name: "Therapy", icon: Heart, color: "bg-accent-ochre" },
-    { id: "community", name: "Community", icon: Users, color: "bg-accent-slate" },
-    { id: "cultural", name: "Cultural", icon: Music, color: "bg-secondary-500" },
+    { id: "all",       name: "All Events",      icon: Calendar, color: "bg-primary-600" },
+    { id: "theater",   name: "Theater & Dance", icon: Music,    color: "bg-accent-terracotta" },
+    { id: "workshop",  name: "Workshops",       icon: Coffee,   color: "bg-secondary-600" },
+    { id: "therapy",   name: "Therapy",         icon: Heart,    color: "bg-accent-ochre" },
+    { id: "community", name: "Community",       icon: Users,    color: "bg-primary-600" },
+    { id: "cultural",  name: "Cultural",        icon: Music,    color: "bg-accent-terracotta" },
   ];
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
+  useEffect(() => { loadEvents(); }, []);
 
   const loadEvents = async () => {
     try {
       setLoading(true);
       const result = await getDocuments();
       if (result.success) {
-        setEvents(sortEventsByDate(result.data.filter((event) => (event.status || 'approved') === 'approved')));
+        setEvents(sortEventsByDate(result.data.filter((e) => (e.status || 'approved') === 'approved')));
       }
-    } catch (error) {
-      console.error('Error loading events:', error);
+    } catch (err) {
+      console.error('Error loading events:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredEvents = events.filter(event =>
-    (selectedCategory === "all" || event.category === selectedCategory) &&
-    (selectedMonth === "all" || getEventMonth(event) === selectedMonth)
+  const filteredEvents = events.filter(e =>
+    (selectedCategory === "all" || e.category === selectedCategory) &&
+    (selectedMonth   === "all" || getEventMonth(e) === selectedMonth)
   );
 
-  const featuredEvents = filteredEvents.filter(event => event.featured);
-  const regularEvents = filteredEvents.filter(event => !event.featured);
+  const featuredEvents = filteredEvents.filter(e => e.featured);
+  const regularEvents  = filteredEvents.filter(e => !e.featured);
   const months = [
     { id: "all", name: "All Months" },
-    ...Array.from(new Set(events.map(getEventMonth).filter(Boolean))).map((month) => ({
-      id: month,
-      name: month.charAt(0).toUpperCase() + month.slice(1)
-    }))
+    ...Array.from(new Set(events.map(getEventMonth).filter(Boolean))).map((m) => ({
+      id: m,
+      name: m.charAt(0).toUpperCase() + m.slice(1),
+    })),
   ];
 
-  // Event Card Component
+  /* ── Event Card ──────────────────────────────────────────────── */
   const EventCard = ({ event }) => {
-    const CategoryIcon = eventCategories.find(cat => cat.id === event.category)?.icon || Calendar;
-    const capacityNumber = Number(String(event.capacity || '').match(/\d+/)?.[0] || 0);
-    const registrationCount = Number(event.registrationCount || 0);
-    const isFull = capacityNumber > 0 && registrationCount >= capacityNumber;
+    const cat = eventCategories.find(c => c.id === event.category);
+    const CategoryIcon = cat?.icon || Calendar;
+    const capacityNum = Number(String(event.capacity || '').match(/\d+/)?.[0] || 0);
+    const regCount    = Number(event.registrationCount || 0);
+    const isFull = capacityNum > 0 && regCount >= capacityNum;
 
     return (
       <motion.div
         layoutId={`event-${event.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="group"
+        transition={{ duration: 0.45 }}
+        className="group cursor-pointer h-full"
         onClick={() => navigate(`/events/${event.id}`)}
       >
-        <div className="h-full relative bg-white rounded-2xl overflow-hidden shadow-medium hover:shadow-hard transition-all duration-500 border border-neutral-100 cursor-pointer">
-          {/* Event Tag */}
+        <div className="h-full flex flex-col bg-[var(--gazra-paper)] rounded-lg overflow-hidden
+                        border border-[rgba(184,121,44,0.18)] hover:shadow-xl hover:border-primary-300/50
+                        transition-all duration-400">
+          {/* Toran top on hover */}
+          <div className="h-[3px] w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+               style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
+
+          {/* Category tag */}
           <div className="absolute top-4 left-4 z-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-primary-600 shadow-soft">
-              <CategoryIcon className="w-3 h-3 mr-1" />
-              {eventCategories.find(cat => cat.id === event.category)?.name || "Event"}
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold
+                             bg-[rgba(251,244,231,0.95)] backdrop-blur-sm text-primary-700 shadow-sm border border-primary-100/60">
+              <CategoryIcon className="w-3 h-3" />
+              {cat?.name || 'Event'}
             </span>
           </div>
 
-          {/* Image Container */}
-          <div className="aspect-w-16 aspect-h-10 relative">
-            <img
-              src={event.image}
-              alt={event.title}
-              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Image */}
+          <div className="relative h-44 overflow-hidden flex-shrink-0">
+            <img src={event.image} alt={event.title}
+                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-600" />
+            <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
 
           {/* Content */}
-          <div className="p-5 space-y-3">
-            {/* Title and Description */}
-            <div className="space-y-2">
-              <h3 className="text-xl font-display font-bold text-neutral-900 group-hover:text-primary-600 transition-colors duration-300 line-clamp-1">
+          <div className="flex flex-col flex-1 p-5 space-y-3">
+            <div>
+              <h3 className="font-display text-lg font-bold text-neutral-900 group-hover:text-primary-600
+                             transition-colors duration-200 line-clamp-1 leading-snug">
                 {event.title}
               </h3>
-              <p className="text-neutral-600 text-sm line-clamp-2">{event.description}</p>
+              <p className="text-neutral-600 text-sm leading-relaxed line-clamp-2 mt-1">{event.description}</p>
             </div>
 
-            {/* Event Details */}
-            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-neutral-100">
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-neutral-600">
-                  <Calendar className="w-3 h-3 mr-2 text-primary-500 flex-shrink-0" />
-                  <span className="truncate">{formatEventDate(event)}</span>
-                </div>
-                <div className="flex items-center text-xs text-neutral-600">
-                  <Clock className="w-3 h-3 mr-2 text-primary-500 flex-shrink-0" />
-                  <span className="truncate">{event.time}</span>
-                </div>
+            <div className="grid grid-cols-2 gap-1.5 pt-3 border-t border-[rgba(184,121,44,0.12)]">
+              <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                <Calendar className="w-3 h-3 text-primary-500 flex-shrink-0" />
+                <span className="truncate">{formatEventDate(event)}</span>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-neutral-600">
-                  <MapPin className="w-3 h-3 mr-2 text-primary-500 flex-shrink-0" />
-                  <span className="truncate">{event.location?.split(",")[0] || "Location TBA"}</span>
-                </div>
-                <div className="flex items-center text-xs text-neutral-600">
-                  <Users className="w-3 h-3 mr-2 text-primary-500 flex-shrink-0" />
-                  <span className="truncate">{capacityNumber ? `${Math.max(capacityNumber - registrationCount, 0)} slots left` : (event.capacity || "Open")}</span>
-                </div>
+              <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                <MapPin className="w-3 h-3 text-primary-500 flex-shrink-0" />
+                <span className="truncate">{event.location?.split(',')[0] || 'Location TBA'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                <Clock className="w-3 h-3 text-primary-500 flex-shrink-0" />
+                <span className="truncate">{event.time}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                <Users className="w-3 h-3 text-primary-500 flex-shrink-0" />
+                <span className="truncate">
+                  {capacityNum ? `${Math.max(capacityNum - regCount, 0)} slots left` : (event.capacity || 'Open')}
+                </span>
               </div>
             </div>
 
-            {/* Action Button */}
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-xs font-medium text-primary-600">
+            <div className="flex items-center justify-between pt-1 mt-auto">
+              <span className="text-xs font-semibold text-primary-600">
                 {isFull ? 'Fully booked' : event.price}
               </span>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-300 ${isFull ? 'bg-red-50 text-red-700' : 'bg-primary-50 text-primary-600 hover:bg-primary-100'}`}
-              >
+              <span className={`px-3 py-1 rounded text-xs font-semibold transition-colors duration-200
+                ${isFull
+                  ? 'bg-red-50 text-red-700 border border-red-100'
+                  : 'bg-primary-600 text-white group-hover:bg-primary-700'}`}>
                 {isFull ? 'Fully Booked' : 'View Details'}
-              </motion.button>
+              </span>
             </div>
           </div>
         </div>
@@ -149,169 +148,157 @@ const EventsPage = () => {
     );
   };
 
+  /* ── Loading state ───────────────────────────────────────────── */
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading events...</p>
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600 font-medium">Loading events…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
-      {/* Hero Section with Video */}
-      <section className="relative overflow-hidden h-[60vh] min-h-[500px]">
-        {/* Video Background */}
-        <div className="absolute inset-0 z-0">
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="/video/event.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-black/50 backdrop-filter backdrop-blur-sm"></div>
-        </div>
+    <div className="min-h-screen bg-[var(--gazra-paper)]">
 
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl"
-          >
-            <div className="inline-flex items-center px-4 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6">
-              <Calendar className="w-4 h-4 mr-2" />
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <section className="relative h-[58vh] min-h-[480px] overflow-hidden bg-neutral-950">
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-55"
+               autoPlay muted loop playsInline>
+          <source src="/video/event.mp4" type="video/mp4" />
+        </video>
+        <img src="/images/image-four.jpg" alt=""
+             className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/25" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
+
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
+                      className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/40
+                            bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
+                            text-accent-terracotta shadow-lg backdrop-blur-md mb-6">
+              <Calendar className="w-3.5 h-3.5" />
               Upcoming Events
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
-              Join Our Community Events
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight
+                           drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)] mb-5">
+              Join Our<br />Community Events
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-primary-100/80 text-base sm:text-lg mb-8 leading-relaxed">
               Connect, learn, and grow with our diverse community through these carefully curated events.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow transition-all duration-300"
-              onClick={() => {
-                const filtersSection = document.getElementById("filters-section");
-                filtersSection?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
+            <button
+              onClick={() => document.getElementById('filters-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
+                         font-semibold px-7 py-3.5 rounded-lg shadow-lg transition-colors duration-200">
               Explore Events
-            </motion.button>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </motion.div>
         </div>
       </section>
 
-      {/* Filters Section */}
-      <section id="filters-section" className="py-6 sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-neutral-100 shadow-soft">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Category Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
-              {eventCategories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${selectedCategory === category.id
-                      ? `${category.color} text-white`
-                      : "bg-white border border-neutral-200 text-neutral-600 hover:bg-primary-50"
-                    }`}
-                >
-                  <category.icon className="w-4 h-4 mr-2" />
-                  {category.name}
-                </motion.button>
-              ))}
-            </div>
+      {/* ── Sticky filter bar ────────────────────────────────────── */}
+      <section id="filters-section"
+               className="sticky top-[134px] z-40 bg-[rgba(251,244,231,0.97)] backdrop-blur-xl
+                          border-b border-[rgba(184,121,44,0.2)] shadow-[0_4px_16px_rgba(45,33,20,0.08)]">
+        <div className="h-[2px]"
+             style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
+        <div className="container mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+          {/* Category filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+            {eventCategories.map((cat) => {
+              const active = selectedCategory === cat.id;
+              return (
+                <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold
+                              whitespace-nowrap transition-all duration-200 flex-shrink-0
+                              ${active ? `${cat.color} text-white shadow-md` : 'bg-transparent text-neutral-600 hover:bg-primary-50 hover:text-primary-700'}`}>
+                  <cat.icon size={14} />
+                  {cat.name}
+                </button>
+              );
+            })}
+          </div>
 
-            {/* Month Filter */}
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-neutral-500" />
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="bg-white border border-neutral-200 rounded-xl px-4 py-2 text-neutral-600 focus:outline-none focus:border-primary-500"
-              >
-                {months.map((month) => (
-                  <option key={month.id} value={month.id}>
-                    {month.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Month filter */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Filter className="w-3.5 h-3.5 text-neutral-400" />
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}
+              className="text-sm border border-[rgba(184,121,44,0.3)] rounded-lg px-3 py-2 bg-white
+                         text-neutral-700 focus:outline-none focus:border-primary-500">
+              {months.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
           </div>
         </div>
       </section>
 
-      {/* Featured Events */}
+      {/* ── Featured Events ───────────────────────────────────────── */}
       {featuredEvents.length > 0 && (
-        <section className="py-12">
+        <section className="py-12 bg-[var(--gazra-paper)]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-display font-bold text-neutral-800">Featured Events</h2>
-              <span className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center cursor-pointer">
-                <span>See All</span>
-                <ArrowRight className="ml-1 w-4 h-4" />
-              </span>
+            <div className="flex justify-between items-baseline mb-7">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-primary-200/50
+                                bg-primary-50 text-xs font-bold uppercase tracking-wide text-primary-600 mb-2">
+                  Spotlight
+                </div>
+                <h2 className="font-display text-2xl font-bold text-neutral-900">Featured Events</h2>
+              </div>
+              <button onClick={() => setSelectedCategory('all')}
+                className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors">
+                See All <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6 relative">
               <AnimatePresence>
-                {featuredEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
+                {featuredEvents.map((event) => <EventCard key={event.id} event={event} />)}
               </AnimatePresence>
             </div>
           </div>
         </section>
       )}
 
-      {/* Regular Events Grid */}
-      <section className="py-12 bg-primary-50/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex justify-between items-center">
-            <h2 className="text-2xl font-display font-bold text-neutral-800">
-              {selectedCategory === "all"
-                ? "All Events"
-                : `${eventCategories.find(cat => cat.id === selectedCategory)?.name || "Events"}`
-              }
-            </h2>
+      {/* ── Divider ───────────────────────────────────────────────── */}
+      {featuredEvents.length > 0 && (
+        <div className="py-2 bg-[var(--gazra-paper)]">
+          <div className="gazra-folk-chain max-w-sm mx-auto" />
+        </div>
+      )}
 
+      {/* ── Regular Events ────────────────────────────────────────── */}
+      <section className="py-12 bg-[var(--gazra-paper)]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-baseline mb-7">
+            <h2 className="font-display text-2xl font-bold text-neutral-900">
+              {selectedCategory === 'all'
+                ? 'All Events'
+                : eventCategories.find(c => c.id === selectedCategory)?.name || 'Events'}
+            </h2>
             {regularEvents.length > 0 && (
-              <span className="text-neutral-500 text-sm">
-                Showing {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
+              <span className="text-sm text-neutral-400">
+                {regularEvents.length} event{regularEvents.length !== 1 ? 's' : ''}
               </span>
             )}
           </div>
 
           {regularEvents.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 relative">
               <AnimatePresence>
-                {regularEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
+                {regularEvents.map((event) => <EventCard key={event.id} event={event} />)}
               </AnimatePresence>
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-xl shadow-soft">
-              <Calendar className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-neutral-600 mb-2">No events found</h3>
-              <p className="text-neutral-500 mb-6">Try changing your filters or check back later.</p>
-              <button
-                onClick={() => {
-                  setSelectedCategory("all");
-                  setSelectedMonth("all");
-                }}
-                className="px-6 py-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors duration-300"
-              >
+            <div className="text-center py-20 bg-white/60 rounded-lg border border-[rgba(184,121,44,0.15)]">
+              <Calendar className="w-14 h-14 text-neutral-300 mx-auto mb-4" />
+              <h3 className="font-display text-xl font-bold text-neutral-600 mb-2">No events found</h3>
+              <p className="text-neutral-500 mb-6 text-sm">Try changing your filters or check back later.</p>
+              <button onClick={() => { setSelectedCategory('all'); setSelectedMonth('all'); }}
+                className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold
+                           rounded-lg transition-colors duration-200 text-sm">
                 View All Events
               </button>
             </div>
@@ -319,100 +306,56 @@ const EventsPage = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-primary-300/5" />
-          <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, -5, 0],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-primary-200/10 rounded-full blur-3xl"
-          />
-        </div>
-
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl mx-auto text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
-              Never Miss an Event
-            </h2>
-            <p className="text-lg text-neutral-600 mb-8">
-              Subscribe to our newsletter and stay updated with the latest events and community happenings.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-3 rounded-xl border border-neutral-200 focus:border-primary-500 focus:ring focus:ring-primary-500/20 transition-all duration-300"
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow transition-all duration-300"
-              >
-                Subscribe
-              </motion.button>
-            </div>
-          </motion.div>
+      {/* ── Newsletter CTA ────────────────────────────────────────── */}
+      <section className="py-16 bg-primary-600 relative overflow-hidden">
+        <div className="absolute inset-0 gazra-jaali opacity-20" />
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="gazra-folk-chain max-w-xs mx-auto mb-7" />
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-white mb-3">
+            Never Miss an Event
+          </h2>
+          <p className="text-primary-100/80 mb-8 max-w-md mx-auto">
+            Subscribe to stay updated with the latest events and community happenings.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input type="email" placeholder="Enter your email"
+              className="flex-1 px-5 py-3 rounded-lg border border-primary-100/30 bg-white/15 backdrop-blur-sm
+                         text-white placeholder-primary-100/60 focus:outline-none focus:border-white/60 text-sm" />
+            <button className="px-6 py-3 bg-white text-primary-700 font-bold rounded-lg hover:bg-primary-50
+                               transition-colors duration-200 text-sm whitespace-nowrap shadow-lg">
+              Subscribe
+            </button>
+          </div>
+          <div className="gazra-folk-chain max-w-xs mx-auto mt-7" />
         </div>
       </section>
 
-      {/* Quick Links Section */}
-      <section className="py-16 bg-white">
+      {/* ── Quick Links ───────────────────────────────────────────── */}
+      <section className="py-14 bg-[var(--gazra-paper)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
-              {
-                icon: Calendar,
-                title: "Event Calendar",
-                description: "View our complete calendar of upcoming events",
-                link: "/calendar",
-              },
-              {
-                icon: Coffee,
-                title: "Gazra Cafe",
-                description: "Visit our inclusive community cafe space",
-                link: "/cafe",
-              },
-              {
-                icon: Heart,
-                title: "Get Involved",
-                description: "Volunteer opportunities and ways to contribute",
-                link: "/volunteer",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all duration-300 border border-neutral-100"
-              >
-                <div className="w-12 h-12 mb-4 rounded-xl bg-primary-50 flex items-center justify-center text-primary-500 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-300">
-                  <item.icon className="w-6 h-6" />
+              { icon: Calendar, title: 'Event Calendar',     body: 'View our complete calendar of upcoming events',    link: '/events' },
+              { icon: Coffee,   title: 'Gazra Cafe',         body: 'Visit our inclusive community café space',         link: '/cafe' },
+              { icon: Heart,    title: 'Get Involved',       body: 'Volunteer opportunities and ways to contribute',   link: '/volunteer' },
+            ].map((item, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                transition={{ delay: i * 0.09 }}
+                className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6
+                           hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+                <div className="w-12 h-12 rounded bg-primary-600 flex items-center justify-center mb-4
+                                group-hover:bg-primary-700 transition-colors duration-200">
+                  <item.icon className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-2">{item.title}</h3>
-                <p className="text-neutral-600 mb-4">{item.description}</p>
-                <motion.a
-                  href={item.link}
-                  whileHover={{ x: 5 }}
-                  className="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
-                >
+                <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-neutral-600 mb-4 leading-relaxed">{item.body}</p>
+                <Link to={item.link}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600
+                             hover:text-primary-700 transition-colors group">
                   Learn More
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </motion.a>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </motion.div>
             ))}
           </div>

@@ -291,7 +291,7 @@ const GazraCafe = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading cafe data...</p>
@@ -301,7 +301,7 @@ const GazraCafe = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
+    <div className="min-h-screen bg-[var(--gazra-paper)]">
 
       {/* Modern Video Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">
@@ -486,9 +486,8 @@ const GazraCafe = () => {
           </div>
 
           {/* Category Navigation - Sticky tabs */}
-          <div className="sticky top-4 z-40 mb-12 sm:mb-16 flex justify-center">
-             {/* Removed motion wrapper, let parent handle animation */}
-              <div className="inline-flex flex-wrap justify-center bg-white rounded-full p-1.5 sm:p-2 shadow-lg border border-gray-100">
+          <div className="sticky top-[134px] z-40 mb-12 sm:mb-16 flex justify-center">
+              <div className="inline-flex flex-wrap justify-center bg-[rgba(251,244,231,0.97)] backdrop-blur-xl rounded-xl p-1.5 sm:p-2 shadow-lg border border-[rgba(184,121,44,0.2)]">
                 {categories.map((category) => (
                   <motion.button
                     key={category.id}
@@ -527,7 +526,7 @@ const GazraCafe = () => {
                     onClick={() => setSelectedDish(item)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100/30 rounded-3xl transform group-hover:rotate-1 transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
-                    <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl border border-gray-100 flex flex-col flex-grow">
+                    <div className="relative bg-[var(--gazra-paper)] rounded-lg overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl border border-[rgba(184,121,44,0.18)] flex flex-col flex-grow">
                       <DishImageCarousel 
                         images={(item.images || [item.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url)} 
                         item={item}
@@ -576,7 +575,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Special Features Section */}
-      <section className="py-24 bg-primary-50/30 relative overflow-hidden">
+      <section className="py-20 bg-[var(--gazra-paper)] relative overflow-hidden">
         {/* Background decorative blobs */}
         <div className="absolute inset-0">
           <div className="absolute w-[600px] h-[600px] -top-[300px] -right-[100px] bg-primary-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
@@ -640,7 +639,7 @@ const GazraCafe = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+                    className="group bg-[var(--gazra-paper)] rounded-lg p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-[rgba(184,121,44,0.18)] hover:border-primary-300/50"
                   >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-300">
                       <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -659,7 +658,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 relative overflow-hidden bg-[#FDFBF7]">
+      <section className="py-24 relative overflow-hidden bg-[var(--gazra-paper)]">
         {/* Background Blobs */}
          <div className="absolute inset-0">
            <div className="absolute w-[500px] h-[500px] -top-[250px] -right-[250px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -811,7 +810,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Location Section */}
-      <section id="location" className="py-24 bg-[#FDFBF7]">
+      <section id="location" className="py-24 bg-[var(--gazra-paper)]">
          <div className="container mx-auto px-4">
            <motion.div
              initial={{ opacity: 0, y: 20 }}

@@ -1,0 +1,22 @@
+# robots.txt — Project Gazra (https://gazra.org)
+# See: https://www.robotstxt.org/
+
+User-agent: *
+Allow: /
+
+# Block admin panel from all crawlers
+Disallow: /admin/
+Disallow: /admin
+
+# Block internal API routes
+Disallow: /api/
+
+# Common crawler hints
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://gazra.org/sitemap.xml
+
+# llms.txt — AI engine reference file
+# AI-specific file (see https://llmstxt.org)
+# llms-full: https://gazra.org/llms.txt

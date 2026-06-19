@@ -56,14 +56,16 @@ const CafePreview = () => {
         viewport={{ once: true }}
         className="text-center mb-12"
       >
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Coffee className="w-8 h-8 text-primary-600" />
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Gazra Cafe
-          </h2>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/60
+                        bg-primary-50 text-xs font-bold uppercase tracking-wide text-primary-700 mb-4">
+          <Coffee className="w-3.5 h-3.5" />
+          Gazra Cafe
         </div>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          A community space where flavors meet purpose. Every meal served supports our mission to empower and uplift.
+        <h2 className="font-display text-3xl sm:text-4xl font-black text-neutral-900 mb-3">
+          Where Flavours Meet Purpose
+        </h2>
+        <p className="text-neutral-600 max-w-xl mx-auto text-sm sm:text-base">
+          A community space with authentic Gujarati flavours. Every meal served supports our mission to empower and uplift.
         </p>
       </motion.div>
 
@@ -75,22 +77,28 @@ const CafePreview = () => {
         viewport={{ once: true }}
         className="grid md:grid-cols-3 gap-6 mb-12"
       >
-        <motion.div variants={itemVariants} className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-          <ChefHat className="w-10 h-10 text-primary-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Authentic Flavors</h3>
-          <p className="text-gray-600">Traditional recipes with a modern twist, prepared with love and care</p>
+        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+          <div className="w-11 h-11 rounded bg-primary-600 flex items-center justify-center mb-4">
+            <ChefHat className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Authentic Flavors</h3>
+          <p className="text-neutral-600 text-sm leading-relaxed">Traditional recipes with a modern twist, prepared with love and care</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-          <Heart className="w-10 h-10 text-red-500 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Community Impact</h3>
-          <p className="text-gray-600">Every purchase directly supports skill development and empowerment programs</p>
+        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+          <div className="w-11 h-11 rounded bg-accent-terracotta flex items-center justify-center mb-4">
+            <Heart className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Community Impact</h3>
+          <p className="text-neutral-600 text-sm leading-relaxed">Every purchase directly supports skill development and empowerment programs</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="bg-white rounded-xl p-6 shadow-lg border border-primary-100">
-          <Clock className="w-10 h-10 text-primary-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Daily Fresh</h3>
-          <p className="text-gray-600">Fresh ingredients sourced locally, ensuring quality in every bite</p>
+        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+          <div className="w-11 h-11 rounded bg-secondary-600 flex items-center justify-center mb-4">
+            <Clock className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="font-display text-lg font-bold text-neutral-900 mb-2">Daily Fresh</h3>
+          <p className="text-neutral-600 text-sm leading-relaxed">Fresh ingredients sourced locally, ensuring quality in every bite</p>
         </motion.div>
       </motion.div>
 
@@ -109,7 +117,7 @@ const CafePreview = () => {
               <motion.div
                 key={dish.id}
                 variants={itemVariants}
-                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
+                className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg overflow-hidden hover:shadow-xl hover:border-primary-300/50 transition-all duration-300"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
@@ -131,8 +139,8 @@ const CafePreview = () => {
                   )}
                 </div>
                 <div className="p-5">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-2">{dish.name}</h4>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
+                  <h4 className="font-display text-base font-bold text-neutral-900 mb-2">{dish.name}</h4>
+                  <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-primary-600">{dish.price}</span>
                     {dish.spiceLevel && dish.spiceLevel !== 'none' && (
@@ -153,30 +161,32 @@ const CafePreview = () => {
         viewport={{ once: true }}
         className="text-center"
       >
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-8 md:p-12 shadow-xl">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Experience the Gazra Cafe
-          </h3>
-          <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-            Visit us for a delightful dining experience that makes a difference. Explore our full menu, learn about our story, and be part of our mission.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/cafe"
-              className="bg-white text-primary-600 px-8 py-3 rounded-full font-semibold hover:bg-primary-50 transition-all duration-300 flex items-center gap-2 shadow-lg"
-            >
-              View Full Menu
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <a
-              href="https://maps.google.com/?q=Gazra+Cafe"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/10 backdrop-blur-sm text-white px-8 py-3 rounded-full font-semibold hover:bg-white/20 transition-all duration-300 flex items-center gap-2 border border-white/30"
-            >
-              <MapPin className="w-5 h-5" />
-              Visit Us
-            </a>
+        <div className="relative bg-primary-600 rounded-lg p-8 md:p-12 overflow-hidden">
+          <div className="absolute inset-0 gazra-jaali opacity-20" />
+          <div className="relative z-10 text-center">
+            <div className="gazra-folk-chain max-w-xs mx-auto mb-6" />
+            <h3 className="font-display text-2xl sm:text-3xl font-black text-white mb-3">
+              Experience the Gazra Cafe
+            </h3>
+            <p className="text-primary-100/80 mb-7 max-w-xl mx-auto text-sm sm:text-base">
+              Visit us for an authentic dining experience that makes a difference. Explore our full menu and be part of our mission.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/cafe"
+                className="inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-7 py-3
+                           rounded-lg shadow-lg hover:bg-primary-50 transition-colors duration-200">
+                View Full Menu
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a href="https://maps.google.com/?q=Shri+Maharani+Chimnabai+Stree+Udyogalaya+Vadodara"
+                 target="_blank" rel="noopener noreferrer"
+                 className="inline-flex items-center gap-2 border-2 border-primary-100/60 text-primary-50
+                            font-semibold px-7 py-3 rounded-lg hover:bg-primary-700 transition-colors duration-200">
+                <MapPin className="w-4 h-4" />
+                Visit Us
+              </a>
+            </div>
+            <div className="gazra-folk-chain max-w-xs mx-auto mt-6" />
           </div>
         </div>
       </motion.div>
