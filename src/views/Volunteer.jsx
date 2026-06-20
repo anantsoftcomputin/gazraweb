@@ -216,8 +216,7 @@ const VolunteerPage = () => {
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-neutral-950">
         <img src="/images/image7.webp" alt=""
-             className="absolute inset-0 w-full h-full object-cover opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/65 to-neutral-950/30" />
+             className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20">

@@ -75,8 +75,7 @@ const About = () => {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[80vh] overflow-hidden bg-neutral-950 flex items-center">
         <img src="/images/image13.png" alt="Maharani Chimnabai legacy"
-             className="absolute inset-0 w-full h-full object-cover object-top opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/65 to-neutral-950/25" />
+             className="absolute inset-0 w-full h-full object-cover object-top" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20 lg:py-24">

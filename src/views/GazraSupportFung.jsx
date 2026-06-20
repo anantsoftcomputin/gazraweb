@@ -130,8 +130,7 @@ const GazraSupportFund = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-950 min-h-[80vh] flex items-center">
         <img src="/images/image7.webp" alt=""
-             className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/97 via-neutral-950/70 to-neutral-950/30" />
+             className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20 lg:py-24">

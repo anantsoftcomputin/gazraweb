@@ -850,8 +850,7 @@ const GazraSkills = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-950 min-h-[70vh] flex items-center">
         <img src="/images/skill1.webp" alt=""
-             className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/60 to-neutral-950/10" />
+             className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-16 lg:py-20">

@@ -18,6 +18,7 @@ const emailSecrets = [smtpPassword];
 const otpTtlMs = 10 * 60 * 1000;
 
 function getSmtpConfig() {
+  // Rebind point: bump this comment to force Cloud Functions to re-resolve SMTP_PASS to its latest secret version.
   const port = Number(process.env.SMTP_PORT || 465);
   const user = process.env.SMTP_USER || 'support@gazra.org';
   const pass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || smtpPassword.value();
@@ -533,6 +534,235 @@ Project Gazra`
 async function sendRsvpCancellationEmail(rsvp, type) {
   return sendRsvpEmail(rsvp, type);
 }
+
+/* ── Generic form-submission notifications (volunteer, support fund, skills, cafe bookings, contact) ── */
+
+function adminUrl(path) {
+  return `${(process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://gazraweb.netlify.app').replace(/\/$/, '')}${path}`;
+}
+
+function genericFieldsTable(fields) {
+  const rows = fields.filter(([, value]) => value !== undefined && value !== null && value !== '');
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eadfd1;border-radius:12px;overflow:hidden;margin:18px 0;">
+    ${rows.map(([label, value], index) => `
+      <tr>
+        <td style="width:160px;background:${index % 2 ? '#ffffff' : '#faf8f5'};padding:12px 14px;color:#666;font-size:13px;border-bottom:1px solid #f1e8dd;vertical-align:top;">${escapeHtml(label)}</td>
+        <td style="background:${index % 2 ? '#ffffff' : '#faf8f5'};padding:12px 14px;color:#222;font-size:14px;border-bottom:1px solid #f1e8dd;"><strong>${escapeHtml(String(value))}</strong></td>
+      </tr>
+    `).join('')}
+  </table>`;
+}
+
+function fieldsText(fields) {
+  return fields.filter(([, value]) => value).map(([label, value]) => `${label}: ${value}`).join('\n');
+}
+
+async function sendFormAdminNotification({ formLabel, fields, recipientName, recipientEmail, adminCtaPath, logType }) {
+  if (!canSendEmail()) {
+    await queueEmail({ rsvp: { email: recipientEmail }, type: logType, status: 'pending_smtp_config', to: getSmtpConfig().adminEmail });
+    return { sent: false, status: 'pending_smtp_config' };
+  }
+
+  const config = getSmtpConfig();
+  const to = config.adminEmail;
+  if (!to) {
+    await queueEmail({ rsvp: { email: recipientEmail }, type: logType, status: 'skipped', error: 'Missing admin recipient email' });
+    return { sent: false, status: 'skipped' };
+  }
+
+  const subject = `New ${formLabel}: ${recipientName || recipientEmail || 'Guest'}`;
+  const html = emailShell({
+    eyebrow: `New ${formLabel}`,
+    title: `New ${formLabel} submission`,
+    intro: `${recipientName || 'Someone'} just submitted the ${formLabel} form.`,
+    body: genericFieldsTable(fields),
+    ctaLabel: 'Open Admin Dashboard',
+    ctaUrl: adminUrl(adminCtaPath),
+    footerNote: `This admin notification was sent because a new ${formLabel} entry was created.`
+  });
+  const text = `${subject}\n\n${fieldsText(fields)}\n\nAdmin: ${adminUrl(adminCtaPath)}\n\nProject Gazra`;
+
+  await createTransporter().sendMail({ from: config.from, replyTo: recipientEmail || config.replyTo, to, subject, html, text });
+  await queueEmail({ rsvp: { email: recipientEmail }, type: logType, status: 'sent', to });
+  return { sent: true, status: 'sent' };
+}
+
+async function sendFormConfirmationEmail({ formLabel, fields, recipientName, recipientEmail, confirmationIntro, logType }) {
+  if (!recipientEmail) {
+    return { sent: false, status: 'skipped' };
+  }
+
+  if (!canSendEmail()) {
+    await queueEmail({ rsvp: { email: recipientEmail }, type: logType, status: 'pending_smtp_config' });
+    return { sent: false, status: 'pending_smtp_config' };
+  }
+
+  const config = getSmtpConfig();
+  const subject = `We received your ${formLabel.toLowerCase()} submission`;
+  const intro = confirmationIntro || `We've received your ${formLabel.toLowerCase()} submission and the Gazra team will be in touch soon.`;
+  const html = emailShell({
+    eyebrow: formLabel,
+    title: `Thanks, ${recipientName || 'there'}!`,
+    intro,
+    body: genericFieldsTable(fields),
+    ctaLabel: 'Visit Gazra',
+    ctaUrl: process.env.SITE_URL || 'https://gazra.org',
+    footerNote: 'If anything here looks incorrect, reply to this email and we will update it.'
+  });
+  const text = `${subject}\n\nHi ${recipientName || 'there'},\n\n${intro}\n\n${fieldsText(fields)}\n\nProject Gazra`;
+
+  await createTransporter().sendMail({ from: config.from, replyTo: config.replyTo, to: recipientEmail, subject, html, text });
+  await queueEmail({ rsvp: { email: recipientEmail }, type: logType, status: 'sent', to: recipientEmail });
+  return { sent: true, status: 'sent' };
+}
+
+function registerSubmissionNotifications({ exportName, collectionPath, formLabel, adminCtaPath, buildFields, getEmail, getName, confirmationIntro }) {
+  const logSlug = formLabel.toLowerCase().replace(/\s+/g, '_');
+
+  exports[exportName] = onDocumentCreated(
+    { region, document: collectionPath, secrets: emailSecrets },
+    async (event) => {
+      const data = event.data?.data();
+      if (!data) return;
+
+      const fields = buildFields(data);
+      const recipientEmail = getEmail(data);
+      const recipientName = getName(data);
+      const updates = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+
+      try {
+        const result = await sendFormAdminNotification({
+          formLabel, fields, recipientName, recipientEmail, adminCtaPath,
+          logType: `${logSlug}_admin`
+        });
+        updates.adminNotificationStatus = result.status;
+        updates.adminNotificationSentAt = result.sent ? admin.firestore.FieldValue.serverTimestamp() : null;
+      } catch (error) {
+        logger.error(`${formLabel} admin notification failed`, { error: error.message });
+        updates.adminNotificationStatus = 'failed';
+        updates.adminNotificationError = error.message;
+      }
+
+      try {
+        const result = await sendFormConfirmationEmail({
+          formLabel, fields, recipientName, recipientEmail, confirmationIntro,
+          logType: `${logSlug}_confirmation`
+        });
+        updates.confirmationEmailStatus = result.status;
+        updates.confirmationEmailSentAt = result.sent ? admin.firestore.FieldValue.serverTimestamp() : null;
+      } catch (error) {
+        logger.error(`${formLabel} confirmation email failed`, { error: error.message });
+        updates.confirmationEmailStatus = 'failed';
+        updates.confirmationEmailError = error.message;
+      }
+
+      await event.data.ref.update(updates);
+    }
+  );
+}
+
+registerSubmissionNotifications({
+  exportName: 'onVolunteerApplicationCreated',
+  collectionPath: 'volunteers/{docId}',
+  formLabel: 'Volunteer Application',
+  adminCtaPath: '/admin/volunteers',
+  buildFields: (data) => [
+    ['Name', data.name],
+    ['Email', data.email],
+    ['Phone', data.phone],
+    ['Contribution areas', Array.isArray(data.contributions) ? data.contributions.join(', ') : data.contributions],
+    ['Other contribution', data.otherContribution],
+    ['Availability', Array.isArray(data.availability) ? data.availability.join(', ') : data.availability],
+    ['Experience level', data.experienceLevel],
+    ['Message', data.message]
+  ],
+  getEmail: (data) => data.email,
+  getName: (data) => data.name,
+  confirmationIntro: 'Thank you for offering to volunteer with Project Gazra. Our team will review your application and reach out soon.'
+});
+
+registerSubmissionNotifications({
+  exportName: 'onSupportRequestCreated',
+  collectionPath: 'supportRequests/{docId}',
+  formLabel: 'Support Fund Request',
+  adminCtaPath: '/admin/support-requests',
+  buildFields: (data) => [
+    ['Full name', data.fullName],
+    ['Age', data.age],
+    ['Gender', data.gender],
+    ['Phone', data.phoneNumber],
+    ['Email', data.email],
+    ['Address', data.address],
+    ['City', data.city],
+    ['State', data.state],
+    ['Pincode', data.pincode],
+    ['Support type', data.supportType],
+    ['Support description', data.supportDescription],
+    ['Amount requested', data.amountRequested],
+    ['Urgency level', data.urgencyLevel],
+    ['Employment status', data.employmentStatus],
+    ['Monthly income', data.monthlyIncome]
+  ],
+  getEmail: (data) => data.email,
+  getName: (data) => data.fullName,
+  confirmationIntro: 'We have received your support fund request. Our team will review it and contact you soon.'
+});
+
+registerSubmissionNotifications({
+  exportName: 'onSkillsEnrollmentCreated',
+  collectionPath: 'skillsEnrollments/{docId}',
+  formLabel: 'Skill Hub Enrollment',
+  adminCtaPath: '/admin/skills/enrollments',
+  buildFields: (data) => [
+    ['Full name', data.fullName],
+    ['Email', data.email],
+    ['Phone', data.phoneNumber],
+    ['Course', data.courseSelected],
+    ['Batch timing', data.batchTiming],
+    ['Employment status', data.employmentStatus],
+    ['Prior experience', data.priorExperience],
+    ['Motivation', data.motivation]
+  ],
+  getEmail: (data) => data.email,
+  getName: (data) => data.fullName,
+  confirmationIntro: 'Thank you for enrolling in a Gazra Skill Hub course. Our team will confirm your seat soon.'
+});
+
+registerSubmissionNotifications({
+  exportName: 'onCafeBookingCreated',
+  collectionPath: 'cafeBookings/{docId}',
+  formLabel: 'Cafe Table Booking',
+  adminCtaPath: '/admin/cafe/bookings',
+  buildFields: (data) => [
+    ['Name', data.name],
+    ['Email', data.email],
+    ['Phone', data.phone],
+    ['Date', data.date],
+    ['Time', data.time],
+    ['Party size', data.partySize],
+    ['Special requests', data.specialRequests]
+  ],
+  getEmail: (data) => data.email,
+  getName: (data) => data.name,
+  confirmationIntro: 'Thank you for booking a table at Gazra Cafe. We look forward to hosting you.'
+});
+
+registerSubmissionNotifications({
+  exportName: 'onContactMessageCreated',
+  collectionPath: 'contactMessages/{docId}',
+  formLabel: 'Contact Message',
+  adminCtaPath: '/admin/messages',
+  buildFields: (data) => [
+    ['Name', data.name],
+    ['Email', data.email],
+    ['Phone', data.phone],
+    ['Subject', data.subject],
+    ['Message', data.message]
+  ],
+  getEmail: (data) => data.email,
+  getName: (data) => data.name,
+  confirmationIntro: "Thanks for reaching out to Project Gazra. We'll get back to you as soon as possible."
+});
 
 exports.health = onRequest({ region }, (request, response) => {
   logger.info('Health check requested', {

@@ -95,7 +95,7 @@ const EventsPage = () => {
 
           {/* Image */}
           <div className="relative h-44 overflow-hidden flex-shrink-0">
-            <img src={event.image} alt={event.title}
+            <img src={event.image || '/images/image-four.jpg'} alt={event.title}
                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-600" />
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
@@ -165,11 +165,10 @@ const EventsPage = () => {
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative h-[58vh] min-h-[480px] overflow-hidden bg-neutral-950">
-        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-55"
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover"
                autoPlay muted loop playsInline>
           <source src="/video/event.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/25" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">

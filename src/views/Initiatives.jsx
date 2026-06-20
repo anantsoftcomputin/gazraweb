@@ -302,13 +302,9 @@ const InitiativesPage = () => {
           style={{
             backgroundImage: 'url("/images/background.jpg")', // <-- Replace Placeholder
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'brightness(0.8)'
+            backgroundPosition: 'center'
           }}
         />
-
-        {/* Elegant gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-primary-900/80 via-primary-800/70 to-secondary-800/60" />
 
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden">

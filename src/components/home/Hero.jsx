@@ -46,7 +46,6 @@ const Hero = () => {
             <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
           </video>
         )}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,rgba(184,121,44,0.18),transparent_28rem),linear-gradient(90deg,rgba(23,19,17,0.94)_0%,rgba(23,19,17,0.70)_46%,rgba(23,19,17,0.28)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>

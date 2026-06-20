@@ -338,7 +338,7 @@ const EventDetail = () => {
             {/* Image Header */}
             <div className="h-64 sm:h-96 relative">
               <img
-                src={event.image}
+                src={event.image || '/images/image-four.jpg'}
                 alt={event.title}
                 className="w-full h-full object-cover"
               />

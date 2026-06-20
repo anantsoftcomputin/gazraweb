@@ -325,9 +325,6 @@ const GazraCafe = () => {
               {/* <source src="/path/to/your/video.mp4" type="video/mp4" /> */}
               Your browser does not support the video tag.
             </video>
-
-            {/* Video overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
           </motion.div>
         </div>
 

@@ -27,6 +27,7 @@ const Navbar = () => {
     },
     // { name: 'Initiatives', path: '/initiatives', icon: Heart },
     { name: 'Events', path: '/events', icon: Calendar },
+    { name: 'Gallery', path: '/gallery', icon: Camera },
     { name: 'Volunteer', path: '/volunteer', icon: Heart },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
@@ -77,6 +78,7 @@ const Navbar = () => {
     { name: 'About', path: '/about', icon: Info },
     { name: 'Initiatives', path: null, icon: BookOpen, isDropdown: true },
     { name: 'Events', path: '/events', icon: Calendar },
+    { name: 'Gallery', path: '/gallery', icon: Camera },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
 

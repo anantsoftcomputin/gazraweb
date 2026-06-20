@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Mail, Phone, Clock, Send, MessageSquare, ArrowRight } from 'lucide-react';
 import PhoneVerification from '../components/shared/PhoneVerification';
+import { useFirestore } from '../hooks/useFirestore';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5 } };
 
@@ -54,13 +55,31 @@ const Field = ({ id, label, type = 'text', placeholder, value, onChange, textare
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
+  const { addDocument } = useFirestore('contactMessages');
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!phoneVerified) { alert('Please verify your phone number before submitting.'); return; }
+
+    setSubmitting(true);
+    const result = await addDocument({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim()
+    });
+    setSubmitting(false);
+
+    if (!result.success) {
+      alert('Something went wrong sending your message. Please try again.');
+      return;
+    }
+
     setSubmitted(true);
     setTimeout(() => {
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -75,8 +94,7 @@ const ContactPage = () => {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[50vh] flex items-center bg-neutral-950 overflow-hidden">
         <img src="/images/image7.webp" alt=""
-             className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/95 via-neutral-950/70 to-neutral-950/30" />
+             className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20">
@@ -181,11 +199,11 @@ const ContactPage = () => {
                            placeholder="Tell us more about your inquiry..."
                            value={form.message} onChange={handleChange} textarea />
 
-                    <button type="submit"
+                    <button type="submit" disabled={submitting}
                       className="w-full inline-flex items-center justify-center gap-2 bg-primary-600
-                                 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg
+                                 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-lg
                                  shadow-md hover:shadow-lg transition-all duration-200">
-                      Send Message
+                      {submitting ? 'Sending…' : 'Send Message'}
                       <Send className="w-4 h-4" />
                     </button>
                   </form>
