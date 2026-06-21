@@ -294,7 +294,7 @@ const GazraCafe = () => {
       <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading cafe data...</p>
+          <p className="text-neutral-600">Loading cafe data...</p>
         </div>
       </div>
     );
@@ -365,38 +365,39 @@ const GazraCafe = () => {
                 animate={{ opacity: 1, y: 0 }} // Use animate instead of whileInView for initial load
                 transition={{ duration: 0.8, delay: 0.3 }} // Added delay
               >
-                <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium text-white mb-6">
+                <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded text-sm font-medium text-white mb-6">
                   <Coffee className="w-4 h-4 inline mr-2" />
-                  Welcome to Gazra Cafe
+                  Gujarat's First Queer-Led Community Cafe
                 </span>
 
                 <h1 className="text-5xl md:text-7xl font-display font-bold leading-tight mb-6 text-white">
-                  A Culinary
+                  A Table for
                   <span className="block mt-2 bg-gradient-to-r from-primary-300 to-primary-100 bg-clip-text text-transparent">
-                    Journey Home
+                    Every Identity
                   </span>
                 </h1>
 
                 <p className="text-xl text-white/80 mb-8 max-w-xl">
-                  Experience authentic flavors with a modern twist in our warm, welcoming space.
+                  Authentic Maharashtrian flavors, served in a warm space where every guest —
+                  however they identify — is welcomed exactly as they are.
                 </p>
 
                 <div className="flex flex-wrap gap-4">
                   <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     href="#menu"
-                    className="px-8 py-4 bg-white text-primary-600 rounded-full font-medium inline-flex items-center shadow-lg hover:shadow-xl transition-all"
+                    className="px-8 py-4 bg-white text-primary-700 rounded-lg font-semibold inline-flex items-center shadow-lg hover:shadow-xl hover:bg-primary-50 transition-all"
                   >
                     Explore Our Menu
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </motion.a>
 
                   <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     href="#location"
-                    className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-medium inline-flex items-center hover:bg-white/10 transition-all"
+                    className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold inline-flex items-center hover:bg-white/10 transition-all"
                   >
                     Visit Us
                     <MapPin className="ml-2 w-5 h-5" />
@@ -428,6 +429,16 @@ const GazraCafe = () => {
             <motion.div className="w-1.5 h-1.5 bg-white rounded-full" />
           </motion.div>
         </div>
+
+        {/* Heritage toran stripe + a quiet pride-spectrum thread beneath it */}
+        <div className="absolute bottom-0 inset-x-0 z-10">
+          <div className="gazra-toran-stripe" />
+          <div
+            className="h-[3px] w-full"
+            aria-label="An inclusive space for every identity"
+            style={{ background: 'linear-gradient(90deg, #E40303, #FF8C00, #FFED00, #008026, #24408E, #732982)' }}
+          />
+        </div>
       </section>
 
       {/* Quick Stats Section - Floating cards */}
@@ -441,16 +452,16 @@ const GazraCafe = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-4 sm:p-6 border border-white/60"
+                className="bg-[rgba(251,244,231,0.97)] backdrop-blur-lg rounded-lg shadow-xl p-4 sm:p-6 border border-[rgba(184,121,44,0.2)]"
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 mb-3 sm:mb-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded bg-primary-50 flex items-center justify-center text-primary-600 mb-3 sm:mb-4">
                     <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-600 mb-1">
                     {stat.number}{stat.suffix}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
+                  <div className="text-xs sm:text-sm text-neutral-600">{stat.label}</div>
                 </div>
               </motion.div>
             ))}
@@ -469,15 +480,15 @@ const GazraCafe = () => {
               viewport={{ once: true }}
               className="max-w-3xl mx-auto"
             >
-              <span className="inline-block px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm font-medium mb-4">
+              <span className="inline-block px-4 py-2 bg-primary-50 text-primary-600 rounded text-sm font-medium mb-4">
                 Our Menu
               </span>
-              <h2 className="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-6">
+              <h2 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 mb-6">
                 Savor the Authentic
                 <span className="block mt-2 text-primary-600">Maharashtrian Flavors</span>
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600">
-                Each dish tells a story of tradition, prepared with love and served with pride.
+              <p className="text-lg sm:text-xl text-neutral-600">
+                Every dish tells a story of tradition. Every guest, whoever they are, gets a seat at the table.
               </p>
             </motion.div>
           </div>
@@ -492,10 +503,10 @@ const GazraCafe = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory(category.id)}
                     className={`
-                      flex items-center px-4 py-2 sm:px-6 sm:py-3 rounded-full font-medium text-sm sm:text-base transition-all duration-300
+                      flex items-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all duration-300
                       ${selectedCategory === category.id
-                        ? 'bg-primary-500 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-primary-50'
+                        ? 'bg-primary-600 text-white shadow-md'
+                        : 'text-neutral-600 hover:bg-primary-50'
                       }
                     `}
                   >
@@ -522,30 +533,30 @@ const GazraCafe = () => {
                     className="group relative flex flex-col cursor-pointer" // Added cursor-pointer
                     onClick={() => setSelectedDish(item)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100/30 rounded-3xl transform group-hover:rotate-1 transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100/30 rounded-lg transform group-hover:rotate-1 transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
                     <div className="relative bg-[var(--gazra-paper)] rounded-lg overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl border border-[rgba(184,121,44,0.18)] flex flex-col flex-grow">
-                      <DishImageCarousel 
-                        images={(item.images || [item.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url)} 
+                      <DishImageCarousel
+                        images={(item.images || [item.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url)}
                         item={item}
                       />
 
                       <div className="p-5 sm:p-6 flex flex-col flex-grow min-h-[200px]"> {/* Added min-height */}
                         <div className="flex justify-between items-start mb-3 gap-2">
-                          <h3 className="text-md sm:text-lg font-semibold text-gray-800 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2">
+                          <h3 className="text-md sm:text-lg font-semibold text-neutral-800 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2">
                              {item.name}
                           </h3>
-                          <span className="text-sm sm:text-md font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full flex-shrink-0">
+                          <span className="text-sm sm:text-md font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded flex-shrink-0">
                              {item.price}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-4 leading-relaxed">{item.description}</p> {/* Increased to 4 lines with better spacing */}
+                        <p className="text-sm text-neutral-600 mb-4 flex-grow line-clamp-4 leading-relaxed">{item.description}</p> {/* Increased to 4 lines with better spacing */}
 
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100"> {/* Use mt-auto */}
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-[rgba(184,121,44,0.15)]"> {/* Use mt-auto */}
                           <div className="flex flex-wrap gap-1.5">
                             {item.tags.map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                className="px-2 py-1 bg-primary-50 text-neutral-700 text-xs rounded"
                               >
                                 {tag}
                               </span>
@@ -553,12 +564,12 @@ const GazraCafe = () => {
                           </div>
 
                           {item.spiceLevel && (
-                            <div className="flex items-center bg-gray-100 px-2 py-1 rounded-full flex-shrink-0">
+                            <div className="flex items-center bg-primary-50 px-2 py-1 rounded flex-shrink-0">
                               <span
                                 className={`w-2 h-2 rounded-full mr-1.5 ${getSpiceLevelColor(item.spiceLevel)}`}
                                 title={`Spice Level: ${item.spiceLevel}`}
                               />
-                              <span className="text-xs text-gray-600 capitalize">{item.spiceLevel}</span>
+                              <span className="text-xs text-neutral-600 capitalize">{item.spiceLevel}</span>
                             </div>
                           )}
                         </div>
@@ -568,6 +579,18 @@ const GazraCafe = () => {
                 ))
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Inclusive interstitial banner — between menu and features */}
+      <section className="py-14 bg-primary-600 relative overflow-hidden">
+        <div className="absolute inset-0 gazra-jaali opacity-15" />
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="gazra-folk-chain max-w-xs mx-auto mb-6" />
+          <p className="font-display text-2xl sm:text-3xl font-bold text-white max-w-2xl mx-auto leading-snug">
+            Whoever you are, however you identify — this kitchen has a seat for you.
+          </p>
+          <div className="gazra-folk-chain max-w-xs mx-auto mt-6" />
         </div>
       </section>
 
@@ -615,15 +638,17 @@ const GazraCafe = () => {
               viewport={{ once: true }}
               className="space-y-6 sm:space-y-8"
             >
-              <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded-full text-sm font-medium">
+              <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded text-sm font-medium">
                 Why Choose Us
               </span>
-              <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900">
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900">
                 A Perfect Blend of
                 <span className="block mt-1 sm:mt-2 text-primary-600">Tradition & Innovation</span>
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600">
-                At Gazra Cafe, we're more than just a restaurant. We're a celebration of Maharashtra's rich culinary heritage, reimagined for the modern palate.
+              <p className="text-lg sm:text-xl text-neutral-600">
+                At Gazra Cafe, we're more than just a restaurant — we're Gujarat's first queer-led
+                community cafe, celebrating Maharashtra's culinary heritage in a space where every
+                identity is welcome at the table.
               </p>
 
               <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">
@@ -638,13 +663,13 @@ const GazraCafe = () => {
                     transition={{ delay: index * 0.1 }}
                     className="group bg-[var(--gazra-paper)] rounded-lg p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-[rgba(184,121,44,0.18)] hover:border-primary-300/50"
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-300">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
                       <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <h3 className="text-md sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors duration-300">
+                    <h3 className="text-md sm:text-lg font-bold text-neutral-900 mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors duration-300">
                        {feature.title}
                     </h3>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
+                    <p className="text-sm text-neutral-600">{feature.description}</p>
                   </motion.div>
                   );
                 })}
@@ -669,14 +694,14 @@ const GazraCafe = () => {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
              >
-               <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded-full text-sm font-medium mb-4 shadow border border-gray-100">
+               <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded text-sm font-medium mb-4 shadow border border-[rgba(184,121,44,0.15)]">
                  Guest Stories
                </span>
-               <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-4">
-                 What Our Community Says
+               <h2 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900 mb-4">
+                 Voices from Our Table
                </h2>
-               <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-                 Real experiences from our valued guests who cherish our flavors and ambiance.
+               <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+                 Real experiences from the guests who've found a place — and a flavor — to call their own.
                </p>
              </motion.div>
           </div>
@@ -691,9 +716,7 @@ const GazraCafe = () => {
                 transition={{ delay: index * 0.1 }}
                 className="relative group" // Keep group for potential future hover effects on parent
               >
-                {/* Optional subtle background element */}
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-secondary-50 rounded-2xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300 -z-10"></div> */}
-                <div className="relative bg-white/80 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-lg border border-white/60 h-full flex flex-col"> {/* Added flex */}
+                <div className="relative bg-[rgba(251,244,231,0.92)] backdrop-blur-md rounded-lg p-6 sm:p-8 shadow-lg border border-[rgba(184,121,44,0.18)] h-full flex flex-col"> {/* Added flex */}
                   <div className="flex items-center mb-4 sm:mb-6">
                     {testimonial.image ? (
                       <img
@@ -708,22 +731,22 @@ const GazraCafe = () => {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-gray-900">{testimonial.name}</h3>
-                      <p className="text-sm text-gray-600">{testimonial.role}</p>
+                      <h3 className="font-bold text-neutral-900">{testimonial.name}</h3>
+                      <p className="text-sm text-neutral-600">{testimonial.role}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center mb-3 sm:mb-4">
                     {[...Array(5)].map((_, i) => ( // Always show 5 stars
-                      <Star key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                      <Star key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} />
                     ))}
                   </div>
 
-                  <blockquote className="text-gray-600 mb-6 italic text-sm sm:text-base flex-grow"> {/* Added flex-grow */}
+                  <blockquote className="text-neutral-600 mb-6 italic text-sm sm:text-base flex-grow"> {/* Added flex-grow */}
                     "{testimonial.comment}"
                   </blockquote>
 
-                  <div className="mt-auto flex items-center text-xs sm:text-sm text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full self-start"> {/* Use self-start and mt-auto */}
+                  <div className="mt-auto flex items-center text-xs sm:text-sm text-primary-600 bg-primary-50 px-3 py-1.5 rounded self-start"> {/* Use self-start and mt-auto */}
                     <Utensils className="w-3.5 h-3.5 mr-2" />
                     Favorite: {testimonial.dish}
                   </div>
@@ -735,7 +758,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Instagram Feed Section */}
-      <section id="moments" className="py-24 bg-gradient-to-b from-white to-primary-50/30">
+      <section id="moments" className="py-24 bg-gradient-to-b from-[var(--gazra-paper)] to-primary-50/30">
          <div className="container mx-auto px-4">
            <div className="text-center mb-16">
               <motion.div
@@ -743,14 +766,14 @@ const GazraCafe = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded-full text-sm font-medium mb-4 shadow border border-gray-100">
+                <span className="inline-block px-4 py-2 bg-white text-primary-600 rounded text-sm font-medium mb-4 shadow border border-[rgba(184,121,44,0.15)]">
                   @chimnabai_udyogalaya
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-4">
-                  Moments & Memories
+                <h2 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900 mb-4">
+                  Our Chosen Family
                 </h2>
-                <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-                  Follow us on Instagram for daily updates and behind-the-scenes glimpses.
+                <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+                  Moments from the cafe — follow us on Instagram for daily updates and behind-the-scenes glimpses.
                 </p>
               </motion.div>
            </div>
@@ -784,8 +807,12 @@ const GazraCafe = () => {
                   </a>
                 </motion.div>
               )) : (
-                <div className="col-span-2 md:col-span-4 text-center py-12">
-                  <p className="text-gray-500">No moments available yet. Check back soon!</p>
+                <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-14 h-14 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 mb-4">
+                    <Instagram className="w-6 h-6" />
+                  </div>
+                  <p className="text-neutral-600 font-medium">Our photo wall is just getting started.</p>
+                  <p className="text-neutral-500 text-sm mt-1">New moments from the cafe and our community land here soon.</p>
                 </div>
               )}
            </div>
@@ -797,7 +824,7 @@ const GazraCafe = () => {
                 href="https://instagram.com/chimnabai_udyogalaya" // Replace with your actual Instagram link
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 border-2 border-primary-200 text-primary-600 rounded-full hover:bg-primary-50 transition-all duration-300 text-sm sm:text-base"
+                className="inline-flex items-center px-6 py-3 border-2 border-primary-200 text-primary-600 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-300 text-sm sm:text-base"
               >
                 Follow Us on Instagram
                 <Instagram className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
@@ -818,24 +845,24 @@ const GazraCafe = () => {
              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
                {/* Location Details */}
                <div className="space-y-6 sm:space-y-8">
-                 <span className="inline-block px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm font-medium">
+                 <span className="inline-block px-4 py-2 bg-primary-50 text-primary-600 rounded text-sm font-medium">
                    Visit Us
                  </span>
-                 <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900">
+                 <h2 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900">
                    Come Experience
                    <span className="block mt-1 sm:mt-2 text-primary-600">The Magic</span>
                  </h2>
 
                  <div className="space-y-5 sm:space-y-6">
                     <div className="flex items-start space-x-4">
-                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 shrink-0">
                          <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                        </div>
                        <div>
-                         <h3 className="font-bold text-gray-900 mb-1">Location</h3>
-                         <p className="text-gray-600 text-sm sm:text-base">Gazra Cafe, Shri Maharani Chimnabai Stree Udyogalaya, Opp. Sursagar, Mandvi, Vadodara</p> {/* Updated Address */}
+                         <h3 className="font-bold text-neutral-900 mb-1">Location</h3>
+                         <p className="text-neutral-600 text-sm sm:text-base">Gazra Cafe, Shri Maharani Chimnabai Stree Udyogalaya, Opp. Sursagar, Mandvi, Vadodara</p>
                          <a
-                           href="https://maps.google.com/?q=Shri+Maharani+Chimnabai+Stree+Udyogalaya+Vadodara" // Example Google Maps link
+                           href="https://maps.google.com/?q=Shri+Maharani+Chimnabai+Stree+Udyogalaya+Vadodara"
                            target="_blank"
                            rel="noopener noreferrer"
                            className="text-primary-600 hover:text-primary-700 text-sm mt-1 inline-flex items-center"
@@ -846,46 +873,45 @@ const GazraCafe = () => {
                     </div>
 
                     <div className="flex items-start space-x-4">
-                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 shrink-0">
                          <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
                        </div>
                        <div>
-                         <h3 className="font-bold text-gray-900 mb-1">Hours</h3>
-                         <p className="text-gray-600 text-sm sm:text-base">Monday - Sunday: 9:00 AM - 10:00 PM</p>
-                         <p className="text-gray-600 text-sm sm:text-base">Kitchen closes at 9:30 PM</p>
+                         <h3 className="font-bold text-neutral-900 mb-1">Hours</h3>
+                         <p className="text-neutral-600 text-sm sm:text-base">Monday - Sunday: 9:00 AM - 10:00 PM</p>
+                         <p className="text-neutral-600 text-sm sm:text-base">Kitchen closes at 9:30 PM</p>
                        </div>
                     </div>
 
-                    {/* Add Phone Contact */}
-                     <div className="flex items-start space-x-4">
-                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+                    <div className="flex items-start space-x-4">
+                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 shrink-0">
                          <Phone className="w-5 h-5 sm:w-6 sm:h-6" />
                        </div>
                        <div>
-                         <h3 className="font-bold text-gray-900 mb-1">Contact</h3>
-                         <a href="tel:+918200306871" className="text-gray-600 text-sm sm:text-base hover:text-primary-600">+91 82003 06871</a> {/* Example Phone */}
+                         <h3 className="font-bold text-neutral-900 mb-1">Contact</h3>
+                         <a href="tel:+918200306871" className="text-neutral-600 text-sm sm:text-base hover:text-primary-600">+91 82003 06871</a>
                        </div>
                      </div>
 
                  </div>
 
                  <motion.button
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
-                   className="mt-6 inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-500 text-white rounded-full font-medium shadow-lg hover:bg-primary-600 transition-colors duration-200 text-sm sm:text-base"
+                   whileHover={{ scale: 1.03 }}
+                   whileTap={{ scale: 0.97 }}
+                   onClick={() => window.dispatchEvent(new CustomEvent('openBookingForm'))}
+                   className="mt-6 inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 text-white rounded-lg font-semibold shadow-lg hover:bg-primary-700 transition-colors duration-200 text-sm sm:text-base"
                   >
                    Reserve a Table
                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                  </motion.button>
                </div>
 
-               {/* Map Placeholder */}
+               {/* Map */}
                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-secondary-200 rounded-3xl transform rotate-3 -z-10"></div>
-                  <div className="relative rounded-2xl overflow-hidden shadow-lg border-4 sm:border-8 border-white h-[400px] sm:h-[500px]">
-                    {/* Replace with actual map iframe or image */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-secondary-200 rounded-lg transform rotate-3 -z-10"></div>
+                  <div className="relative rounded-lg overflow-hidden shadow-lg border-4 sm:border-8 border-white h-[400px] sm:h-[500px]">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.548806266471!2d73.19829807507117!3d22.29503642968911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395fc5bbe3f0607b%3A0x33ac28417835816d!2sShri%20Maharani%20Chimnabai%20Stree%20Udyogalaya!5e0!3m2!1sen!2sin!4v1716886941234!5m2!1sen!2sin" // Example embed URL
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.548806266471!2d73.19829807507117!3d22.29503642968911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395fc5bbe3f0607b%3A0x33ac28417835816d!2sShri%20Maharani%20Chimnabai%20Stree%20Udyogalaya!5e0!3m2!1sen!2sin!4v1716886941234!5m2!1sen!2sin"
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
@@ -901,8 +927,8 @@ const GazraCafe = () => {
                         </div>
                      </div>
                      <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md p-3 sm:p-4 pointer-events-none">
-                         <p className="font-medium text-center text-gray-900 text-sm sm:text-base">Gazra Cafe</p>
-                         <p className="text-xs sm:text-sm text-center text-gray-600">Opp. Sursagar, Mandvi, Vadodara</p>
+                         <p className="font-medium text-center text-neutral-900 text-sm sm:text-base">Gazra Cafe</p>
+                         <p className="text-xs sm:text-sm text-center text-neutral-600">Opp. Sursagar, Mandvi, Vadodara</p>
                      </div>
                   </div>
                </div>
@@ -932,25 +958,26 @@ const GazraCafe = () => {
 
              <div className="relative px-6 py-16 sm:px-8 sm:py-20 md:py-24 text-center">
                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4 sm:mb-6">
-                 Experience the Taste of Maharashtra
+                 A Seat Waiting for You
                </h2>
                <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                 Join us for a culinary journey that celebrates tradition with a modern twist, in a space that feels like home.
+                 Join us for a culinary journey that celebrates tradition with a modern twist, in a space that feels like home — for everyone.
                </p>
                <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
-                  {/* <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-white text-primary-600 rounded-full font-medium hover:bg-gray-100 transition-colors duration-200 shadow-lg text-sm sm:text-base"
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => window.dispatchEvent(new CustomEvent('openBookingForm'))}
+                    className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-white text-primary-700 rounded-lg font-semibold hover:bg-primary-50 transition-colors duration-200 shadow-lg text-sm sm:text-base"
                   >
                     Reserve a Table
                     <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-                  </motion.button> */}
-                  <motion.a // Changed to anchor tag to link to menu section
+                  </motion.button>
+                  <motion.a
                     href="#menu"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white/10 transition-colors duration-200 text-sm sm:text-base"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200 text-sm sm:text-base"
                   >
                     View Full Menu
                     <Utensils className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
@@ -997,7 +1024,7 @@ const GazraCafe = () => {
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedDish.name}</h2>
+                    <h2 className="text-3xl font-bold text-neutral-900 mb-2">{selectedDish.name}</h2>
                     <div className="flex items-center gap-3">
                       {selectedDish.spiceLevel && selectedDish.spiceLevel !== 'none' && (
                         <div className="flex items-center gap-1">
@@ -1007,7 +1034,7 @@ const GazraCafe = () => {
                             selectedDish.spiceLevel === 'hot' ? 'text-orange-500' :
                             'text-red-500'
                           }`} />
-                          <span className="text-sm text-gray-600 capitalize">{selectedDish.spiceLevel}</span>
+                          <span className="text-sm text-neutral-600 capitalize">{selectedDish.spiceLevel}</span>
                         </div>
                       )}
                     </div>
@@ -1016,7 +1043,7 @@ const GazraCafe = () => {
                 </div>
 
                 {/* Description */}
-                <p className="text-gray-700 text-lg leading-relaxed mb-6">{selectedDish.description}</p>
+                <p className="text-neutral-700 text-lg leading-relaxed mb-6">{selectedDish.description}</p>
 
                 {/* Tags */}
                 {selectedDish.tags && selectedDish.tags.length > 0 && (
@@ -1024,7 +1051,7 @@ const GazraCafe = () => {
                     {selectedDish.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        className="px-3 py-1.5 bg-primary-50 text-neutral-700 text-sm rounded"
                       >
                         {tag}
                       </span>

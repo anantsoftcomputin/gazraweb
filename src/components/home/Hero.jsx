@@ -1,24 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper, Volume2, VolumeX } from 'lucide-react';
 
 const Hero = () => {
-  const [isDesktop, setIsDesktop] = useState(false);
   const [muted, setMuted] = useState(true);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    setIsDesktop(mq.matches);
-    const handler = (e) => setIsDesktop(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
   const toggleMute = () => {
     if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setMuted(videoRef.current.muted);
+    const next = !muted;
+    videoRef.current.muted = next;
+    setMuted(next);
   };
   const serviceButtons = [
     { icon: Smartphone, title: "Gazra Mitra", url: "https://mitra.gazra.org", isExternal: true },
@@ -30,39 +22,25 @@ const Hero = () => {
   return (
     <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950 -mt-[134px] lg:mt-0">
       <div className="absolute inset-0 overflow-hidden">
-        {isDesktop ? (
-          /* Desktop (768px+): muted ambient video — mute=1 required for browser autoplay policy */
-          <iframe
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.18]"
-            src="https://www.youtube.com/embed/0Dv_G_SzTmk?start=68&autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&loop=1&playlist=0Dv_G_SzTmk&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0"
-            title="Project Gazra community video"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerPolicy="strict-origin-when-cross-origin"
-            aria-hidden="true"
-          />
-        ) : (
-          /* Mobile/tablet: local video via <video> tag — supports playsInline for mobile autoplay */
-          <video
-            ref={videoRef}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden="true"
-          >
-            <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
-          </video>
-        )}
-        {!isDesktop && (
-          <button
-            onClick={toggleMute}
-            aria-label={muted ? 'Unmute video' : 'Mute video'}
-            className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
-          >
-            {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
-        )}
+        {/* Local video for all screen sizes — must start muted for browser autoplay policy */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+        >
+          <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
+        </video>
+        <button
+          onClick={toggleMute}
+          aria-label={muted ? 'Unmute video' : 'Mute video'}
+          className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>
