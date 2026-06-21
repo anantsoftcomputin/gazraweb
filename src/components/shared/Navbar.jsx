@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from '../../lib/routerCompat';
-import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Camera, Phone, Shield, Mail } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Camera, Phone, Shield, Mail, FileText } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import ToranBorder from './ToranBorder';
@@ -28,6 +28,7 @@ const Navbar = () => {
     // { name: 'Initiatives', path: '/initiatives', icon: Heart },
     { name: 'Events', path: '/events', icon: Calendar },
     { name: 'Gallery', path: '/gallery', icon: Camera },
+    { name: 'Blog', path: '/blog', icon: FileText },
     { name: 'Volunteer', path: '/volunteer', icon: Heart },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
