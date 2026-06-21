@@ -1,4 +1,5 @@
 import '../src/index.css';
+import SplashScreen from '../src/components/shared/SplashScreen';
 
 const SITE_URL = 'https://gazra.org';
 const SITE_NAME = 'Project Gazra';
@@ -208,7 +209,10 @@ export default function RootLayout({ children }) {
         {/* Language / locale signals */}
         <meta httpEquiv="content-language" content="en-IN" />
       </head>
-      <body>{children}</body>
+      <body>
+        <SplashScreen />
+        {children}
+      </body>
     </html>
   );
 }

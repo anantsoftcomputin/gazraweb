@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from '../../lib/routerCompat';
-import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper } from 'lucide-react';
-import ParrotDecor from '../shared/ParrotDecor';
+import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper, Volume2, VolumeX } from 'lucide-react';
 
 const Hero = () => {
   const [isDesktop, setIsDesktop] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -13,6 +14,12 @@ const Hero = () => {
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setMuted(videoRef.current.muted);
+  };
   const serviceButtons = [
     { icon: Smartphone, title: "Gazra Mitra", url: "https://mitra.gazra.org", isExternal: true },
     { icon: Wallet, title: "Gazra Support Fund", url: "/gazra-support" },
@@ -36,6 +43,7 @@ const Hero = () => {
         ) : (
           /* Mobile/tablet: local video via <video> tag — supports playsInline for mobile autoplay */
           <video
+            ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover object-center"
             autoPlay
             muted
@@ -46,28 +54,18 @@ const Hero = () => {
             <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
           </video>
         )}
+        {!isDesktop && (
+          <button
+            onClick={toggleMute}
+            aria-label={muted ? 'Unmute video' : 'Mute video'}
+            className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
+          >
+            {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+        )}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>
-
-      {/* Mobile parrot — visible on phones/small tablets, larger screens use the MainLayout parrots */}
-      <div className="absolute top-10 right-3 z-20 md:hidden gazra-parrot-bob">
-        <ParrotDecor size={52} flip={false} opacity={0.58} />
-      </div>
-
-      {/* Desktop parrots — pair of parrots at the right side of the hero */}
-      <ParrotDecor
-        size={72}
-        flip={false}
-        opacity={0.72}
-        className="absolute bottom-28 right-6 z-20 hidden lg:block"
-      />
-      <ParrotDecor
-        size={56}
-        flip={true}
-        opacity={0.55}
-        className="absolute bottom-36 right-24 z-20 hidden xl:block"
-      />
 
       {/* Main content */}
       <div className="relative flex min-h-[86vh] w-full items-end pt-[160px] pb-10 px-4 sm:px-8 sm:pt-[160px] sm:pb-12 lg:items-center lg:px-12 xl:px-16 lg:pt-16 lg:pb-16">

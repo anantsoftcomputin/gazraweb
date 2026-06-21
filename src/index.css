@@ -13,6 +13,14 @@
   --gazra-marigold: #b8792c;
   --gazra-red: #9f2f28;
   --gazra-green: #2f6b45;
+
+  /* Deep heritage canvas palette — used by the splash screen and future
+     dark-canvas sections (woven-textile moodboard: forest green + ivory/gold) */
+  --gazra-canvas-dark: #141d18;
+  --gazra-canvas: #1f2c24;
+  --gazra-canvas-light: #2b3c30;
+  --gazra-ivory: #f3ecd9;
+  --gazra-gold-soft: #d8b978;
 }
 
 body {
@@ -204,17 +212,6 @@ body {
 }
 
 /*
- * Parrot-motif repeating side panel — thin strip with staggered parrots
- * (purely CSS, minimal; for decorative vertical rails).
- */
-.gazra-parrot-rail {
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='48'%3E%3Ccircle cx='12' cy='10' r='6' fill='%232F6B45' opacity='0.18'/%3E%3Cellipse cx='10' cy='22' rx='6' ry='9' fill='%232F6B45' opacity='0.14'/%3E%3C%2Fsvg%3E");
-  background-size: 24px 48px;
-  background-repeat: repeat-y;
-}
-
-/*
  * Section heading accent — small inline folk flower before a heading.
  * Usage: <h2 class="gazra-heading-flower"> … </h2>
  */
@@ -250,13 +247,18 @@ body {
   background-repeat: repeat-x;
 }
 
-/* Gentle bobbing animation for decorative parrot accents on mobile */
-@keyframes gazra-parrot-bob {
-  0%, 100% { transform: translateY(0px); }
-  45%       { transform: translateY(-9px); }
-  55%       { transform: translateY(-9px); }
-}
-.gazra-parrot-bob {
-  animation: gazra-parrot-bob 3.8s ease-in-out infinite;
-  will-change: transform;
+
+/*
+ * Woven-canvas texture — fine crosshatch weave over a deep forest-green base,
+ * with soft gold/shadow vignettes for depth. Mirrors the burlap/linen
+ * heritage-textile moodboard look. Used by the splash screen.
+ */
+.gazra-canvas-texture {
+  background-color: var(--gazra-canvas);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(243, 236, 217, 0.05) 0px, rgba(243, 236, 217, 0.05) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(90deg, rgba(243, 236, 217, 0.05) 0px, rgba(243, 236, 217, 0.05) 1px, transparent 1px, transparent 3px),
+    radial-gradient(circle at 20% 18%, rgba(217, 161, 58, 0.10), transparent 32rem),
+    radial-gradient(circle at 82% 76%, rgba(0, 0, 0, 0.40), transparent 36rem);
+  background-size: 3px 3px, 3px 3px, auto, auto;
 }
