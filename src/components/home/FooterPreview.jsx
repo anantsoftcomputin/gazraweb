@@ -36,7 +36,7 @@ const Footer = () => {
         <div className="grid gap-8 lg:grid-cols-[1.35fr_0.8fr_0.8fr_1.1fr]">
           <div>
             <Link to="/" className="inline-flex items-center gap-3">
-              <img src="https://gazra.org/logo.png" alt="Gazra Logo" className="h-14 w-14 object-contain" />
+              <img src="/logo.svg" alt="Gazra Logo" className="h-14 w-14 object-contain" />
               <div>
                 <div className="font-display text-2xl font-black text-primary-700">Project Gazra</div>
                 <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-accent-terracotta">Stories & community</div>

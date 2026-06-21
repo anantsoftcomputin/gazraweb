@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Coffee, Users, BookOpen, Heart } from 'lucide-react';
 
@@ -15,15 +16,18 @@ const PILLARS = [
 
 const SplashScreen = () => {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
 
   useEffect(() => {
+    if (isAdminRoute) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
     setVisible(true);
     sessionStorage.setItem(STORAGE_KEY, '1');
 
     const timer = setTimeout(() => setVisible(false), 4000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAdminRoute]);
 
   return (
     <AnimatePresence>
@@ -34,6 +38,15 @@ const SplashScreen = () => {
           transition={{ duration: 0.6, ease: 'easeInOut' }}
           className="gazra-canvas-texture fixed inset-0 z-[9999] flex flex-col items-center justify-center"
         >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[rgba(243,236,217,0.92)] shadow-lg p-3 mb-4"
+          >
+            <img src="/logo.svg" alt="Gazra Logo" className="w-full h-full object-contain" />
+          </motion.div>
+
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 0.7, y: 0 }}

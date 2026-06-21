@@ -79,7 +79,7 @@ const Hero = () => {
             {/* Logos side by side — hidden on mobile to keep video visible */}
             <div className="hidden sm:flex space-x-4 items-center">
               <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
-                <img src="https://gazra.org/logo.png" alt="Gazra Logo" className="w-full h-full object-contain"/>
+                <img src="/logo.svg" alt="Gazra Logo" className="w-full h-full object-contain"/>
               </div>
               <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[rgba(251,244,231,0.78)] p-2 shadow-lg backdrop-blur-md">
                 <img src="https://i0.wp.com/mcsu.in/wp-content/uploads/2022/07/Logo.png?w=512&ssl=1" alt="MCSU Logo" className="w-full h-full object-contain"/>

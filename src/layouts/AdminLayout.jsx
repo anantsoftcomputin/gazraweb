@@ -90,7 +90,7 @@ const AdminLayout = ({ children }) => {
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-3">
-              <img src="https://gazra.org/logo.png" alt="Gazra" className="h-10 w-auto" />
+              <img src="/logo.svg" alt="Gazra" className="h-10 w-auto" />
               <span className="font-bold text-neutral-800">Admin</span>
             </div>
           )}
@@ -235,7 +235,7 @@ const AdminLayout = ({ children }) => {
           >
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img src="https://gazra.org/logo.png" alt="Gazra" className="h-10 w-auto" />
+                <img src="/logo.svg" alt="Gazra" className="h-10 w-auto" />
                 <span className="font-bold text-neutral-800">Admin</span>
               </div>
               <button onClick={() => setMobileMenuOpen(false)}>

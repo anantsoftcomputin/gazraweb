@@ -146,7 +146,7 @@ const Navbar = () => {
               {/* Logo with image */}
               <Link to="/" className="flex items-center">
                 <img 
-                  src="https://gazra.org/logo.png" 
+                  src="/logo.svg" 
                   alt="Gazra Logo" 
                   className="h-11 w-auto mr-2"
                 />

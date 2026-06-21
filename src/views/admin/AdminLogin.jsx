@@ -59,7 +59,7 @@ const AdminLogin = () => {
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <img 
-            src="https://gazra.org/logo.png" 
+            src="/logo.svg" 
             alt="Gazra Logo" 
             className="h-20 w-auto mx-auto mb-4" 
           />
