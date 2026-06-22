@@ -12,7 +12,7 @@ import { useFirestore } from '../hooks/useFirestore';
 const HospitalityCourse = () => {
   return (
     <div className="space-y-8">
-      <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+      <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
         {/* Course Header */}
         <div className="bg-gradient-to-r from-accent-ochre to-accent-terracotta p-6 text-white">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -187,7 +187,7 @@ const MakeupArtistCourse = () => {
   // Structure similar to HospitalityCourse with makeup-specific content
   return (
     <div className="space-y-8">
-       <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+       <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
         {/* Course Header */}
         <div className="bg-gradient-to-r from-accent-terracotta to-primary-500 p-6 text-white">
            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -278,7 +278,7 @@ const ITCourse = () => {
   // Structure similar to HospitalityCourse with IT/Digital Marketing content
    return (
     <div className="space-y-8">
-       <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+       <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
          {/* Course Header */}
          <div className="bg-gradient-to-r from-accent-slate to-primary-600 p-6 text-white">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -369,7 +369,7 @@ const HandicraftsCourse = () => {
   // Structure similar to HospitalityCourse with handicrafts content
   return (
     <div className="space-y-8">
-      <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+      <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
          {/* Course Header */}
          <div className="bg-gradient-to-r from-accent-sage to-accent-ochre p-6 text-white">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -475,7 +475,7 @@ const DynamicCourseDisplay = ({ course }) => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+      <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
         {/* Course Header */}
         <div className="bg-gradient-to-r from-accent-ochre to-accent-terracotta p-6 text-white">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -635,7 +635,8 @@ const CourseSelectorTabs = ({ selectedCourse, onSelectCourse, courses }) => {
 
 const SuccessStoryCard = ({ imageSrc, altText, title, text, graduateInfo }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-medium overflow-hidden border border-neutral-100">
+    <div className="relative heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300 hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300">
+      <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
       <div className="aspect-w-4 aspect-h-3"> {/* Adjusted aspect ratio */}
         <img
           src={imageSrc}
@@ -849,60 +850,50 @@ const GazraSkills = () => {
     <div className="min-h-screen bg-[var(--gazra-paper)]">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-950 min-h-[70vh] flex items-center">
-        <img src="/images/skill1.webp" alt=""
-             className="absolute inset-0 w-full h-full object-cover" />
+        <video src="/video/skill.mp4" autoPlay loop muted playsInline
+               className="absolute inset-0 w-full h-full object-contain" />
+        {/* Darkening scrim — video alone isn't reliably dark enough for white text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/45" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-16 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
-                        className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/40
-                              bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
-                              text-accent-terracotta shadow-lg backdrop-blur-md">
-                <Award className="w-3.5 h-3.5" />
-                Gazra Skills Development
-              </div>
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
+                      className="max-w-2xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded border border-primary-200/40
+                            bg-[rgba(251,244,231,0.88)] text-xs font-bold uppercase tracking-wide
+                            text-accent-terracotta shadow-lg backdrop-blur-md">
+              <Award className="w-3.5 h-3.5" />
+              Gazra Skills Development
+            </div>
 
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-white
-                             drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
-                Empowering
-                <span className="block text-primary-300">Through Practical</span>
-                Skills Training
-              </h1>
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-white
+                           drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+              Empowering
+              <span className="block text-primary-300">Through Practical</span>
+              Skills Training
+            </h1>
 
-              <p className="text-primary-100/80 text-lg leading-relaxed max-w-lg">
-                Develop marketable skills and build a sustainable livelihood with our industry-focused
-                training programs designed for economic independence and professional growth.
-              </p>
+            <p className="text-primary-100/80 text-lg leading-relaxed max-w-lg">
+              Develop marketable skills and build a sustainable livelihood with our industry-focused
+              training programs designed for economic independence and professional growth.
+            </p>
 
-              <div className="flex flex-wrap gap-4">
-                <a href="#courses"
-                   className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
-                              font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors duration-200">
-                  Explore Courses
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-                <a href="#apply"
-                   className="inline-flex items-center gap-2 border-2 border-primary-100/60
-                              bg-neutral-950/20 hover:bg-primary-600 text-primary-50 hover:text-white
-                              font-semibold px-6 py-3 rounded-lg backdrop-blur-md transition-all duration-200">
-                  Apply Now
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, delay: 0.15 }}
-                        className="relative hidden lg:block">
-              <div className="absolute -inset-2 rounded-lg opacity-30"
-                   style={{ background: 'linear-gradient(135deg,#9F2F28,#D9A13A,#2F6B45)' }} />
-              <div className="relative rounded-lg overflow-hidden shadow-2xl border-2 border-[var(--gazra-paper)]">
-                <video src="/video/skill.mp4" autoPlay loop muted playsInline
-                       className="w-full h-full object-cover max-h-80" />
-              </div>
-            </motion.div>
-          </div>
+            <div className="flex flex-wrap gap-4">
+              <a href="#courses"
+                 className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white
+                            font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors duration-200">
+                Explore Courses
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a href="#apply"
+                 className="inline-flex items-center gap-2 border-2 border-primary-100/60
+                            bg-neutral-950/20 hover:bg-primary-600 text-primary-50 hover:text-white
+                            font-semibold px-6 py-3 rounded-lg backdrop-blur-md transition-all duration-200">
+                Apply Now
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </motion.div>
         </div>
       </section>
 

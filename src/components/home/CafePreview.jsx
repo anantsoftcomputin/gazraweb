@@ -77,7 +77,8 @@ const CafePreview = () => {
         viewport={{ once: true }}
         className="grid md:grid-cols-3 gap-6 mb-12"
       >
-        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+        <motion.div variants={itemVariants} className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 p-6 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2">
+          <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
           <div className="w-11 h-11 rounded bg-primary-600 flex items-center justify-center mb-4">
             <ChefHat className="w-5 h-5 text-white" />
           </div>
@@ -85,7 +86,8 @@ const CafePreview = () => {
           <p className="text-neutral-600 text-sm leading-relaxed">Traditional recipes with a modern twist, prepared with love and care</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+        <motion.div variants={itemVariants} className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 p-6 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2">
+          <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
           <div className="w-11 h-11 rounded bg-accent-terracotta flex items-center justify-center mb-4">
             <Heart className="w-5 h-5 text-white" />
           </div>
@@ -93,7 +95,8 @@ const CafePreview = () => {
           <p className="text-neutral-600 text-sm leading-relaxed">Every purchase directly supports skill development and empowerment programs</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+        <motion.div variants={itemVariants} className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 p-6 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2">
+          <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
           <div className="w-11 h-11 rounded bg-secondary-600 flex items-center justify-center mb-4">
             <Clock className="w-5 h-5 text-white" />
           </div>
@@ -117,8 +120,9 @@ const CafePreview = () => {
               <motion.div
                 key={dish.id}
                 variants={itemVariants}
-                className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg overflow-hidden hover:shadow-xl hover:border-primary-300/50 transition-all duration-300"
+                className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2"
               >
+                <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={(dish.images && dish.images[0]) || dish.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}

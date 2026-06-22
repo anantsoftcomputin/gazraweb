@@ -109,8 +109,9 @@ const Blog = () => {
                 >
                   <Link
                     to={`/blog/${post.id}`}
-                    className="block bg-white rounded-2xl shadow-soft hover:shadow-hard transition-all duration-300 overflow-hidden h-full group"
+                    className="group relative block heritage-paper rounded-lg border border-neutral-300 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300 overflow-hidden h-full"
                   >
+                    <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
                     <div className="aspect-video bg-neutral-100 relative overflow-hidden">
                       {post.featuredImage ? (
                         <img

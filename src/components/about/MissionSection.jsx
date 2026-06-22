@@ -40,8 +40,9 @@ const MissionSection = () => {
               {values.map((value, index) => (
                 <div 
                   key={index}
-                  className="p-6 bg-white rounded-2xl shadow-soft hover:shadow-lg transition-shadow duration-300"
+                  className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 p-6 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300"
                 >
+                  <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
                   <value.icon className="w-8 h-8 text-primary-500 mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     {value.title}

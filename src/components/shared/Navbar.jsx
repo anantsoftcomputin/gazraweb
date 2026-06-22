@@ -107,12 +107,6 @@ const Navbar = () => {
                   </a>
                 ))}
                 <span className="hidden md:inline text-primary-200">|</span>
-                <Link 
-                  to="/become-a-partner"
-                  className="hidden md:inline text-white hover:text-primary-200 transition-colors duration-300"
-                >
-                  Contribute to a Cause
-                </Link>
                 <Link
                   to="/admin/login"
                   className="hidden md:inline text-white hover:text-primary-200 transition-colors duration-300"

@@ -77,12 +77,10 @@ const EventsPage = () => {
         className="group cursor-pointer h-full"
         onClick={() => navigate(`/events/${event.id}`)}
       >
-        <div className="h-full flex flex-col bg-[var(--gazra-paper)] rounded-lg overflow-hidden
-                        border border-[rgba(184,121,44,0.18)] hover:shadow-xl hover:border-primary-300/50
+        <div className="relative h-full flex flex-col heritage-paper rounded-lg overflow-hidden
+                        border border-neutral-300 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2
                         transition-all duration-400">
-          {/* Toran top on hover */}
-          <div className="h-[3px] w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-               style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
+          <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
 
           {/* Category tag */}
           <div className="absolute top-4 left-4 z-10">

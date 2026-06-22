@@ -215,8 +215,10 @@ const VolunteerPage = () => {
     <div className="min-h-screen bg-[var(--gazra-paper)]">
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-neutral-950">
-        <img src="/images/image7.webp" alt=""
+        <img src="/images/join-community.jpg" alt=""
              className="absolute inset-0 w-full h-full object-cover" />
+        {/* Darkening scrim for consistent text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/45" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20">
@@ -300,12 +302,13 @@ const VolunteerPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.09 }}
-                className={`group relative bg-[var(--gazra-paper)] rounded-lg p-6 border transition-all duration-300 cursor-pointer
+                className={`group relative heritage-paper overflow-hidden rounded-lg p-6 border shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-2
                   ${selectedRole === role.id
-                    ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
-                    : 'border-[rgba(184,121,44,0.18)] hover:shadow-md hover:border-primary-300/50'}`}
+                    ? 'border-primary-500 ring-2 ring-primary-200'
+                    : 'border-neutral-300 hover:shadow-xl hover:border-primary-500'}`}
                 onClick={() => setSelectedRole(role.id)}
               >
+                <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
                 <div className="w-12 h-12 mb-4 bg-primary-600 rounded flex items-center justify-center text-white">
                   <role.icon className="w-6 h-6" />
                 </div>

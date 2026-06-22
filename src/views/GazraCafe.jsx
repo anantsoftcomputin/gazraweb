@@ -663,8 +663,9 @@ const GazraCafe = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group bg-[var(--gazra-paper)] rounded-lg p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-[rgba(184,121,44,0.18)] hover:border-primary-300/50"
+                    className="group relative heritage-paper overflow-hidden rounded-lg p-5 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-neutral-300 hover:border-primary-500 hover:-translate-y-2"
                   >
+                    <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
                     <div className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
                       <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
@@ -718,7 +719,8 @@ const GazraCafe = () => {
                 transition={{ delay: index * 0.1 }}
                 className="relative group" // Keep group for potential future hover effects on parent
               >
-                <div className="relative bg-[rgba(251,244,231,0.92)] backdrop-blur-md rounded-lg p-6 sm:p-8 shadow-lg border border-[rgba(184,121,44,0.18)] h-full flex flex-col"> {/* Added flex */}
+                <div className="relative overflow-hidden bg-[rgba(251,244,231,0.92)] backdrop-blur-md rounded-lg p-6 sm:p-8 shadow-lg hover:shadow-xl border border-neutral-300 hover:border-primary-500 transition-all duration-300 h-full flex flex-col">
+                  <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
                   <div className="flex items-center mb-4 sm:mb-6">
                     {testimonial.image ? (
                       <img

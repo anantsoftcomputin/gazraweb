@@ -6,7 +6,8 @@ import { useFirestore } from '../../hooks/useFirestore';
 import { formatEventDate, getEventCategory, getUpcomingEvents } from '../../utils/eventUtils';
 
 const EventCard = ({ event }) => (
-  <div className="group relative bg-[var(--gazra-paper)] rounded-lg overflow-hidden border border-[rgba(184,121,44,0.18)] hover:shadow-xl hover:border-primary-300/50 transition-all duration-400">
+  <div className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-400">
+    <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
     {/* Event Tag */}
     <div className="absolute top-4 left-4 z-10">
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-primary-600 shadow-soft">

@@ -30,8 +30,9 @@ const ResourceCard = ({ resource, onVisit }) => {
       layout
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.18)] rounded-lg p-6 flex flex-col gap-4 hover:shadow-lg hover:border-primary-300/50 transition-all duration-300"
+      className="relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 p-6 shadow-lg flex flex-col gap-4 transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2"
     >
+      <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded bg-primary-600 flex items-center justify-center flex-shrink-0">
@@ -82,10 +83,10 @@ const ResourceCard = ({ resource, onVisit }) => {
 
       <button
         onClick={() => onVisit(resource)}
-        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors"
+        className="group inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
       >
         Visit
-        <ExternalLink className="w-3.5 h-3.5" />
+        <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-200" />
       </button>
     </motion.div>
   );

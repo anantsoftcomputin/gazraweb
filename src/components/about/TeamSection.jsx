@@ -61,8 +61,9 @@ const TeamSection = () => {
           {teamMembers.map((member, index) => (
             <div
               key={index}
-              className="group relative bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              className="group relative heritage-paper rounded-lg border border-neutral-300 shadow-lg overflow-hidden hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300"
             >
+              <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
               <div className="aspect-w-3 aspect-h-4">
                 <img
                   src={member.image}

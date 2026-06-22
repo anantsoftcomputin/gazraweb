@@ -66,7 +66,8 @@ const MenuCard = () => {
               className="group relative cursor-pointer"
               onClick={() => setSelectedItem(item)}
             >
-              <div className="relative bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
+              <div className="relative heritage-paper rounded-lg overflow-hidden border border-neutral-300 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary-500 hover:-translate-y-2">
+                <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
                 <div className="relative overflow-hidden h-48">
                   <img
 	                    src={dishImages[item.name] || fallbackDishImage}

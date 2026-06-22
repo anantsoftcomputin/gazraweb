@@ -16,7 +16,7 @@ const SectionLabel = ({ icon: Icon, children }) => (
 
 /* ─── Stat chip ────────────────────────────────────────────────────── */
 const StatChip = ({ icon: Icon, value, label }) => (
-  <div className="flex items-center gap-3 bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.2)]
+  <div className="flex items-center gap-3 heritage-paper border border-neutral-300
                   rounded-lg p-4 shadow-sm">
     <div className="w-10 h-10 rounded bg-primary-600 flex items-center justify-center flex-shrink-0">
       <Icon className="w-5 h-5 text-white" />
@@ -31,8 +31,9 @@ const StatChip = ({ icon: Icon, value, label }) => (
 /* ─── Value card ───────────────────────────────────────────────────── */
 const ValueCard = ({ icon: Icon, title, body, accent }) => (
   <motion.div {...fadeUp}
-    className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.15)] rounded-lg p-6
-               hover:shadow-lg hover:border-primary-300/50 transition-all duration-300">
+    className="group relative heritage-paper overflow-hidden border border-neutral-300 rounded-lg p-6 shadow-lg
+               hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300">
+    <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
     <div className={`w-12 h-12 rounded flex items-center justify-center mb-4 ${accent}`}>
       <Icon className="w-6 h-6 text-white" />
     </div>
@@ -46,11 +47,10 @@ const ValueCard = ({ icon: Icon, title, body, accent }) => (
 /* ─── Initiative card ──────────────────────────────────────────────── */
 const InitiativeCard = ({ image, title, body, link, linkLabel }) => (
   <motion.div {...fadeUp}
-    className="group bg-[var(--gazra-paper)] border border-[rgba(184,121,44,0.15)] rounded-lg
-               overflow-hidden hover:shadow-xl transition-all duration-300">
+    className="group relative heritage-paper border border-neutral-300 rounded-lg shadow-lg
+               overflow-hidden hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300">
+    <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
     <div className="relative h-48 overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-[3px]"
-           style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
       <img src={image} alt={title}
            className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-500" />
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/60 to-transparent" />
