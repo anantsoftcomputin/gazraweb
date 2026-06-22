@@ -12,18 +12,21 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
   const [verified, setVerified] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-          window.recaptchaVerifier = null;
-        } catch (err) {
-          console.error('reCAPTCHA cleanup error:', err);
-        }
+  const clearRecaptcha = () => {
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (err) {
+        console.error('reCAPTCHA cleanup error:', err);
       }
-    };
+      window.recaptchaVerifier = null;
+    }
+    const container = document.getElementById('recaptcha-container');
+    if (container) container.innerHTML = '';
+  };
+
+  useEffect(() => {
+    return clearRecaptcha;
   }, []);
 
   const sendOTP = async () => {
@@ -37,14 +40,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
 
     try {
       // Clean up any existing reCAPTCHA first
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-          window.recaptchaVerifier = null;
-        } catch {
-          console.log('Previous reCAPTCHA cleared');
-        }
-      }
+      clearRecaptcha();
 
       // Wait a moment before creating new reCAPTCHA
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -127,16 +123,9 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
       }
       
       setError(errorMessage);
-      
+
       // Reset reCAPTCHA on error
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (clearErr) {
-          console.error('Error clearing reCAPTCHA:', clearErr);
-        }
-        window.recaptchaVerifier = null;
-      }
+      clearRecaptcha();
     } finally {
       setLoading(false);
     }

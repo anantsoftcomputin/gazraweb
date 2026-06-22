@@ -8,7 +8,7 @@ const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0
 
 const GAZRA_ADDRESS = 'Gazra Cafe, Shri Maharani Chimnabai Stree Udyogalaya, Opp. Sursagar, Mandvi, Vadodara, Gujarat 390001';
 const GAZRA_PHONE   = '+91 82003 06871';
-const GAZRA_EMAIL   = 'hello@gazra.org';
+const GAZRA_EMAIL   = 'support@gazra.org';
 const MAPS_URL      = 'https://maps.google.com/?q=Shri+Maharani+Chimnabai+Stree+Udyogalaya+Vadodara';
 const MAPS_EMBED    = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.548806266471!2d73.19829807507117!3d22.29503642968911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395fc5bbe3f0607b%3A0x33ac28417835816d!2sShri%20Maharani%20Chimnabai%20Stree%20Udyogalaya!5e0!3m2!1sen!2sin!4v1716886941234!5m2!1sen!2sin';
 
@@ -95,6 +95,7 @@ const ContactPage = () => {
       <section className="relative min-h-[50vh] flex items-center bg-neutral-950 overflow-hidden">
         <img src="/images/image7.webp" alt=""
              className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20">

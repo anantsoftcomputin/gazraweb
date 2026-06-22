@@ -105,7 +105,13 @@ const Footer = () => {
 
         <div className="heritage-textile mt-10 h-2" />
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-neutral-900/10 pt-6 text-center text-sm text-neutral-700 md:flex-row">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-semibold text-neutral-600">
+          <Link to="/terms-and-conditions" className="hover:text-accent-terracotta transition">Terms & Conditions</Link>
+          <Link to="/privacy-policy" className="hover:text-accent-terracotta transition">Privacy Policy</Link>
+          <Link to="/refund-policy" className="hover:text-accent-terracotta transition">Refund Policy</Link>
+        </div>
+
+        <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-neutral-900/10 pt-6 text-center text-sm text-neutral-700 md:flex-row">
           <p>© {year} Project Gazra. All rights reserved.</p>
           <div className="flex items-center gap-3">
             <a href="https://www.facebook.com/chimnabaiudyogalaya/?profile_tab_item_selected=about&_rdr" target="_blank" rel="noopener noreferrer" className="rounded border border-neutral-900/10 bg-primary-50 p-2 text-primary-700 transition hover:bg-primary-600 hover:text-white" aria-label="Facebook">
