@@ -667,7 +667,7 @@ const VolunteerPage = () => {
       <section className="py-16 bg-primary-600 relative overflow-hidden">
         <div className="absolute inset-0 gazra-jaali opacity-20" />
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <div className="gazra-folk-chain max-w-xs mx-auto mb-7" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mb-7" />
           <h2 className="font-display text-3xl sm:text-4xl font-black text-white mb-4">
             Join Our Community Today
           </h2>
@@ -689,7 +689,7 @@ const VolunteerPage = () => {
               <ArrowRight className="w-4 h-4" />
             </a>
           </div>
-          <div className="gazra-folk-chain max-w-xs mx-auto mt-7" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mt-7" />
         </div>
       </section>
 

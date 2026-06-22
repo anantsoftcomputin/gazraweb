@@ -326,6 +326,8 @@ const GazraCafe = () => {
               Your browser does not support the video tag.
             </video>
           </motion.div>
+          {/* Darkening scrim — video alone isn't reliably dark enough for white text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/45" />
         </div>
 
         {/* Video controls */}
@@ -372,7 +374,7 @@ const GazraCafe = () => {
 
                 <h1 className="text-5xl md:text-7xl font-display font-bold leading-tight mb-6 text-white">
                   A Table for
-                  <span className="block mt-2 bg-gradient-to-r from-primary-300 to-primary-100 bg-clip-text text-transparent">
+                  <span className="block mt-2 text-white">
                     Every Identity
                   </span>
                 </h1>
@@ -586,11 +588,11 @@ const GazraCafe = () => {
       <section className="py-14 bg-primary-600 relative overflow-hidden">
         <div className="absolute inset-0 gazra-jaali opacity-15" />
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <div className="gazra-folk-chain max-w-xs mx-auto mb-6" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mb-6" />
           <p className="font-display text-2xl sm:text-3xl font-bold text-white max-w-2xl mx-auto leading-snug">
             Whoever you are, however you identify — this kitchen has a seat for you.
           </p>
-          <div className="gazra-folk-chain max-w-xs mx-auto mt-6" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mt-6" />
         </div>
       </section>
 

@@ -9,6 +9,7 @@ export const metadata = {
     'Gazra support fund', 'queer community support Vadodara',
     'MCSU support program', 'LGBTQIA assistance India', 'social welfare Gujarat',
     'marginalized community support Vadodara',
+    'NALSA transgender rights', 'SMILE scheme transgender', 'Garima Greh shelter',
   ],
   openGraph: {
     title: 'Gazra Support Fund | Assistance for LGBTQIA+ Community in Gujarat',

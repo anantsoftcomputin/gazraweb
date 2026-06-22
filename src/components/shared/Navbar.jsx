@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from '../../lib/routerCompat';
-import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, Coffee, BookOpen, Camera, Phone, Shield, Mail, FileText } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, BookOpen, Camera, Phone, Shield, Mail, FileText, LifeBuoy } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import ToranBorder from './ToranBorder';
@@ -29,6 +29,7 @@ const Navbar = () => {
     { name: 'Events', path: '/events', icon: Calendar },
     { name: 'Gallery', path: '/gallery', icon: Camera },
     { name: 'Blog', path: '/blog', icon: FileText },
+    { name: 'Resources', path: '/resources', icon: LifeBuoy },
     { name: 'Volunteer', path: '/volunteer', icon: Heart },
     { name: 'Contact', path: '/contact', icon: MapPin }
   ];
@@ -73,23 +74,6 @@ const Navbar = () => {
     }
   };
 
-  // Mobile navigation items (simplified for bottom nav) — Cafe is placed dead
-  // center of the bar (4th of 7 items) per design request.
-  const mobileNavItems = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'About', path: '/about', icon: Info },
-    { name: 'Initiatives', path: null, icon: BookOpen, isDropdown: true },
-    { name: 'Cafe', path: '/cafe', icon: Coffee },
-    { name: 'Events', path: '/events', icon: Calendar },
-    { name: 'Gallery', path: '/gallery', icon: Camera },
-    { name: 'Contact', path: '/contact', icon: MapPin }
-  ];
-
-  // Determine which nav items to show — the same bottom nav is used everywhere,
-  // including on /cafe, so the Cafe item (and its raised circular button) is
-  // always visible and consistent across pages.
-  const currentNavItems = mobileNavItems;
-
   return (
     <>
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-primary-800/10 bg-[rgba(251,244,231,0.50)] shadow-[0_10px_30px_rgba(45,33,20,0.10)] backdrop-blur-xl supports-[backdrop-filter]:bg-[rgba(251,244,231,0.42)]">
@@ -100,7 +84,7 @@ const Navbar = () => {
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                   <Mail size={14} />
-                  <span className="hidden sm:inline">info@mcsu.in</span>
+                  <span className="hidden sm:inline">support@gazra.org</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <Phone size={14} />
@@ -331,153 +315,6 @@ const Navbar = () => {
 
       {/* Spacer: top-bar (~32px) + nav-row (64px) + toran-stripe (36px) + border (~2px) */}
       <div className="h-[134px]" aria-hidden="true" />
-
-      {/* ── Bottom mobile navigation — floating folk-art pill ─────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col-reverse gap-2 px-3 pb-3">
-
-        {/* Floating nav pill — outer wrapper is intentionally NOT overflow-hidden so the
-            raised circular Cafe button can poke out above the rounded top edge */}
-        <div className="relative rounded-2xl bg-[rgba(251,244,231,0.97)] backdrop-blur-xl border border-[rgba(184,121,44,0.18)] shadow-[0_8px_32px_rgba(45,33,20,0.22)]">
-          {/* Clipped inner content — toran stripe + nav row stay confined to rounded corners */}
-          <div className="rounded-2xl overflow-hidden">
-            {/* Mini toran stripe — brand textile at the crown of the pill */}
-            <div
-              className="h-[3px] w-full"
-              style={{ background: 'linear-gradient(90deg, #9F2F28 0%, #D9A13A 20%, #2F6B45 40%, #D9A13A 60%, #9F2F28 80%, #D9A13A 100%)' }}
-            />
-            {/* Nav items */}
-            <div className="flex h-[54px]">
-              {currentNavItems.map((item, index) => {
-                if (item.name === 'Cafe') {
-                  // Visible button is rendered separately below (raised circle); this
-                  // keeps the flex column width allocated so the layout stays balanced.
-                  return <div key={index} className="flex-1" aria-hidden="true" />;
-                }
-
-                const isActive =
-                  (item.path && location.pathname === item.path) ||
-                  (item.isDropdown && dropdownOpen === 'mobile-programs');
-
-                const innerContent = (
-                  <>
-                    {isActive && (
-                      <span className="absolute inset-x-0.5 inset-y-0.5 rounded-xl bg-primary-600 -z-10" />
-                    )}
-                    <item.icon
-                      size={17}
-                      strokeWidth={isActive ? 2.5 : 1.8}
-                      className={`transition-colors duration-200 ${isActive ? 'text-white' : 'text-neutral-500'}`}
-                    />
-                    <span
-                      className={`text-[9px] font-bold mt-0.5 leading-none whitespace-nowrap transition-colors duration-200 ${
-                        isActive ? 'text-white' : 'text-neutral-400'
-                      }`}
-                    >
-                      {item.name}
-                    </span>
-                  </>
-                );
-
-                const cls = 'relative flex flex-col items-center justify-center flex-1 h-full py-2 select-none';
-
-                if (item.isDropdown) {
-                  return (
-                    <button key={index} className={cls} onClick={() => toggleDropdown('mobile-programs')}>
-                      {innerContent}
-                    </button>
-                  );
-                }
-                return (
-                  <Link
-                    key={index}
-                    to={item.path}
-                    className={cls}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {innerContent}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Raised circular Cafe button — half above the pill's top edge, half inside it */}
-          <Link
-            to="/cafe"
-            onClick={() => setIsMenuOpen(false)}
-            aria-label="Gazra Cafe"
-            className={`absolute left-1/2 -translate-x-1/2 -top-7 z-10 flex flex-col items-center justify-center w-14 h-14 rounded-full border-[3px] border-[rgba(251,244,231,0.97)] shadow-[0_6px_16px_rgba(45,33,20,0.32)] transition-colors duration-200 ${
-              location.pathname === '/cafe' ? 'bg-primary-700' : 'bg-primary-600'
-            }`}
-          >
-            <Coffee size={20} className="text-white" strokeWidth={1.8} />
-            <span className="text-[8px] font-bold mt-0.5 leading-none text-white/90">Cafe</span>
-          </Link>
-        </div>
-
-        {/* Programs sheet — appears above the pill (flex-col-reverse stacks upward) */}
-        {dropdownOpen === 'mobile-programs' && (
-          <div className="heritage-paper rounded-2xl border border-[rgba(184,121,44,0.22)] shadow-[0_-8px_24px_rgba(45,33,20,0.14)] overflow-hidden">
-            {/* Sheet toran stripe */}
-            <div
-              className="h-[3px]"
-              style={{ background: 'linear-gradient(90deg, #9F2F28 0%, #D9A13A 25%, #2F6B45 50%, #D9A13A 75%, #9F2F28 100%)' }}
-            />
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-display font-black text-base text-primary-800">Our Programs</h3>
-                <button
-                  onClick={() => setDropdownOpen(null)}
-                  className="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-primary-50 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <div className="gazra-folk-chain mb-3" />
-              <div className="grid grid-cols-2 gap-2">
-                {navigationItems.find(item => item.name === 'Our Programs')?.submenu.map((subItem, subIndex) => (
-                  subItem.isExternal ? (
-                    <a
-                      key={subIndex}
-                      href={subItem.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(184,121,44,0.06)] border border-[rgba(184,121,44,0.12)] hover:bg-primary-50 hover:border-primary-400 transition-all"
-                      onClick={() => setDropdownOpen(null)}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
-                        {subItem.name === 'Gazra Mitra' && <BookOpen size={14} />}
-                        {subItem.name === 'Gazra Support Fund' && <Heart size={14} />}
-                        {subItem.name === 'Gazra Cafe' && <Coffee size={14} />}
-                        {subItem.name === 'Gazra Skill Hub' && <BookOpen size={14} />}
-                      </div>
-                      <span className="text-xs font-bold text-neutral-800 leading-snug">{subItem.name}</span>
-                    </a>
-                  ) : (
-                    <Link
-                      key={subIndex}
-                      to={subItem.path}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(184,121,44,0.06)] border border-[rgba(184,121,44,0.12)] hover:bg-primary-50 hover:border-primary-400 transition-all"
-                      onClick={() => setDropdownOpen(null)}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
-                        {subItem.name === 'Gazra Mitra' && <BookOpen size={14} />}
-                        {subItem.name === 'Gazra Support Fund' && <Heart size={14} />}
-                        {subItem.name === 'Gazra Cafe' && <Coffee size={14} />}
-                        {subItem.name === 'Gazra Skill Hub' && <BookOpen size={14} />}
-                      </div>
-                      <span className="text-xs font-bold text-neutral-800 leading-snug">{subItem.name}</span>
-                    </Link>
-                  )
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Spacer — accounts for floating pill height (3px stripe + 54px nav + 12px bottom gap) */}
-      <div className="lg:hidden h-[72px]" aria-hidden="true" />
     </>
   );
 };

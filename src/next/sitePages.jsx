@@ -19,6 +19,7 @@ import MenuCard from '../components/shared/MenuCard';
 import EventCalendarPage from '../views/EventCalendarPage';
 import GazraSupportFund from '../views/GazraSupportFung';
 import GazraSkills from '../views/GazraSkills';
+import ResourcesPage from '../views/Resources';
 
 import AdminLogin from '../views/admin/AdminLogin';
 import AdminDashboard from '../views/admin/AdminDashboard';
@@ -39,6 +40,7 @@ import AdminSupportRequests from '../views/admin/AdminSupportRequests';
 import AdminGallery from '../views/admin/AdminGallery';
 import AdminInitiatives from '../views/admin/AdminInitiatives';
 import AdminBlog from '../views/admin/AdminBlog';
+import AdminResources from '../views/admin/AdminResources';
 import AdminSkillsCourses from '../views/admin/AdminSkillsCourses';
 import AdminSkillsEnrollments from '../views/admin/AdminSkillsEnrollments';
 
@@ -64,6 +66,7 @@ export const MenuClient = () => <PublicPage><MenuCard /></PublicPage>;
 export const CalendarClient = () => <PublicPage><EventCalendarPage /></PublicPage>;
 export const SupportClient = () => <PublicPage><GazraSupportFund /></PublicPage>;
 export const SkillsClient = () => <PublicPage><GazraSkills /></PublicPage>;
+export const ResourcesClient = () => <PublicPage><ResourcesPage /></PublicPage>;
 
 export const AdminLoginClient = () => <AdminLogin />;
 export const AdminDashboardClient = () => <AdminDashboard />;
@@ -84,5 +87,6 @@ export const AdminSupportRequestsClient = () => <AdminSupportRequests />;
 export const AdminGalleryClient = () => <AdminGallery />;
 export const AdminInitiativesClient = () => <AdminInitiatives />;
 export const AdminBlogClient = () => <AdminBlog />;
+export const AdminResourcesClient = () => <AdminResources />;
 export const AdminSkillsCoursesClient = () => <AdminSkillsCourses />;
 export const AdminSkillsEnrollmentsClient = () => <AdminSkillsEnrollments />;

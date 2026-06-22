@@ -8,6 +8,7 @@ export const metadata = {
     'About Gazra', 'MCSU history', 'Chimnabai Udyogalaya', 'LGBTQ Vadodara',
     'queer inclusive space Gujarat', 'MCSU 1914', 'Gaekwad royal family Vadodara',
     'social reform Gujarat', 'women empowerment Vadodara',
+    'LGBTQIA+ rights India', 'transgender inclusion India', 'queer-friendly Vadodara',
   ],
   openGraph: {
     title: 'About Project Gazra | MCSU\'s Inclusive Community Since 1914',

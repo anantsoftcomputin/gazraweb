@@ -2,7 +2,8 @@ import { TermsClient } from '../../src/next/sitePages';
 
 export const metadata = {
   title: 'Terms & Conditions | Project Gazra',
-  description: 'Terms and conditions governing the use of the Project Gazra website and Gazra Cafe services.'
+  description: 'Terms and conditions governing the use of the Project Gazra website and Gazra Cafe services.',
+  alternates: { canonical: 'https://gazra.org/terms-and-conditions' },
 };
 
 export default function Page() {

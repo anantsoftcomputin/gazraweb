@@ -110,13 +110,7 @@ const EventsPreview = () => {
   }, []);
 
   return (
-    <section 
-      className="py-12 relative"
-      style={{ 
-        background: 'url("/images/background.jpg") center/cover no-repeat'
-      }}
-    >
-      
+    <section className="py-12 relative">
       {/* Header */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-2xl mx-auto text-center mb-10">
@@ -124,11 +118,10 @@ const EventsPreview = () => {
             <Calendar className="w-4 h-4 mr-2" />
             Upcoming Events
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-5
-                         drop-shadow-[0_4px_16px_rgba(0,0,0,0.55)] px-4 py-2 bg-[rgba(251,244,231,0.12)] rounded-lg inline-block backdrop-blur-sm">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 mb-5">
             Join Our Community Events
           </h2>
-          <p className="text-base sm:text-lg text-white/85 bg-[rgba(251,244,231,0.12)] backdrop-blur-sm p-4 rounded-lg">
+          <p className="text-base sm:text-lg text-neutral-600">
             Connect, learn, and grow with our diverse community through these carefully curated events.
           </p>
         </div>

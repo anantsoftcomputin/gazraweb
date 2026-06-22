@@ -203,12 +203,25 @@ body {
  */
 .gazra-folk-chain {
   height: 8px;
+  /* Three-diamond repeating tile (marigold, red, green — the same heritage
+     triad used in the toran stripes) so the chain cycles through all three
+     colors rather than rendering as a single flat tone. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='8'%3E%3Cpolygon points='14,1 27,4 14,7 1,4' fill='none' stroke='%23B8792C' stroke-width='0.9'/%3E%3Ccircle cx='14' cy='4' r='1.5' fill='%23B8792C'/%3E%3C%2Fsvg%3E");
-  background-size: 28px 8px;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='8'%3E%3Cpolygon points='14,1 27,4 14,7 1,4' fill='none' stroke='%23B8792C' stroke-width='0.9'/%3E%3Ccircle cx='14' cy='4' r='1.5' fill='%23B8792C'/%3E%3Cpolygon points='42,1 55,4 42,7 29,4' fill='none' stroke='%239F2F28' stroke-width='0.9'/%3E%3Ccircle cx='42' cy='4' r='1.5' fill='%239F2F28'/%3E%3Cpolygon points='70,1 83,4 70,7 57,4' fill='none' stroke='%232F6B45' stroke-width='0.9'/%3E%3Ccircle cx='70' cy='4' r='1.5' fill='%232F6B45'/%3E%3C%2Fsvg%3E");
+  background-size: 84px 8px;
   background-repeat: repeat-x;
   background-position: center;
   opacity: 0.6;
+}
+
+/*
+ * White variant — for use on brown/primary-600 backgrounds where the
+ * multi-color tile above doesn't read clearly. Stack alongside the base
+ * class: `gazra-folk-chain gazra-folk-chain--on-brown`.
+ */
+.gazra-folk-chain--on-brown {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
 }
 
 /*

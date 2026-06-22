@@ -8,6 +8,7 @@ export const metadata = {
     'volunteer Vadodara', 'volunteer LGBTQ India', 'NGO volunteer Gujarat',
     'Gazra volunteer', 'community service Vadodara', 'MCSU volunteer',
     'inclusive organisation volunteer India', 'social work Vadodara',
+    'LGBTQIA+ volunteer opportunities India', 'transgender ally volunteer India',
   ],
   openGraph: {
     title: 'Volunteer with Project Gazra | Vadodara',

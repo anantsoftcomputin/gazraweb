@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Calendar, Users, Coffee,
   Image, MessageSquare, LogOut, Menu, X,
-  Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck, Home, MapPinned, QrCode, FileText
+  Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck, Home, MapPinned, QrCode, FileText, LifeBuoy
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../config/firebase';
@@ -63,6 +63,7 @@ const AdminLayout = ({ children }) => {
     { icon: Image, label: 'Gallery', path: '/admin/gallery' },
     { icon: BookOpen, label: 'Initiatives', path: '/admin/initiatives' },
     { icon: FileText, label: 'Blog', path: '/admin/blog' },
+    { icon: LifeBuoy, label: 'Resources', path: '/admin/resources' },
   ];
 
   const cafeMenuItems = [

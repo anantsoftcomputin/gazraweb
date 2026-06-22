@@ -7,6 +7,7 @@ export const metadata = {
   keywords: [
     'Gazra events calendar', 'Vadodara events calendar', 'upcoming events Vadodara',
     'Gazra schedule', 'LGBTQ events calendar Gujarat', 'community events Vadodara',
+    'LGBTQIA+ events calendar India',
   ],
   openGraph: {
     title: 'Events Calendar | Project Gazra, Vadodara',

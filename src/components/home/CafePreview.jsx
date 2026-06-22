@@ -164,7 +164,7 @@ const CafePreview = () => {
         <div className="relative bg-primary-600 rounded-lg p-8 md:p-12 overflow-hidden">
           <div className="absolute inset-0 gazra-jaali opacity-20" />
           <div className="relative z-10 text-center">
-            <div className="gazra-folk-chain max-w-xs mx-auto mb-6" />
+            <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mb-6" />
             <h3 className="font-display text-2xl sm:text-3xl font-black text-white mb-3">
               Experience the Gazra Cafe
             </h3>
@@ -186,7 +186,7 @@ const CafePreview = () => {
                 Visit Us
               </a>
             </div>
-            <div className="gazra-folk-chain max-w-xs mx-auto mt-6" />
+            <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mt-6" />
           </div>
         </div>
       </motion.div>

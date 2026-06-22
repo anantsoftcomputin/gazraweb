@@ -7,7 +7,8 @@ export const metadata = {
   keywords: [
     'Gazra', 'Gazra cafe', 'community cafe Vadodara', 'LGBTQ Gujarat',
     'inclusive space Vadodara', 'Sursagar cafe', 'Project Gazra',
-    'MCSU Vadodara', 'queer cafe India',
+    'MCSU Vadodara', 'queer cafe India', 'LGBTQIA+ community Vadodara',
+    'queer-friendly Vadodara', 'transgender support Gujarat',
   ],
   openGraph: {
     title: 'Project Gazra — Community Cafe & Inclusive Space in Vadodara',

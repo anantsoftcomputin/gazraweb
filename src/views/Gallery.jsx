@@ -441,14 +441,14 @@ const Gallery = () => {
         </div>
 
         <div className="relative container mx-auto px-4 text-center">
-          <div className="gazra-folk-chain mx-auto mb-6 max-w-xs" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown mx-auto mb-6 max-w-xs" />
           <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-snug max-w-2xl mx-auto">
             "यादें हमारी, किस्से आपके,<br className="hidden sm:block" /> जगह हम सबकी"
           </p>
           <p className="mt-3 text-primary-100/80 text-sm tracking-wide">
             Memories ours · Stories yours · Place everyone's
           </p>
-          <div className="gazra-folk-chain mx-auto mt-6 max-w-xs" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown mx-auto mt-6 max-w-xs" />
         </div>
       </section>
 

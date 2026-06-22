@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import Navbar from '../components/shared/Navbar';
+import MobileBottomNav from '../components/shared/MobileBottomNav';
 import AmbientThreeScene from '../components/shared/AmbientThreeScene';
 import FooterPreview from '../components/home/FooterPreview';
 
@@ -17,6 +18,11 @@ const MainLayout = ({ children }) => {
         </main>
 
         <FooterPreview />
+
+        {/* Rendered last so its spacer reserves room at the END of the page,
+            not before <main> — keeps the fixed top nav from pushing all
+            page content down by an extra ~72px on mobile. */}
+        <MobileBottomNav />
       </div>
     </div>
   );

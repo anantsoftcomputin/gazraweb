@@ -76,6 +76,8 @@ const About = () => {
       <section className="relative min-h-[80vh] overflow-hidden bg-neutral-950 flex items-center">
         <img src="/images/image13.png" alt="Maharani Chimnabai legacy"
              className="absolute inset-0 w-full h-full object-cover object-top" />
+        {/* Darkening scrim — image is bright enough to wash out white hero text */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/40" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 container mx-auto px-4 sm:px-8 py-20 lg:py-24">
@@ -297,7 +299,7 @@ const About = () => {
       <section className="py-16 bg-primary-600 relative overflow-hidden">
         <div className="absolute inset-0 gazra-jaali opacity-20" />
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <div className="gazra-folk-chain max-w-xs mx-auto mb-8" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mb-8" />
           <h2 className="font-display text-3xl sm:text-4xl font-black text-white mb-4">
             Join Our Community
           </h2>
@@ -319,7 +321,7 @@ const About = () => {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="gazra-folk-chain max-w-xs mx-auto mt-8" />
+          <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mt-8" />
         </div>
       </section>
 

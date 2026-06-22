@@ -189,7 +189,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
             <Phone className="w-4 h-4 inline mr-2" />
             Phone Number * (10 digits)
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1">
               <div className="flex">
                 <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
@@ -214,10 +214,10 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
               type="button"
               onClick={sendOTP}
               disabled={loading || phoneNumber.length !== 10}
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+              className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {loading ? (
-                <Loader className="w-5 h-5 animate-spin" />
+                <Loader className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 'Send OTP'
               )}
@@ -232,7 +232,7 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Enter OTP sent to +91 {phoneNumber}
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={otp}
@@ -249,10 +249,10 @@ const PhoneVerification = ({ onVerified, phoneNumber, onPhoneChange }) => {
               type="button"
               onClick={verifyOTP}
               disabled={loading || otp.length !== 6}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+              className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {loading ? (
-                <Loader className="w-5 h-5 animate-spin" />
+                <Loader className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 'Verify'
               )}

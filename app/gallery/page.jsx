@@ -8,6 +8,7 @@ export const metadata = {
     'Gazra gallery', 'Gazra cafe photos', 'LGBTQ community photos Vadodara',
     'Gazra events gallery', 'community cafe photos Gujarat',
     'inclusive cafe interior Vadodara', 'Gujarati culture photos',
+    'queer community photos India',
   ],
   openGraph: {
     title: 'Gallery | Gazra Cafe & Community Moments',

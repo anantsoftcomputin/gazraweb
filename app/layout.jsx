@@ -22,6 +22,9 @@ export const metadata = {
     'community space Vadodara', 'Sursagar cafe', 'Chimnabai Udyogalaya',
     'Maharani Chimnabai', 'LGBTQIA safe space Vadodara', 'Gujarati cafe',
     'community cafe India', 'inclusive restaurant Gujarat',
+    'LGBTQIA+ community Vadodara', 'LGBTQIA+ support resources India',
+    'transgender support Vadodara', 'queer community center Gujarat',
+    'gender-affirming care India', 'queer-friendly Vadodara',
   ],
 
   authors: [{ name: 'Project Gazra', url: SITE_URL }],
@@ -101,7 +104,7 @@ const jsonLd = [
       "Gujarat's first queer-led community cafe at MCSU, Vadodara — serving authentic Gujarati and Maharashtrian homestyle cuisine in a warm, inclusive space.",
     url: `${SITE_URL}/cafe`,
     telephone: '+918200306871',
-    email: 'info@mcsu.in',
+    email: 'support@gazra.org',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Shri Maharani Chimnabai Stree Udyogalaya, Opp. Sursagar Lake, Mandvi',
@@ -141,7 +144,7 @@ const jsonLd = [
     },
     parentOrganization: { '@id': `${SITE_URL}/#org` },
     foundingDate: '2023-08-18',
-    keywords: 'LGBTQ cafe, inclusive cafe, Gujarati food, Vadodara, community space',
+    keywords: 'LGBTQ cafe, queer-friendly cafe, inclusive cafe, Gujarati food, Vadodara, community space, transgender-friendly, LGBTQIA+ safe space',
   },
 
   // NGO / Organisation schema
@@ -156,7 +159,7 @@ const jsonLd = [
     url: 'https://mcsu.in',
     foundingDate: '1914',
     telephone: '+918200306871',
-    email: 'info@mcsu.in',
+    email: 'support@gazra.org',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Opp. Sursagar Lake, Mandvi',

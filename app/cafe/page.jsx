@@ -8,7 +8,7 @@ export const metadata = {
     'Gazra cafe menu', 'Gujarati cafe Vadodara', 'Maharashtrian food Vadodara',
     'book table Gazra', 'Sursagar cafe Vadodara', 'queer cafe Gujarat',
     'inclusive restaurant Vadodara', 'homestyle Gujarati food', 'community cafe MCSU',
-    'cafe near Sursagar lake',
+    'cafe near Sursagar lake', 'queer-friendly cafe India', 'LGBTQ+ safe space dining',
   ],
   openGraph: {
     title: 'Gazra Cafe | Authentic Gujarati Food in Vadodara',

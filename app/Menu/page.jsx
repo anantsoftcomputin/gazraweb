@@ -7,6 +7,7 @@ export const metadata = {
   keywords: [
     'Gazra cafe menu', 'Gujarati food menu Vadodara', 'Maharashtrian food menu',
     'homestyle Indian food Vadodara', 'Gazra food items', 'cafe menu Sursagar',
+    'queer-friendly cafe menu',
   ],
   openGraph: {
     title: 'Gazra Cafe Menu | Authentic Gujarati & Maharashtrian Food',

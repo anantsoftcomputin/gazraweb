@@ -8,7 +8,7 @@ export const metadata = {
     'events Vadodara', 'community events Gujarat', 'LGBTQ events Vadodara',
     'cultural events Vadodara', 'Gazra events', 'inclusive workshops Vadodara',
     'theater Vadodara', 'Kathak Vadodara', 'MCSU events', 'queer events Gujarat',
-    'art events Vadodara',
+    'art events Vadodara', 'LGBTQIA+ events India', 'queer community gatherings Gujarat',
   ],
   openGraph: {
     title: 'Community Events in Vadodara | Project Gazra',

@@ -12,6 +12,6 @@ export const PARENT_ORG = {
 
 export const LEGAL_CONTACT = {
   email: 'support@gazra.org',
-  altEmail: 'info@mcsu.in',
+  altEmail: 'support@gazra.org',
   phone: '+91 82003 06871',
 };

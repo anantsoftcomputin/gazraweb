@@ -9,6 +9,7 @@ export const metadata = {
     'hospitality course Vadodara', 'LGBTQ empowerment skills India',
     'Gazra skill hub', 'culinary training Vadodara', 'MCSU skill program',
     'community skill development Gujarat', 'restaurant management course Vadodara',
+    'transgender employment training India', 'queer job skills India',
   ],
   openGraph: {
     title: 'Gazra Skill Hub | Vocational Training in Vadodara',
