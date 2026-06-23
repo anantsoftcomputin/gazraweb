@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
   Coffee, Utensils, Leaf, ChefHat, Heart, Star, Clock, Sparkles, MapPin,
@@ -6,6 +6,11 @@ import {
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import FloatingBookingForm from '../components/cafe/FloatingBookingForm';
+import {
+  DEFAULT_CAFE_CATEGORIES,
+  normalizeCafeCategoryId,
+  sortCafeCategories
+} from '../constants/cafeCategories';
 
 // Dish Image Carousel Component for card view
 const DishImageCarousel = ({ images, item }) => {
@@ -24,7 +29,7 @@ const DishImageCarousel = ({ images, item }) => {
   }, [imageArray.length]);
   
   return (
-    <div className="relative overflow-hidden h-48 flex-shrink-0">
+    <div className="relative h-full min-h-[148px] w-28 flex-shrink-0 overflow-hidden sm:h-48 sm:w-full">
       <AnimatePresence mode="wait">
         <motion.img
           key={`${item.id}-${currentIndex}`}
@@ -145,15 +150,19 @@ const GazraCafe = () => {
   const [muted, setMuted] = useState(true);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [moments, setMoments] = useState([]);
-  const [menuItems, setMenuItems] = useState({ starters: [], mains: [], beverages: [] });
+  const [menuItems, setMenuItems] = useState({});
+  const [cafeCategories, setCafeCategories] = useState(DEFAULT_CAFE_CATEGORIES);
   const [features, setFeatures] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDish, setSelectedDish] = useState(null);
+  const [isCategoryPinned, setIsCategoryPinned] = useState(false);
   const videoRef = useRef(null);
+  const categoryControlsRef = useRef(null);
   const { scrollY } = useScroll();
   const { getDocuments: getMoments } = useFirestore('cafeMoments');
   const { getDocuments: getMenuItems } = useFirestore('menuItems');
+  const { getDocuments: getCafeCategories } = useFirestore('cafeCategories');
   const { getDocuments: getFeatures } = useFirestore('cafeFeatures');
   const { getDocuments: getTestimonials } = useFirestore('cafeTestimonials');
 
@@ -215,14 +224,37 @@ const GazraCafe = () => {
           setMoments(sortedMoments);
         }
 
+        // Load categories before menu items so dishes can be grouped dynamically.
+        const categoriesResult = await getCafeCategories();
+        const activeCategories = categoriesResult.success && categoriesResult.data.length > 0
+          ? sortCafeCategories(categoriesResult.data)
+          : DEFAULT_CAFE_CATEGORIES;
+        setCafeCategories(activeCategories);
+
         // Load menu items
         const menuResult = await getMenuItems();
         if (menuResult.success && menuResult.data.length > 0) {
-          const categorizedMenu = {
-            starters: menuResult.data.filter(item => item.category === 'starters' && item.available !== false),
-            mains: menuResult.data.filter(item => item.category === 'mains' && item.available !== false),
-            beverages: menuResult.data.filter(item => item.category === 'beverages' && item.available !== false)
-          };
+          const categorizedMenu = activeCategories.reduce((acc, category) => {
+            acc[category.slug] = [];
+            return acc;
+          }, {});
+
+          menuResult.data
+            .filter(item => item.available !== false)
+            .sort((a, b) => {
+              const orderA = Number.isFinite(Number(a.order)) ? Number(a.order) : 999;
+              const orderB = Number.isFinite(Number(b.order)) ? Number(b.order) : 999;
+              if (orderA !== orderB) return orderA - orderB;
+              return (a.name || '').localeCompare(b.name || '');
+            })
+            .forEach((item) => {
+              const categoryId = normalizeCafeCategoryId(item.category);
+              if (!categorizedMenu[categoryId]) {
+                categorizedMenu[categoryId] = [];
+              }
+              categorizedMenu[categoryId].push({ ...item, category: categoryId });
+            });
+
           setMenuItems(categorizedMenu);
         }
 
@@ -246,6 +278,22 @@ const GazraCafe = () => {
     loadAllData();
   }, []);
 
+  useEffect(() => {
+    const updatePinnedState = () => {
+      const isMobile = window.innerWidth < 640;
+      const triggerY = (categoryControlsRef.current?.offsetTop || 0) - 128;
+      setIsCategoryPinned(isMobile && window.scrollY > triggerY);
+    };
+
+    updatePinnedState();
+    window.addEventListener('scroll', updatePinnedState, { passive: true });
+    window.addEventListener('resize', updatePinnedState);
+    return () => {
+      window.removeEventListener('scroll', updatePinnedState);
+      window.removeEventListener('resize', updatePinnedState);
+    };
+  }, []);
+
   // Helper to get spice level color
   const getSpiceLevelColor = (level) => {
     const colors = {
@@ -260,9 +308,11 @@ const GazraCafe = () => {
   // Menu data
   const categories = [
     { id: 'all', name: 'All', icon: Utensils },
-    { id: 'starters', name: 'Small Plates', icon: ChefHat },
-    { id: 'mains', name: 'Mains', icon: Utensils },
-    { id: 'beverages', name: 'Drinks', icon: Coffee }
+    ...cafeCategories.map((category) => ({
+      id: category.slug,
+      name: category.name,
+      icon: Utensils
+    }))
   ];
 
   // Helper to get icon component from icon name string
@@ -496,8 +546,11 @@ const GazraCafe = () => {
           </div>
 
           {/* Category Navigation - Sticky tabs */}
-          <div className="sticky top-[134px] z-40 mb-12 sm:mb-16 flex justify-center">
-              <div className="inline-flex flex-wrap justify-center bg-[rgba(251,244,231,0.97)] backdrop-blur-xl rounded-xl p-1.5 sm:p-2 shadow-lg border border-[rgba(184,121,44,0.2)]">
+          <div
+            ref={categoryControlsRef}
+            className={`${isCategoryPinned ? 'fixed left-0 right-0 top-[128px] z-40 mx-0 border-y border-[rgba(184,121,44,0.22)]' : 'relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)]'} bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:relative sm:left-auto sm:right-auto sm:top-auto sm:z-auto sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
+          >
+              <div className="flex snap-x gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:inline-flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:rounded-xl sm:border sm:border-[rgba(184,121,44,0.2)] sm:bg-[rgba(251,244,231,0.97)] sm:p-2 sm:shadow-lg sm:backdrop-blur-xl [&::-webkit-scrollbar]:hidden">
                 {categories.map((category) => (
                   <motion.button
                     key={category.id}
@@ -505,10 +558,10 @@ const GazraCafe = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory(category.id)}
                     className={`
-                      flex items-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all duration-300
+                      flex min-w-fit snap-start items-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-300 sm:px-6 sm:py-3 sm:text-base
                       ${selectedCategory === category.id
                         ? 'bg-primary-600 text-white shadow-md'
-                        : 'text-neutral-600 hover:bg-primary-50'
+                        : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-primary-50 sm:border-0 sm:bg-transparent'
                       }
                     `}
                   >
@@ -518,12 +571,13 @@ const GazraCafe = () => {
                 ))}
               </div>
           </div>
+          {isCategoryPinned && <div className="h-[64px] sm:hidden" />}
 
           {/* Menu Grid - Modern cards with hover effects */}
-          <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Object.entries(menuItems).flatMap(([category, items]) => // Use flatMap for direct array
               items
-                .filter(item => selectedCategory === 'all' || selectedCategory === category)
+                .filter(() => selectedCategory === 'all' || selectedCategory === category)
                 .map((item, index) => (
                   <motion.div
                     key={item.id}
@@ -536,26 +590,27 @@ const GazraCafe = () => {
                     onClick={() => setSelectedDish(item)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100/30 rounded-lg transform group-hover:rotate-1 transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
-                    <div className="relative bg-[var(--gazra-paper)] rounded-lg overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl border border-[rgba(184,121,44,0.18)] flex flex-col flex-grow">
+                    <div className="heritage-paper relative flex flex-row flex-grow overflow-hidden rounded-lg border-2 border-[rgba(184,121,44,0.55)] shadow-sm transition-all duration-300 group-hover:shadow-xl sm:flex-col sm:shadow-md">
+                      <div className="heritage-rule absolute left-0 top-0 z-10 h-1.5 w-full" />
                       <DishImageCarousel
                         images={(item.images || [item.image]).filter(Boolean).map(img => typeof img === 'string' ? img : img?.url)}
                         item={item}
                       />
 
-                      <div className="p-5 sm:p-6 flex flex-col flex-grow min-h-[200px]"> {/* Added min-height */}
-                        <div className="flex justify-between items-start mb-3 gap-2">
-                          <h3 className="text-md sm:text-lg font-semibold text-neutral-800 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2">
+                      <div className="flex min-w-0 flex-grow flex-col p-3.5 sm:min-h-[200px] sm:p-6"> {/* Added min-height */}
+                        <div className="mb-2 flex items-start justify-between gap-2 sm:mb-3">
+                          <h3 className="line-clamp-2 text-[15px] font-semibold text-neutral-800 transition-colors duration-300 group-hover:text-primary-600 sm:text-lg">
                              {item.name}
                           </h3>
-                          <span className="text-sm sm:text-md font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded flex-shrink-0">
+                          <span className="flex-shrink-0 rounded bg-primary-50 px-2.5 py-1 text-sm font-bold text-primary-600 sm:text-md">
                              {item.price}
                           </span>
                         </div>
-                        <p className="text-sm text-neutral-600 mb-4 flex-grow line-clamp-4 leading-relaxed">{item.description}</p> {/* Increased to 4 lines with better spacing */}
+                        <p className="mb-3 line-clamp-2 flex-grow text-xs leading-relaxed text-neutral-600 sm:mb-4 sm:line-clamp-4 sm:text-sm">{item.description}</p> {/* Increased to 4 lines with better spacing */}
 
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-[rgba(184,121,44,0.15)]"> {/* Use mt-auto */}
+                        <div className="mt-auto flex items-center justify-between border-t border-[rgba(184,121,44,0.15)] pt-2.5 sm:pt-4"> {/* Use mt-auto */}
                           <div className="flex flex-wrap gap-1.5">
-                            {item.tags.map((tag, tagIndex) => (
+                            {(item.tags || []).map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
                                 className="px-2 py-1 bg-primary-50 text-neutral-700 text-xs rounded"

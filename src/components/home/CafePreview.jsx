@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Coffee, ArrowRight, Heart, Sparkles, ChefHat, Clock, MapPin } from 'lucide-react';
 import { Link } from '../../lib/routerCompat';
@@ -14,10 +14,13 @@ const CafePreview = () => {
       try {
         const result = await getMenuItems();
         if (result.success && result.data.length > 0) {
-          // Get 3 popular or recommended dishes
-          const featured = result.data
+          const available = result.data.filter(item => item.available !== false);
+          const highlighted = available
             .filter(item => (item.popular || item.recommended) && item.available !== false)
             .slice(0, 3);
+          const featured = highlighted.length > 0
+            ? highlighted
+            : available.slice(0, 3);
           setFeaturedDishes(featured);
         }
       } catch (error) {
@@ -116,7 +119,7 @@ const CafePreview = () => {
         >
           <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Featured Dishes</h3>
           <div className="grid md:grid-cols-3 gap-6">
-            {featuredDishes.map((dish, index) => (
+            {featuredDishes.map((dish) => (
               <motion.div
                 key={dish.id}
                 variants={itemVariants}
@@ -138,7 +141,7 @@ const CafePreview = () => {
                   {dish.recommended && (
                     <div className="absolute top-3 left-3 px-3 py-1 bg-primary-500 text-white text-xs rounded-full flex items-center">
                       <Sparkles className="w-3 h-3 mr-1" />
-                      Chef's Pick
+                      Chef&apos;s Pick
                     </div>
                   )}
                 </div>

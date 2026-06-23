@@ -30,6 +30,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    match /cafeCategories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     
     // Cafe collections - public read, authenticated write
     match /cafeFeatures/{featureId} {

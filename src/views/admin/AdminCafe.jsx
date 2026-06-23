@@ -1,32 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { writeBatch, doc } from 'firebase/firestore';
 import {
   Plus, Search, Edit2, Trash2, X, Upload, Image as ImageIcon,
-  Save, AlertCircle, ChefHat, Coffee, Utensils, Flame
+  Save, AlertCircle, ChefHat, Utensils, Flame
 } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
 import { useStorage } from '../../hooks/useStorage';
+import { db } from '../../config/firebase';
+import {
+  DEFAULT_CAFE_CATEGORIES,
+  createCafeCategorySlug,
+  normalizeCafeCategoryId,
+  sortCafeCategories
+} from '../../constants/cafeCategories';
 
 const AdminCafe = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [cafeCategories, setCafeCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [categoryForm, setCategoryForm] = useState({ name: '', order: '' });
+  const [reassignCategory, setReassignCategory] = useState('');
   const [loading, setLoading] = useState(true);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+  const [savingCategory, setSavingCategory] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   
   const { getDocuments, addDocument, updateDocument, deleteDocument } = useFirestore('menuItems');
+  const {
+    getDocuments: getCategoryDocuments,
+    addDocument: addCategoryDocument,
+    updateDocument: updateCategoryDocument,
+    deleteDocument: deleteCategoryDocument
+  } = useFirestore('cafeCategories');
   const { uploadFile, deleteFile } = useStorage();
+
+  const defaultCategoryId = DEFAULT_CAFE_CATEGORIES[0].slug;
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    category: 'starters',
+    category: defaultCategoryId,
     spiceLevel: 'mild',
     images: [],
     tags: [],
@@ -37,9 +62,11 @@ const AdminCafe = () => {
 
   const categories = [
     { id: 'all', name: 'All Items', icon: Utensils },
-    { id: 'starters', name: 'Small Plates', icon: ChefHat },
-    { id: 'mains', name: 'Mains', icon: Utensils },
-    { id: 'beverages', name: 'Drinks', icon: Coffee }
+    ...cafeCategories.map((category) => ({
+      id: category.slug,
+      name: category.name,
+      icon: Utensils
+    }))
   ];
 
   const spiceLevels = [
@@ -69,8 +96,32 @@ const AdminCafe = () => {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      setCategoryLoading(true);
+      const result = await getCategoryDocuments();
+      if (result.success && result.data.length > 0) {
+        setCafeCategories(sortCafeCategories(result.data));
+        return;
+      }
+
+      const created = [];
+      for (const category of DEFAULT_CAFE_CATEGORIES) {
+        const addResult = await addCategoryDocument(category);
+        created.push({ ...category, id: addResult.id });
+      }
+      setCafeCategories(sortCafeCategories(created));
+    } catch (error) {
+      console.error('Error loading cafe categories:', error);
+      setCafeCategories(DEFAULT_CAFE_CATEGORIES);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadMenuItems();
+    loadCategories();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filterItems = () => {
@@ -79,7 +130,7 @@ const AdminCafe = () => {
     let filtered = [...menuItems];
 
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(item => item.category === selectedCategory);
+      filtered = filtered.filter(item => normalizeCafeCategoryId(item.category) === selectedCategory);
     }
 
     if (searchQuery) {
@@ -153,7 +204,7 @@ const AdminCafe = () => {
         name: item.name,
         description: item.description,
         price: item.price,
-        category: item.category,
+        category: normalizeCafeCategoryId(item.category),
         spiceLevel: item.spiceLevel || 'mild',
         images: existingImages,
         tags: item.tags || [],
@@ -168,7 +219,7 @@ const AdminCafe = () => {
         name: '',
         description: '',
         price: '',
-        category: 'starters',
+        category: cafeCategories[0]?.slug || defaultCategoryId,
         spiceLevel: 'mild',
         images: [],
         tags: [],
@@ -180,6 +231,127 @@ const AdminCafe = () => {
     }
     setImageFiles([]);
     setIsModalOpen(true);
+  };
+
+  const getCategoryItemCount = (categorySlug) => (
+    menuItems.filter(item => normalizeCafeCategoryId(item.category) === categorySlug).length
+  );
+
+  const openCategoryModal = (category = null) => {
+    setEditingCategory(category);
+    setCategoryForm({
+      name: category?.name || '',
+      order: category?.order ?? (cafeCategories.length + 1)
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const closeCategoryModal = () => {
+    setIsCategoryModalOpen(false);
+    setEditingCategory(null);
+    setCategoryForm({ name: '', order: '' });
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    const name = categoryForm.name.trim();
+    const order = Number(categoryForm.order) || cafeCategories.length + 1;
+    const slug = editingCategory?.slug || createCafeCategorySlug(name);
+
+    if (!name) {
+      alert('Category name is required.');
+      return;
+    }
+
+    if (!slug) {
+      alert('Please use a category name with letters or numbers.');
+      return;
+    }
+
+    const duplicate = cafeCategories.some(category => (
+      category.id !== editingCategory?.id &&
+      (category.name || '').trim().toLowerCase() === name.toLowerCase()
+    ));
+    if (duplicate) {
+      alert('A category with this name already exists.');
+      return;
+    }
+
+    try {
+      setSavingCategory(true);
+      if (editingCategory) {
+        await updateCategoryDocument(editingCategory.id, { name, order });
+      } else {
+        const slugDuplicate = cafeCategories.some(category => category.slug === slug);
+        if (slugDuplicate) {
+          alert('A category with this URL name already exists. Please choose another name.');
+          return;
+        }
+        await addCategoryDocument({ name, slug, order });
+      }
+      await loadCategories();
+      closeCategoryModal();
+    } catch (error) {
+      console.error('Error saving category:', error);
+      alert('Failed to save category. Please try again.');
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const openDeleteCategoryModal = (category) => {
+    const alternatives = cafeCategories.filter(item => item.slug !== category.slug);
+    if (alternatives.length === 0) {
+      alert('Add another category before deleting this one.');
+      return;
+    }
+
+    setCategoryToDelete(category);
+    setReassignCategory(alternatives[0]?.slug || '');
+    setIsDeleteCategoryModalOpen(true);
+  };
+
+  const closeDeleteCategoryModal = () => {
+    setIsDeleteCategoryModalOpen(false);
+    setCategoryToDelete(null);
+    setReassignCategory('');
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete || !reassignCategory) {
+      alert('Choose a category to receive the dishes first.');
+      return;
+    }
+
+    if (reassignCategory === categoryToDelete.slug) {
+      alert('Please choose a different category.');
+      return;
+    }
+
+    try {
+      setSavingCategory(true);
+      const affectedItems = menuItems.filter(item => normalizeCafeCategoryId(item.category) === categoryToDelete.slug);
+      const batch = writeBatch(db);
+
+      affectedItems.forEach((item) => {
+        batch.update(doc(db, 'menuItems', item.id), { category: reassignCategory });
+      });
+
+      await batch.commit();
+      await deleteCategoryDocument(categoryToDelete.id);
+
+      if (selectedCategory === categoryToDelete.slug) {
+        setSelectedCategory('all');
+      }
+
+      await Promise.all([loadMenuItems(), loadCategories()]);
+      closeDeleteCategoryModal();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Failed to delete category. Please try again.');
+    } finally {
+      setSavingCategory(false);
+    }
   };
 
   const closeModal = () => {
@@ -324,6 +496,60 @@ const AdminCafe = () => {
           </div>
         </div>
 
+        {/* Category Management */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Categories</h2>
+              <p className="text-sm text-gray-600 mt-1">Add, rename, reorder, or delete cafe menu categories</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => openCategoryModal()}
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Category
+            </button>
+          </div>
+
+          {categoryLoading ? (
+            <div className="py-6 text-sm text-gray-500">Loading categories...</div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {cafeCategories.map((category) => {
+                const itemCount = getCategoryItemCount(category.slug);
+                return (
+                  <div key={category.slug} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{category.name}</p>
+                      <p className="text-xs text-gray-500">{itemCount} dish{itemCount === 1 ? '' : 'es'} assigned</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openCategoryModal(category)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        aria-label={`Edit ${category.name}`}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openDeleteCategoryModal(category)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        aria-label={`Delete ${category.name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Menu Items Grid */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -373,7 +599,7 @@ const AdminCafe = () => {
                     )}
                     {item.recommended && (
                       <span className="px-2 py-1 bg-primary-500 text-white text-xs rounded-full">
-                        Chef's Pick
+                        Chef&apos;s Pick
                       </span>
                     )}
                     {!item.available && (
@@ -585,9 +811,11 @@ const AdminCafe = () => {
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
-                      <option value="starters">Small Plates</option>
-                      <option value="mains">Mains</option>
-                      <option value="beverages">Drinks</option>
+                      {cafeCategories.map((category) => (
+                        <option key={category.slug} value={category.slug}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -649,7 +877,7 @@ const AdminCafe = () => {
                       onChange={(e) => setFormData({ ...formData, recommended: e.target.checked })}
                       className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Chef's Pick</span>
+                    <span className="ml-2 text-sm text-gray-700">Chef&apos;s Pick</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -680,6 +908,147 @@ const AdminCafe = () => {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add/Edit Category Modal */}
+      <AnimatePresence>
+        {isCategoryModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={closeCategoryModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            >
+              <form onSubmit={handleCategorySubmit} className="p-6 space-y-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {editingCategory ? 'Edit Category' : 'Add Category'}
+                  </h2>
+                  <button type="button" onClick={closeCategoryModal} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={categoryForm.name}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="e.g., Seasonal Specials"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={categoryForm.order}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, order: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeCategoryModal}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingCategory}
+                    className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-60 transition-colors"
+                  >
+                    {savingCategory ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Category Modal */}
+      <AnimatePresence>
+        {isDeleteCategoryModalOpen && categoryToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={closeDeleteCategoryModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 space-y-5"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Delete {categoryToDelete.name}?</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {getCategoryItemCount(categoryToDelete.slug)} dish{getCategoryItemCount(categoryToDelete.slug) === 1 ? '' : 'es'} must be assigned to another category before this category can be deleted.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Move dishes to *</label>
+                <select
+                  required
+                  value={reassignCategory}
+                  onChange={(e) => setReassignCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  {cafeCategories
+                    .filter(category => category.slug !== categoryToDelete.slug)
+                    .map((category) => (
+                      <option key={category.slug} value={category.slug}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeDeleteCategoryModal}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteCategory}
+                  disabled={savingCategory}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60 transition-colors"
+                >
+                  {savingCategory ? 'Deleting...' : 'Reassign & Delete'}
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
