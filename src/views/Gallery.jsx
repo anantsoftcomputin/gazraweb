@@ -1,26 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ZoomIn, Coffee, Users, Calendar, Images, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { X, ZoomIn, Coffee, Users, Calendar, Images, Landmark, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 
-/* ─── Static seed images ──────────────────────────────────────────── */
+/* ─── Static seed images — real photos from Gazra Cafe & MCSU ───────── */
 const SEED = [
-  { id: 's1',  src: '/images/image-six.jpg',   category: 'cafe',      caption: 'Gazra Cafe — where every cup tells a story' },
+  // Cafe Life
+  { id: 's1',  src: '/images/image-six.jpg',   category: 'cafe',      caption: 'Inside Gazra Cafe — warmth in every corner' },
   { id: 's2',  src: '/images/cafe1.webp',       category: 'cafe',      caption: 'The warm heart of Gazra' },
-  { id: 's3',  src: '/images/image7.webp',      category: 'community', caption: 'Together we thrive' },
-  { id: 's4',  src: '/images/image9.webp',      category: 'community', caption: 'Celebrating every identity' },
-  { id: 's5',  src: '/images/image10.webp',     category: 'cafe',      caption: 'Inclusive space, authentic flavours' },
-  { id: 's6',  src: '/images/image-four.jpg',   category: 'events',    caption: 'Community comes alive' },
-  { id: 's7',  src: '/images/image-five.jpg',   category: 'community', caption: 'Stories worth sharing' },
-  { id: 's8',  src: '/images/image8.webp',      category: 'cafe',      caption: 'Heritage on every plate' },
-  { id: 's9',  src: '/images/image11.jpg',      category: 'events',    caption: 'Creating memories together' },
-  { id: 's10', src: '/images/image12.jpg',      category: 'community', caption: 'Joy in every corner' },
-  { id: 's11', src: '/images/food-image.webp',  category: 'cafe',      caption: "Grandmother's recipes, grandmother's love" },
-  { id: 's12', src: '/images/food-1.png',       category: 'cafe',      caption: 'Gujarati soul food' },
-  { id: 's13', src: '/images/art-therapy.png',  category: 'events',    caption: 'Art as healing' },
-  { id: 's14', src: '/images/skill1.webp',      category: 'community', caption: 'Skills that change lives' },
-  { id: 's15', src: '/images/image-one.jpg',    category: 'community', caption: 'Belonging begins here' },
-  { id: 's16', src: '/images/image-three.jpg',  category: 'events',    caption: 'Every gathering, a memory' },
+  { id: 's3',  src: '/images/image-one.jpg',    category: 'cafe',      caption: 'Behind the counter, crafted with care' },
+  { id: 's4',  src: '/images/food-image.webp',  category: 'cafe',      caption: 'Nachos and dips, fresh off the pass' },
+  { id: 's5',  src: '/images/food-1.png',       category: 'cafe',      caption: 'A Gujarati thali, plated with love' },
+  { id: 's6',  src: '/images/image10.webp',     category: 'cafe',      caption: 'Inclusive space, authentic flavours' },
+  { id: 's7',  src: '/images/image8.webp',      category: 'cafe',      caption: 'Heritage on every plate' },
+  { id: 's8',  src: '/images/skill1.webp',      category: 'cafe',      caption: 'Taking orders at the counter' },
+  // Community
+  { id: 's9',  src: '/images/image7.webp',      category: 'community', caption: 'Together we thrive' },
+  { id: 's10', src: '/images/image9.webp',      category: 'community', caption: 'Celebrating every identity', featured: true },
+  { id: 's11', src: '/images/image-two.jpg',    category: 'community', caption: 'A community conversation at Gazra' },
+  { id: 's12', src: '/images/image-five.jpg',   category: 'community', caption: 'Young voices, found family' },
+  // Events
+  { id: 's13', src: '/images/image-three.jpg',  category: 'events',    caption: 'Pride, out and proud — right outside MCSU', featured: true },
+  { id: 's14', src: '/images/image-four.jpg',   category: 'events',    caption: 'Raising hands, raising spirits at a community workshop', featured: true },
+  { id: 's15', src: '/images/image11.jpg',      category: 'events',    caption: 'Dining with Diyas & Melodies — Diwali at Gazra Cafe' },
+  { id: 's16', src: '/images/image12.jpg',      category: 'events',    caption: 'A Diwali evening, lit with diyas' },
+  { id: 's17', src: '/images/art-therapy.png',  category: 'events',    caption: 'Art as healing — a community circle' },
+  // Heritage
+  { id: 's18', src: '/images/chimnabai2.jpg',   category: 'heritage',  caption: 'Maharani Chimnabai II, whose legacy founded MCSU in 1914', featured: true },
+  { id: 's19', src: '/images/join-community.jpg', category: 'heritage', caption: 'The Gazra Cafe team, dressed in heritage attire' },
 ];
 
 const CATEGORIES = [
@@ -28,6 +35,7 @@ const CATEGORIES = [
   { id: 'cafe',      label: 'Cafe Life',     icon: Coffee },
   { id: 'events',    label: 'Events',        icon: Calendar },
   { id: 'community', label: 'Community',     icon: Users },
+  { id: 'heritage',  label: 'Heritage',      icon: Landmark },
 ];
 
 /* ─── Lightbox ─────────────────────────────────────────────────────── */
@@ -288,6 +296,7 @@ const Gallery = () => {
     cafe:      allImages.filter(i => i.category === 'cafe').length,
     events:    allImages.filter(i => i.category === 'events').length,
     community: allImages.filter(i => i.category === 'community').length,
+    heritage:  allImages.filter(i => i.category === 'heritage').length,
   };
 
   return (
@@ -337,6 +346,7 @@ const Gallery = () => {
               { label: 'Cafe moments', value: counts.cafe },
               { label: 'Events', value: counts.events },
               { label: 'Community', value: counts.community },
+              { label: 'Heritage', value: counts.heritage },
             ].map(s => (
               <div key={s.label} className="px-3 py-1.5 bg-white/8 backdrop-blur-md rounded-lg border border-white/10 text-center min-w-[64px]">
                 <div className="text-lg font-black text-white leading-none">{s.value}</div>
