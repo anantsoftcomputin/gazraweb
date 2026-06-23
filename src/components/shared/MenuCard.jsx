@@ -227,8 +227,18 @@ const MenuCard = () => {
                       <div className="relative h-auto min-h-[172px] w-36 shrink-0 overflow-hidden bg-[#fff8ec] sm:h-56 sm:w-full">
                         <img
                           src={getDishImage(item)}
+                          alt=""
+                          aria-hidden="true"
+                          className="absolute inset-0 h-full w-full scale-125 object-cover opacity-35 blur-lg"
+                          onError={(event) => {
+                            event.currentTarget.src = fallbackDishImage;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-[#fff8ec]/45" />
+                        <img
+                          src={getDishImage(item)}
                           alt={item.name}
-                          className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
+                          className="relative h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
                           onError={(event) => {
                             event.currentTarget.src = fallbackDishImage;
                           }}
@@ -300,8 +310,18 @@ const MenuCard = () => {
               <div className="relative h-52 bg-primary-50 sm:h-64">
                 <img
                   src={getDishImage(selectedItem)}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full scale-125 object-cover opacity-35 blur-lg"
+                  onError={(event) => {
+                    event.currentTarget.src = fallbackDishImage;
+                  }}
+                />
+                <div className="absolute inset-0 bg-[#fff8ec]/45" />
+                <img
+                  src={getDishImage(selectedItem)}
                   alt={selectedItem.name}
-                  className="h-full w-full object-contain bg-[#fff8ec] p-3"
+                  className="relative h-full w-full object-contain p-3"
                   onError={(event) => {
                     event.currentTarget.src = fallbackDishImage;
                   }}

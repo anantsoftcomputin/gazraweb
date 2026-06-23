@@ -30,6 +30,16 @@ const DishImageCarousel = ({ images, item }) => {
   
   return (
     <div className="relative h-full min-h-[172px] w-36 flex-shrink-0 overflow-hidden bg-[#fff8ec] sm:h-56 sm:w-full">
+      <img
+        src={imageArray[currentIndex]}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover scale-125 opacity-35 blur-lg"
+        onError={(e) => {
+          e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+        }}
+      />
+      <div className="absolute inset-0 bg-[#fff8ec]/45" />
       <AnimatePresence mode="wait">
         <motion.img
           key={`${item.id}-${currentIndex}`}
@@ -39,7 +49,7 @@ const DishImageCarousel = ({ images, item }) => {
           transition={{ duration: 0.5 }}
           src={imageArray[currentIndex]}
           alt={item.name}
-          className="w-full h-full object-contain p-2 transition-transform duration-700 transform group-hover:scale-105"
+          className="relative w-full h-full object-contain p-2 transition-transform duration-700 transform group-hover:scale-105"
           loading="lazy"
           onError={(e) => {
             console.error('Image failed to load:', imageArray[currentIndex]);
