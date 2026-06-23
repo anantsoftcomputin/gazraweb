@@ -28,6 +28,27 @@ const EventCalendarPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { getDocuments } = useFirestore('events');
+  const { addDocument: addNewsletterSubscriber } = useFirestore('newsletter');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState(null); // 'success' | 'error' | null
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+
+    setNewsletterSubmitting(true);
+    setNewsletterStatus(null);
+    const result = await addNewsletterSubscriber({ email: newsletterEmail.trim().toLowerCase(), source: 'calendar-page' });
+    setNewsletterSubmitting(false);
+
+    if (result.success) {
+      setNewsletterStatus('success');
+      setNewsletterEmail('');
+    } else {
+      setNewsletterStatus('error');
+    }
+  };
 
   // Event categories matching the main events page
   const eventCategories = [
@@ -439,20 +460,35 @@ const EventCalendarPage = () => {
             <p className="text-lg text-neutral-600 mb-8">
               Subscribe to our newsletter and stay updated with the latest events and community happenings.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-3 rounded-xl border border-neutral-200 focus:border-primary-500 focus:ring focus:ring-primary-500/20 transition-all duration-300"
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow transition-all duration-300"
-              >
-                Subscribe
-              </motion.button>
-            </div>
+            {newsletterStatus === 'success' ? (
+              <div className="flex items-center justify-center gap-2 max-w-md mx-auto px-5 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
+                You're subscribed! Thanks for joining us.
+              </div>
+            ) : (
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  required
+                  disabled={newsletterSubmitting}
+                  className="flex-1 px-6 py-3 rounded-xl border border-neutral-200 focus:border-primary-500 focus:ring focus:ring-primary-500/20 transition-all duration-300"
+                />
+                <motion.button
+                  type="submit"
+                  disabled={newsletterSubmitting}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-3 bg-primary-500 text-white rounded-xl shadow-colored hover:shadow-glow disabled:opacity-60 transition-all duration-300"
+                >
+                  {newsletterSubmitting ? 'Subscribing…' : 'Subscribe'}
+                </motion.button>
+              </form>
+            )}
+            {newsletterStatus === 'error' && (
+              <p className="mt-2 text-xs text-red-600">Something went wrong. Please try again.</p>
+            )}
           </motion.div>
         </div>
       </section>

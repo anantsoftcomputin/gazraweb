@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Link } from '../../lib/routerCompat';
-import { ArrowRight, Heart, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Heart, Mail, MapPin, Phone } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
+import { useFirestore } from '../../hooks/useFirestore';
 
 const footerGroups = [
   {
@@ -26,6 +28,27 @@ const footerGroups = [
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState(null); // 'success' | 'error' | null
+  const { addDocument } = useFirestore('newsletter');
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setSubmitting(true);
+    setStatus(null);
+    const result = await addDocument({ email: email.trim().toLowerCase(), source: 'footer' });
+    setSubmitting(false);
+
+    if (result.success) {
+      setStatus('success');
+      setEmail('');
+    } else {
+      setStatus('error');
+    }
+  };
 
   return (
     <footer className="relative overflow-hidden border-t border-neutral-900/10 bg-[var(--gazra-paper)] text-neutral-900">
@@ -47,18 +70,32 @@ const Footer = () => {
               A warm, inclusive space for conversations, gatherings, learning, food, and belonging in Vadodara.
             </p>
 
-            <form className="mt-6 flex max-w-md flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="min-h-11 flex-1 rounded-lg border border-neutral-900/15 bg-primary-50/70 px-4 text-sm outline-none transition placeholder:text-neutral-500 focus:border-primary-600 focus:ring-2 focus:ring-primary-200"
-                aria-label="Email address"
-              />
-              <button type="submit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 text-sm font-bold text-white shadow-md transition hover:bg-primary-700">
-                Follow
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
+            {status === 'success' ? (
+              <div className="mt-6 flex max-w-md items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                You're subscribed! Thanks for joining us.
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="mt-6 flex max-w-md flex-col gap-3 sm:flex-row">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="min-h-11 flex-1 rounded-lg border border-neutral-900/15 bg-primary-50/70 px-4 text-sm outline-none transition placeholder:text-neutral-500 focus:border-primary-600 focus:ring-2 focus:ring-primary-200"
+                  aria-label="Email address"
+                  required
+                  disabled={submitting}
+                />
+                <button type="submit" disabled={submitting} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 text-sm font-bold text-white shadow-md transition hover:bg-primary-700 disabled:opacity-60">
+                  {submitting ? 'Following…' : 'Follow'}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </form>
+            )}
+            {status === 'error' && (
+              <p className="mt-2 text-xs text-red-600">Something went wrong. Please try again.</p>
+            )}
           </div>
 
           {footerGroups.map((group) => (

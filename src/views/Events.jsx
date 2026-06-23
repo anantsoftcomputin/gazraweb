@@ -19,6 +19,27 @@ const EventsPage = () => {
   const [loading, setLoading] = useState(true);
   const videoRef = useRef(null);
   const { getDocuments } = useFirestore('events');
+  const { addDocument: addNewsletterSubscriber } = useFirestore('newsletter');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState(null); // 'success' | 'error' | null
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+
+    setNewsletterSubmitting(true);
+    setNewsletterStatus(null);
+    const result = await addNewsletterSubscriber({ email: newsletterEmail.trim().toLowerCase(), source: 'events-page' });
+    setNewsletterSubmitting(false);
+
+    if (result.success) {
+      setNewsletterStatus('success');
+      setNewsletterEmail('');
+    } else {
+      setNewsletterStatus('error');
+    }
+  };
 
   const eventCategories = [
     { id: "all",       name: "All Events",      icon: Calendar, color: "bg-primary-600" },
@@ -312,15 +333,29 @@ const EventsPage = () => {
           <p className="text-primary-100/80 mb-8 max-w-md mx-auto">
             Subscribe to stay updated with the latest events and community happenings.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input type="email" placeholder="Enter your email"
-              className="flex-1 px-5 py-3 rounded-lg border border-primary-100/30 bg-white/15 backdrop-blur-sm
-                         text-white placeholder-primary-100/60 focus:outline-none focus:border-white/60 text-sm" />
-            <button className="px-6 py-3 bg-white text-primary-700 font-bold rounded-lg hover:bg-primary-50
+          {newsletterStatus === 'success' ? (
+            <div className="flex items-center justify-center gap-2 max-w-md mx-auto px-5 py-3 rounded-lg bg-white/15 border border-white/30 text-white text-sm font-medium">
+              You're subscribed! Thanks for joining us.
+            </div>
+          ) : (
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input type="email" placeholder="Enter your email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                required
+                disabled={newsletterSubmitting}
+                className="flex-1 px-5 py-3 rounded-lg border border-primary-100/30 bg-white/15 backdrop-blur-sm
+                           text-white placeholder-primary-100/60 focus:outline-none focus:border-white/60 text-sm" />
+              <button type="submit" disabled={newsletterSubmitting}
+                className="px-6 py-3 bg-white text-primary-700 font-bold rounded-lg hover:bg-primary-50 disabled:opacity-60
                                transition-colors duration-200 text-sm whitespace-nowrap shadow-lg">
-              Subscribe
-            </button>
-          </div>
+                {newsletterSubmitting ? 'Subscribing…' : 'Subscribe'}
+              </button>
+            </form>
+          )}
+          {newsletterStatus === 'error' && (
+            <p className="mt-2 text-xs text-red-100">Something went wrong. Please try again.</p>
+          )}
           <div className="gazra-folk-chain gazra-folk-chain--on-brown max-w-xs mx-auto mt-7" />
         </div>
       </section>
