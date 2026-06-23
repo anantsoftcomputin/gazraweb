@@ -17,17 +17,19 @@ const PILLARS = [
 const SplashScreen = () => {
   const [visible, setVisible] = useState(false);
   const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin');
+  // /cafe has its own dedicated splash (CafeSplashScreen) — skip this one there
+  // so the two full-screen overlays never stack on top of each other.
+  const skipRoute = pathname?.startsWith('/admin') || pathname?.startsWith('/cafe');
 
   useEffect(() => {
-    if (isAdminRoute) return;
+    if (skipRoute) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
     setVisible(true);
     sessionStorage.setItem(STORAGE_KEY, '1');
 
     const timer = setTimeout(() => setVisible(false), 4000);
     return () => clearTimeout(timer);
-  }, [isAdminRoute]);
+  }, [skipRoute]);
 
   return (
     <AnimatePresence>

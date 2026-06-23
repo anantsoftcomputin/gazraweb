@@ -7,6 +7,7 @@ import {
 import { useFirestore } from '../hooks/useFirestore';
 import FloatingBookingForm from '../components/cafe/FloatingBookingForm';
 import ReviewCTA from '../components/shared/ReviewCTA';
+import CafeSplashScreen from '../components/cafe/CafeSplashScreen';
 import {
   DEFAULT_CAFE_CATEGORIES,
   normalizeCafeCategoryId,
@@ -168,6 +169,7 @@ const GazraCafe = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDish, setSelectedDish] = useState(null);
   const [isCategoryPinned, setIsCategoryPinned] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
   const videoRef = useRef(null);
   const categoryControlsRef = useRef(null);
   const { scrollY } = useScroll();
@@ -355,19 +357,29 @@ const GazraCafe = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading cafe data...</p>
+      <>
+        <CafeSplashScreen onComplete={() => setSplashDone(true)} />
+        <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Loading cafe data...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   const testimonialLoop = testimonials.length > 0 ? [...testimonials, ...testimonials] : [];
 
   return (
-    <div className="min-h-screen bg-[var(--gazra-paper)]">
+    <>
+      <CafeSplashScreen onComplete={() => setSplashDone(true)} />
+      <motion.div
+        initial={false}
+        animate={{ opacity: splashDone ? 1 : 0, y: splashDone ? 0 : 14 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+        className="min-h-screen bg-[var(--gazra-paper)]"
+      >
 
       {/* Modern Video Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">
@@ -1142,7 +1154,8 @@ const GazraCafe = () => {
         )}
       </AnimatePresence>
 
-    </div>
+      </motion.div>
+    </>
   );
 };
 
