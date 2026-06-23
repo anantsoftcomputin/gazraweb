@@ -1,474 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ChefHat, Utensils, Palette, Scissors, Monitor, FileText, Edit, Search,
-  MessageSquare, Layers, Briefcase, Award, Users, Calendar, Clock,
-  CheckCircle, ArrowRight, Download, Mail, Phone, MapPin
+  Scissors, Shirt, Music, PersonStanding, Briefcase, Award, Users, Calendar, Clock,
+  CheckCircle, ArrowRight, Mail, Phone, MapPin
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
-
-// --- Course Content Components ---
-
-const HospitalityCourse = () => {
-  return (
-    <div className="space-y-8">
-      <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
-        {/* Course Header */}
-        <div className="bg-gradient-to-r from-accent-ochre to-accent-terracotta p-6 text-white">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <ChefHat className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-bold">Hospitality & Restaurant Management</h3>
-                <p className="text-white/80 text-sm sm:text-base">Master essential skills for the food service industry</p>
-              </div>
-            </div>
-            <div className="bg-white/20 px-4 py-2 rounded-lg text-sm self-start sm:self-center flex-shrink-0 mt-2 sm:mt-0">
-              12 Weeks
-            </div>
-          </div>
-        </div>
-
-        {/* Course Overview */}
-        <div className="p-6 border-b border-neutral-100">
-          <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Overview</h4>
-          <p className="text-neutral-600 mb-4">
-            This comprehensive program prepares you for a successful career in the hospitality and restaurant sector.
-            You'll learn everything from food preparation and service techniques to customer relations and basic
-            business management—gaining both practical skills and theoretical knowledge needed in this dynamic industry.
-          </p>
-
-          <div className="grid sm:grid-cols-2 gap-4 mt-6">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div>
-                <h5 className="font-medium text-neutral-800">Duration</h5>
-                <p className="text-neutral-600">12 Weeks (240 Hours)</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h5 className="font-medium text-neutral-800">Batch Size</h5>
-                <p className="text-neutral-600">15 Students</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <h5 className="font-medium text-neutral-800">Schedule</h5>
-                <p className="text-neutral-600">Weekdays & Weekend Batches</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0">
-                <Briefcase className="w-5 h-5" />
-              </div>
-              <div>
-                <h5 className="font-medium text-neutral-800">Placement Support</h5>
-                <p className="text-neutral-600">Yes, with Partner Restaurants</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Course Curriculum */}
-        <div className="p-6">
-          <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Curriculum</h4>
-          <div className="space-y-6">
-            {/* Module 1 */}
-            <div className="border border-neutral-200 rounded-xl overflow-hidden">
-              <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Utensils className="w-5 h-5 text-primary-600" />
-                  <h5 className="font-semibold text-neutral-800">Module 1: Kitchen Fundamentals</h5>
-                </div>
-                <span className="text-sm text-neutral-500">4 Weeks</span>
-              </div>
-              <div className="p-4 text-neutral-600 text-sm">
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Kitchen safety and hygiene practices</span>
-                  </li>
-                  {/* ... other list items */}
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Food storage and inventory management</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            {/* Module 2 */}
-            <div className="border border-neutral-200 rounded-xl overflow-hidden">
-              <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-primary-600" />
-                  <h5 className="font-semibold text-neutral-800">Module 2: Service & Customer Relations</h5>
-                </div>
-                <span className="text-sm text-neutral-500">3 Weeks</span>
-              </div>
-              <div className="p-4 text-neutral-600 text-sm">
-                <ul className="space-y-2">
-                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Professional service techniques and etiquette</span>
-                  </li>
-                  {/* ... other list items */}
-                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Upselling techniques and menu knowledge</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-             {/* Module 3 */}
-             <div className="border border-neutral-200 rounded-xl overflow-hidden">
-              <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-5 h-5 text-primary-600" />
-                  <h5 className="font-semibold text-neutral-800">Module 3: Restaurant Management Basics</h5>
-                </div>
-                <span className="text-sm text-neutral-500">3 Weeks</span>
-              </div>
-              <div className="p-4 text-neutral-600 text-sm">
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Restaurant operations and workflow</span>
-                  </li>
-                  {/* ... other list items */}
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Health, safety and regulatory compliance</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-             {/* Module 4 */}
-             <div className="border border-neutral-200 rounded-xl overflow-hidden">
-              <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Award className="w-5 h-5 text-primary-600" />
-                  <h5 className="font-semibold text-neutral-800">Module 4: Professional Development & Internship</h5>
-                </div>
-                <span className="text-sm text-neutral-500">2 Weeks</span>
-              </div>
-              <div className="p-4 text-neutral-600 text-sm">
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Resume building and interview preparation</span>
-                  </li>
-                  {/* ... other list items */}
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
-                    <span>Final project: Menu development and service planning</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MakeupArtistCourse = () => {
-  // Structure similar to HospitalityCourse with makeup-specific content
-  return (
-    <div className="space-y-8">
-       <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
-        {/* Course Header */}
-        <div className="bg-gradient-to-r from-accent-terracotta to-primary-500 p-6 text-white">
-           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                 <Palette className="w-6 h-6" />
-               </div>
-               <div>
-                 <h3 className="text-xl sm:text-2xl font-bold">Professional Makeup Artistry</h3>
-                 <p className="text-white/80 text-sm sm:text-base">Learn the art and business of makeup application</p>
-               </div>
-             </div>
-             <div className="bg-white/20 px-4 py-2 rounded-lg text-sm self-start sm:self-center flex-shrink-0 mt-2 sm:mt-0">
-               10 Weeks
-             </div>
-           </div>
-         </div>
-         {/* Course Overview */}
-         <div className="p-6 border-b border-neutral-100">
-           <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Overview</h4>
-           <p className="text-neutral-600 mb-4">
-             This makeup artistry program equips you with the technical skills and artistic vision to excel in the beauty industry.
-             From basic techniques to advanced applications for various occasions, you'll develop a versatile skill set along with the business
-             knowledge needed to build a successful career as a professional makeup artist.
-           </p>
-           {/* Details: Duration, Batch Size, etc. */}
-            <div className="grid sm:grid-cols-2 gap-4 mt-6">
-                {/* ... Duration, Batch Size, Schedule, Kit ... */}
-                 <div className="flex items-start gap-3">
-                   <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Calendar className="w-5 h-5" /> </div>
-                   <div> <h5 className="font-medium text-neutral-800">Duration</h5> <p className="text-neutral-600">10 Weeks (200 Hours)</p> </div>
-                 </div>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Users className="w-5 h-5" /> </div>
-                    <div> <h5 className="font-medium text-neutral-800">Batch Size</h5> <p className="text-neutral-600">12 Students</p> </div>
-                  </div>
-                   <div className="flex items-start gap-3">
-                     <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Clock className="w-5 h-5" /> </div>
-                     <div> <h5 className="font-medium text-neutral-800">Schedule</h5> <p className="text-neutral-600">Flexible Timings Available</p> </div>
-                   </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Briefcase className="w-5 h-5" /> </div>
-                      <div> <h5 className="font-medium text-neutral-800">Kit Included</h5> <p className="text-neutral-600">Professional Starter Kit Provided</p> </div>
-                    </div>
-            </div>
-         </div>
-         {/* Course Curriculum */}
-         <div className="p-6">
-           <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Curriculum</h4>
-           <div className="space-y-6">
-             {/* Modules 1-4 */}
-              <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                 <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3"> <Palette className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 1: Makeup Fundamentals</h5> </div>
-                    <span className="text-sm text-neutral-500">3 Weeks</span>
-                 </div>
-                 <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 1 items ... */} </ul> </div>
-              </div>
-               <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                  <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                     <div className="flex items-center gap-3"> <Scissors className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 2: Eye & Lip Techniques</h5> </div>
-                     <span className="text-sm text-neutral-500">3 Weeks</span>
-                  </div>
-                  <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 2 items ... */} </ul> </div>
-               </div>
-                <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                   <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3"> <Users className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 3: Special Occasion Makeup</h5> </div>
-                      <span className="text-sm text-neutral-500">2 Weeks</span>
-                   </div>
-                   <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 3 items ... */} </ul> </div>
-                </div>
-                 <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                    <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                       <div className="flex items-center gap-3"> <Briefcase className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 4: Business of Makeup Artistry</h5> </div>
-                       <span className="text-sm text-neutral-500">2 Weeks</span>
-                    </div>
-                    <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 4 items ... */} </ul> </div>
-                 </div>
-           </div>
-         </div>
-       </div>
-    </div>
-  );
-};
-
-const ITCourse = () => {
-  // Structure similar to HospitalityCourse with IT/Digital Marketing content
-   return (
-    <div className="space-y-8">
-       <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
-         {/* Course Header */}
-         <div className="bg-gradient-to-r from-accent-slate to-primary-600 p-6 text-white">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                     <Monitor className="w-6 h-6" />
-                  </div>
-                  <div>
-                     <h3 className="text-xl sm:text-2xl font-bold">Digital Marketing: SEO & Content Writing</h3>
-                     <p className="text-white/80 text-sm sm:text-base">Master the skills to succeed in the digital landscape</p>
-                  </div>
-               </div>
-               <div className="bg-white/20 px-4 py-2 rounded-lg text-sm self-start sm:self-center flex-shrink-0 mt-2 sm:mt-0">
-                  8 Weeks
-               </div>
-            </div>
-         </div>
-         {/* Course Overview */}
-          <div className="p-6 border-b border-neutral-100">
-           <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Overview</h4>
-           <p className="text-neutral-600 mb-4">
-             This comprehensive digital marketing program focuses on two high-demand skills: Search Engine Optimization (SEO) and
-             Content Writing. You'll learn to create engaging content that ranks well on search engines, drive organic traffic,
-             and develop digital marketing strategies that deliver results for businesses across industries.
-           </p>
-            {/* Details: Duration, Batch Size, etc. */}
-             <div className="grid sm:grid-cols-2 gap-4 mt-6">
-                 {/* ... Duration, Batch Size, Schedule, Certification ... */}
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Calendar className="w-5 h-5" /> </div>
-                    <div> <h5 className="font-medium text-neutral-800">Duration</h5> <p className="text-neutral-600">8 Weeks (160 Hours)</p> </div>
-                  </div>
-                   <div className="flex items-start gap-3">
-                     <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Users className="w-5 h-5" /> </div>
-                     <div> <h5 className="font-medium text-neutral-800">Batch Size</h5> <p className="text-neutral-600">15 Students</p> </div>
-                   </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Clock className="w-5 h-5" /> </div>
-                      <div> <h5 className="font-medium text-neutral-800">Schedule</h5> <p className="text-neutral-600">Evening & Weekend Batches</p> </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                       <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Award className="w-5 h-5" /> </div>
-                       <div> <h5 className="font-medium text-neutral-800">Certification</h5> <p className="text-neutral-600">Industry-Recognized Certificate</p> </div>
-                     </div>
-             </div>
-          </div>
-         {/* Course Curriculum */}
-          <div className="p-6">
-            <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Curriculum</h4>
-            <div className="space-y-6">
-              {/* Modules 1-4 */}
-               <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                  <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                     <div className="flex items-center gap-3"> <Monitor className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 1: Digital Marketing Fundamentals</h5> </div>
-                     <span className="text-sm text-neutral-500">2 Weeks</span>
-                  </div>
-                  <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 1 items ... */} </ul> </div>
-               </div>
-                <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                   <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3"> <Search className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 2: SEO Principles and Techniques</h5> </div>
-                      <span className="text-sm text-neutral-500">2 Weeks</span>
-                   </div>
-                   <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 2 items ... */} </ul> </div>
-                </div>
-                 <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                    <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                       <div className="flex items-center gap-3"> <Edit className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 3: Content Writing Mastery</h5> </div>
-                       <span className="text-sm text-neutral-500">2 Weeks</span>
-                    </div>
-                    <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 3 items ... */} </ul> </div>
-                 </div>
-                  <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                     <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3"> <Briefcase className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 4: Digital Marketing Career Development</h5> </div>
-                        <span className="text-sm text-neutral-500">2 Weeks</span>
-                     </div>
-                     <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 4 items ... */} </ul> </div>
-                  </div>
-            </div>
-          </div>
-       </div>
-     </div>
-  );
-};
-
-const HandicraftsCourse = () => {
-  // Structure similar to HospitalityCourse with handicrafts content
-  return (
-    <div className="space-y-8">
-      <div className="heritage-paper rounded-lg shadow-lg overflow-hidden border border-neutral-300">
-         {/* Course Header */}
-         <div className="bg-gradient-to-r from-accent-sage to-accent-ochre p-6 text-white">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                     <Layers className="w-6 h-6" />
-                  </div>
-                  <div>
-                     <h3 className="text-xl sm:text-2xl font-bold">Handicrafts & Artisanal Skills</h3>
-                     <p className="text-white/80 text-sm sm:text-base">Learn traditional and contemporary craft techniques</p>
-                  </div>
-               </div>
-               <div className="bg-white/20 px-4 py-2 rounded-lg text-sm self-start sm:self-center flex-shrink-0 mt-2 sm:mt-0">
-                  12 Weeks
-               </div>
-            </div>
-         </div>
-         {/* Course Overview */}
-          <div className="p-6 border-b border-neutral-100">
-           <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Overview</h4>
-           <p className="text-neutral-600 mb-4">
-             This hands-on handicrafts program preserves and promotes traditional artisanal skills while teaching
-             modern applications. You'll learn various techniques across different craft disciplines, develop your
-             creative vision, and gain entrepreneurial knowledge to transform your crafting passion into a sustainable
-             livelihood.
-           </p>
-            {/* Details: Duration, Batch Size, etc. */}
-             <div className="grid sm:grid-cols-2 gap-4 mt-6">
-                 {/* ... Duration, Batch Size, Schedule, Materials ... */}
-                  <div className="flex items-start gap-3">
-                     <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Calendar className="w-5 h-5" /> </div>
-                     <div> <h5 className="font-medium text-neutral-800">Duration</h5> <p className="text-neutral-600">12 Weeks (240 Hours)</p> </div>
-                  </div>
-                   <div className="flex items-start gap-3">
-                     <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Users className="w-5 h-5" /> </div>
-                     <div> <h5 className="font-medium text-neutral-800">Batch Size</h5> <p className="text-neutral-600">10 Students</p> </div>
-                   </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Clock className="w-5 h-5" /> </div>
-                      <div> <h5 className="font-medium text-neutral-800">Schedule</h5> <p className="text-neutral-600">Morning & Weekend Batches</p> </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                       <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0"> <Briefcase className="w-5 h-5" /> </div>
-                       <div> <h5 className="font-medium text-neutral-800">Materials</h5> <p className="text-neutral-600">Basic Materials Provided</p> </div>
-                     </div>
-             </div>
-          </div>
-         {/* Course Curriculum */}
-          <div className="p-6">
-            <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Curriculum</h4>
-            <div className="space-y-6">
-               {/* Modules 1-4 */}
-                <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                  <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                     <div className="flex items-center gap-3"> <Layers className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 1: Textile Crafts</h5> </div>
-                     <span className="text-sm text-neutral-500">3 Weeks</span>
-                  </div>
-                  <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 1 items ... */} </ul> </div>
-                </div>
-                 <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                   <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3"> <Palette className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 2: Decorative Arts</h5> </div>
-                      <span className="text-sm text-neutral-500">3 Weeks</span>
-                   </div>
-                   <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 2 items ... */} </ul> </div>
-                 </div>
-                  <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                    <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                       <div className="flex items-center gap-3"> <Edit className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 3: Jewelry & Accessories</h5> </div>
-                       <span className="text-sm text-neutral-500">3 Weeks</span>
-                    </div>
-                    <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 3 items ... */} </ul> </div>
-                  </div>
-                   <div className="border border-neutral-200 rounded-xl overflow-hidden">
-                      <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
-                         <div className="flex items-center gap-3"> <Briefcase className="w-5 h-5 text-primary-600" /> <h5 className="font-semibold text-neutral-800">Module 4: Craft Entrepreneurship</h5> </div>
-                         <span className="text-sm text-neutral-500">3 Weeks</span>
-                      </div>
-                      <div className="p-4 text-neutral-600 text-sm"> <ul className="space-y-2"> {/* ... Module 4 items ... */} </ul> </div>
-                   </div>
-            </div>
-          </div>
-       </div>
-    </div>
-  );
-};
 
 // --- Helper Components ---
 
 const DynamicCourseDisplay = ({ course }) => {
   const getIconComponent = (iconName) => {
     const iconMap = {
-      'ChefHat': ChefHat,
-      'Palette': Palette,
-      'Monitor': Monitor,
       'Scissors': Scissors,
-      'Layers': Layers
+      'Shirt': Shirt,
+      'Music': Music,
+      'PersonStanding': PersonStanding
     };
-    return iconMap[iconName] || ChefHat;
+    return iconMap[iconName] || Scissors;
   };
 
   const IconComponent = getIconComponent(course.icon);
@@ -485,7 +33,7 @@ const DynamicCourseDisplay = ({ course }) => {
               </div>
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold">{course.title}</h3>
-                <p className="text-white/80 text-sm sm:text-base">{course.category}</p>
+                <p className="text-white/80 text-sm sm:text-base">{course.tagline}</p>
               </div>
             </div>
             <div className="bg-white/20 px-4 py-2 rounded-lg text-sm self-start sm:self-center flex-shrink-0">
@@ -571,6 +119,45 @@ const DynamicCourseDisplay = ({ course }) => {
             )}
           </div>
         )}
+
+        {/* Course Curriculum */}
+        {course.modules?.length > 0 && (
+          <div className="p-6 border-t border-neutral-100">
+            <h4 className="text-lg font-semibold text-neutral-800 mb-4">Course Curriculum</h4>
+            <div className="space-y-4">
+              {course.modules.map((module, index) => (
+                <div key={index} className="border border-neutral-200 rounded-xl overflow-hidden">
+                  <div className="bg-primary-50 px-4 py-3 flex items-center justify-between">
+                    <h5 className="font-semibold text-neutral-800">{module.title}</h5>
+                    {module.duration && (
+                      <span className="text-sm text-neutral-500 flex-shrink-0">{module.duration}</span>
+                    )}
+                  </div>
+                  {module.topics?.length > 0 && (
+                    <div className="p-4 text-neutral-600 text-sm">
+                      <ul className="space-y-2">
+                        {module.topics.map((topic, topicIndex) => (
+                          <li key={topicIndex} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
+                            <span>{topic}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Instructor */}
+        {course.instructor && (
+          <div className="p-6 border-t border-neutral-100 bg-primary-50/40">
+            <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-1">Instructor</h4>
+            <p className="text-neutral-800 font-medium">{course.instructor}</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -579,21 +166,20 @@ const DynamicCourseDisplay = ({ course }) => {
 const CourseSelectorTabs = ({ selectedCourse, onSelectCourse, courses }) => {
   const getIconComponent = (iconName) => {
     const iconMap = {
-      'ChefHat': ChefHat,
-      'Palette': Palette,
-      'Monitor': Monitor,
       'Scissors': Scissors,
-      'Layers': Layers
+      'Shirt': Shirt,
+      'Music': Music,
+      'PersonStanding': PersonStanding
     };
-    return iconMap[iconName] || ChefHat;
+    return iconMap[iconName] || Scissors;
   };
 
   const getGradient = (category) => {
     const gradientMap = {
-      'hospitality': 'from-accent-ochre to-accent-terracotta',
-      'beauty': 'from-accent-terracotta to-primary-500',
-      'digital': 'from-accent-slate to-primary-600',
-      'crafts': 'from-accent-sage to-accent-ochre'
+      'beauty-parlour': 'from-accent-terracotta to-primary-500',
+      'tailoring': 'from-accent-ochre to-accent-terracotta',
+      'music': 'from-accent-slate to-primary-600',
+      'kathak': 'from-accent-sage to-accent-ochre'
     };
     return gradientMap[category] || 'from-primary-500 to-secondary-600';
   };
@@ -707,7 +293,7 @@ const FAQItem = ({ question, answer }) => {
 // --- Main GazraSkills Component ---
 
 const GazraSkills = () => {
-  const [selectedCourse, setSelectedCourse] = useState('hospitality'); // Default course
+  const [selectedCourse, setSelectedCourse] = useState('beauty-parlour'); // Default course
   const [formStep, setFormStep] = useState(1); // For multi-step form
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -817,24 +403,24 @@ const GazraSkills = () => {
   const successStories = [
      {
         imageSrc: "/images/image8.webp",
-        altText: "Ananya Success Story",
+        altText: "Beauty Parlour graduate success story",
         title: "Ananya's Journey",
-        text: "After completing the makeup artistry program, I started my own small business doing bridal makeup. The skills I learned at Gazra helped me build a client base and achieve financial independence.",
-        graduateInfo: "Makeup Artistry Graduate"
+        text: "After completing the Beauty Parlour course, I started my own small business doing bridal makeup and hairstyling. The skills I learned at MCSU helped me build a client base and achieve financial independence.",
+        graduateInfo: "Beauty Parlour Course Graduate"
      },
       {
         imageSrc: "/images/image9.webp",
-        altText: "Rahul Success Story",
+        altText: "Tailoring graduate success story",
         title: "Rahul's Story",
-        text: "The hospitality training opened doors for me that I never thought possible. I started as a server and worked my way up to assistant manager at a respected restaurant within a year.",
-        graduateInfo: "Hospitality Program Graduate"
+        text: "The tailoring training opened doors I never thought possible. With loan assistance for a sewing machine after the course, I set up a home-based stitching business within a year.",
+        graduateInfo: "Tailoring Course Graduate"
      },
       {
         imageSrc: "/images/image10.webp",
-        altText: "Maya Success Story",
+        altText: "Kathak dance graduate success story",
         title: "Maya's Success",
-        text: "Learning digital marketing and SEO completely changed my career path. I now work remotely for clients around the country, enjoying the flexibility and income that comes with these skills.",
-        graduateInfo: "Digital Marketing Graduate"
+        text: "Learning Kathak gave me a deep connection to our traditional art form. I now teach dance classes of my own and perform at community events across Vadodara.",
+        graduateInfo: "Kathak Dance Course Graduate"
      }
   ];
 

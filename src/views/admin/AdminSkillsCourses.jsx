@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, BookOpen, X, Save, ChefHat, Scissors, Monitor, Palette } from 'lucide-react';
+import { Plus, Edit, Trash2, BookOpen, X, Save, Scissors, Shirt, Music, PersonStanding } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import AdminLayout from '../../layouts/AdminLayout';
 
@@ -10,8 +10,10 @@ const AdminSkillsCourses = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    category: 'hospitality',
-    icon: 'ChefHat',
+    tagline: '',
+    instructor: '',
+    category: 'beauty-parlour',
+    icon: 'Scissors',
     duration: '',
     batchSize: '',
     schedule: '',
@@ -27,10 +29,10 @@ const AdminSkillsCourses = () => {
   const { getDocuments, addDocument, updateDocument, deleteDocument, loading } = useFirestore('skillsCourses');
 
   const iconOptions = [
-    { value: 'ChefHat', label: 'Chef Hat (Hospitality)', icon: ChefHat },
-    { value: 'Scissors', label: 'Scissors (Beauty)', icon: Scissors },
-    { value: 'Palette', label: 'Palette (Crafts)', icon: Palette },
-    { value: 'Monitor', label: 'Monitor (Digital)', icon: Monitor }
+    { value: 'Scissors', label: 'Scissors (Beauty Parlour)', icon: Scissors },
+    { value: 'Shirt', label: 'Shirt (Tailoring)', icon: Shirt },
+    { value: 'Music', label: 'Music (Music)', icon: Music },
+    { value: 'PersonStanding', label: 'Dancer (Kathak)', icon: PersonStanding }
   ];
 
   useEffect(() => {
@@ -110,6 +112,8 @@ const AdminSkillsCourses = () => {
     setEditingCourse(course);
     setFormData({
       title: course.title,
+      tagline: course.tagline || '',
+      instructor: course.instructor || '',
       category: course.category,
       icon: course.icon,
       duration: course.duration,
@@ -139,8 +143,10 @@ const AdminSkillsCourses = () => {
   const resetForm = () => {
     setFormData({
       title: '',
-      category: 'hospitality',
-      icon: 'ChefHat',
+      tagline: '',
+      instructor: '',
+      category: 'beauty-parlour',
+      icon: 'Scissors',
       duration: '',
       batchSize: '',
       schedule: '',
@@ -311,6 +317,34 @@ const AdminSkillsCourses = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Tagline
+                      </label>
+                      <input
+                        type="text"
+                        name="tagline"
+                        value={formData.tagline}
+                        onChange={handleInputChange}
+                        placeholder="Short subtitle shown under the course title"
+                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Instructor
+                      </label>
+                      <input
+                        type="text"
+                        name="instructor"
+                        value={formData.instructor}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Smt. Diptiben Vyas"
+                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
                         Category *
                       </label>
                       <select
@@ -320,10 +354,10 @@ const AdminSkillsCourses = () => {
                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                         required
                       >
-                        <option value="hospitality">Hospitality</option>
-                        <option value="beauty">Beauty & Wellness</option>
-                        <option value="crafts">Crafts & Artisan</option>
-                        <option value="digital">Digital Skills</option>
+                        <option value="beauty-parlour">Beauty Parlour</option>
+                        <option value="tailoring">Tailoring</option>
+                        <option value="music">Music</option>
+                        <option value="kathak">Kathak Dance</option>
                       </select>
                     </div>
 
