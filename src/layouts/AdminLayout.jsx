@@ -81,24 +81,44 @@ const AdminLayout = ({ children }) => {
     { icon: Users, label: 'Enrollments', path: '/admin/skills/enrollments' },
   ];
 
+  const navButtonClass = (active = false) => (
+    `w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left border ${
+      active
+        ? 'bg-primary-600 text-white border-primary-700 shadow-sm'
+        : 'text-neutral-700 border-transparent hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200'
+    }`
+  );
+
+  const subNavButtonClass = (active = false) => (
+    `w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-left text-sm border ${
+      active
+        ? 'bg-primary-100 text-primary-800 border-primary-200 font-semibold'
+        : 'text-neutral-600 border-transparent hover:bg-primary-50 hover:text-primary-700 hover:border-primary-100'
+    }`
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="admin-heritage min-h-screen flex">
       {/* Sidebar - Desktop */}
       <aside
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-white border-r border-gray-200 fixed h-full transition-all duration-300 hidden lg:block z-30`}
+        } heritage-paper border-r-2 border-[rgba(184,121,44,0.45)] fixed h-full transition-all duration-300 hidden lg:block z-30 shadow-xl`}
       >
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="heritage-rule h-1.5 w-full" />
+        <div className="p-4 border-b border-[rgba(184,121,44,0.22)] flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="Gazra" className="h-10 w-auto" />
-              <span className="font-bold text-neutral-800">Admin</span>
+              <div>
+                <span className="block font-display text-lg font-black text-neutral-900">Gazra</span>
+                <span className="block text-[11px] font-bold uppercase tracking-wide text-primary-700">Admin</span>
+              </div>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-primary-50 text-neutral-700 hover:text-primary-700 rounded-lg border border-transparent hover:border-primary-200"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -107,7 +127,7 @@ const AdminLayout = ({ children }) => {
         <div className="px-4 pt-4">
           <button
             onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-white/70 border border-[rgba(184,121,44,0.22)] hover:bg-primary-50 hover:text-primary-700 transition-colors text-left shadow-sm"
           >
             <Home className="w-5 h-5 flex-shrink-0" />
             {sidebarOpen && <span className="text-sm font-medium">View Website</span>}
@@ -119,9 +139,7 @@ const AdminLayout = ({ children }) => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left ${
-                location.pathname === item.path ? 'bg-primary-50 text-primary-600' : ''
-              }`}
+              className={navButtonClass(location.pathname === item.path)}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
               {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
@@ -132,9 +150,7 @@ const AdminLayout = ({ children }) => {
           <div className="pt-2">
             <button
               onClick={() => setCafeMenuOpen(!cafeMenuOpen)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left ${
-                location.pathname.startsWith('/admin/cafe') ? 'bg-primary-50 text-primary-600' : ''
-              }`}
+              className={navButtonClass(location.pathname.startsWith('/admin/cafe'))}
             >
               <Coffee className="w-5 h-5 flex-shrink-0" />
               {sidebarOpen && (
@@ -158,9 +174,7 @@ const AdminLayout = ({ children }) => {
                     <button
                       key={item.path}
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left text-sm ${
-                        location.pathname === item.path ? 'bg-primary-100 text-primary-700 font-medium' : ''
-                      }`}
+                      className={subNavButtonClass(location.pathname === item.path)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       <span>{item.label}</span>
@@ -175,9 +189,7 @@ const AdminLayout = ({ children }) => {
           <div className="pt-2">
             <button
               onClick={() => setSkillsMenuOpen(!skillsMenuOpen)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left ${
-                location.pathname.startsWith('/admin/skills') ? 'bg-primary-50 text-primary-600' : ''
-              }`}
+              className={navButtonClass(location.pathname.startsWith('/admin/skills'))}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
               {sidebarOpen && (
@@ -201,9 +213,7 @@ const AdminLayout = ({ children }) => {
                     <button
                       key={item.path}
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left text-sm ${
-                        location.pathname === item.path ? 'bg-primary-100 text-primary-700 font-medium' : ''
-                      }`}
+                      className={subNavButtonClass(location.pathname === item.path)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       <span>{item.label}</span>
@@ -215,10 +225,10 @@ const AdminLayout = ({ children }) => {
           </div>
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 w-full p-4 border-t border-[rgba(184,121,44,0.22)] bg-[rgba(251,244,231,0.88)]">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-red-50 hover:text-red-700 border border-transparent hover:border-red-100 transition-colors"
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
             {sidebarOpen && <span className="text-sm font-medium">Logout</span>}
@@ -232,13 +242,17 @@ const AdminLayout = ({ children }) => {
           <motion.div
             initial={{ x: -300 }}
             animate={{ x: 0 }}
-            className="w-64 h-full bg-white"
+            className="heritage-paper w-72 h-full border-r-2 border-[rgba(184,121,44,0.55)] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="heritage-rule h-1.5 w-full" />
+            <div className="p-4 border-b border-[rgba(184,121,44,0.22)] flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img src="/logo.svg" alt="Gazra" className="h-10 w-auto" />
-                <span className="font-bold text-neutral-800">Admin</span>
+                <div>
+                  <span className="block font-display text-lg font-black text-neutral-900">Gazra</span>
+                  <span className="block text-[11px] font-bold uppercase tracking-wide text-primary-700">Admin</span>
+                </div>
               </div>
               <button onClick={() => setMobileMenuOpen(false)}>
                 <X className="w-5 h-5" />
@@ -251,7 +265,7 @@ const AdminLayout = ({ children }) => {
                   navigate('/');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-white/70 border border-[rgba(184,121,44,0.22)] hover:bg-primary-50 hover:text-primary-700 transition-colors"
               >
                 <Home className="w-5 h-5" />
                 <span className="text-sm font-medium">View Website</span>
@@ -264,9 +278,7 @@ const AdminLayout = ({ children }) => {
                     navigate(item.path);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors ${
-                    location.pathname === item.path ? 'bg-primary-50 text-primary-600' : ''
-                  }`}
+                  className={navButtonClass(location.pathname === item.path)}
                 >
                   <item.icon className="w-5 h-5" />
                   <span className="text-sm font-medium">{item.label}</span>
@@ -277,9 +289,7 @@ const AdminLayout = ({ children }) => {
               <div className="pt-2">
                 <button
                   onClick={() => setCafeMenuOpen(!cafeMenuOpen)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors ${
-                    location.pathname.startsWith('/admin/cafe') ? 'bg-primary-50 text-primary-600' : ''
-                  }`}
+                  className={navButtonClass(location.pathname.startsWith('/admin/cafe'))}
                 >
                   <Coffee className="w-5 h-5" />
                   <span className="text-sm font-medium flex-1">Cafe Management</span>
@@ -302,9 +312,7 @@ const AdminLayout = ({ children }) => {
                             navigate(item.path);
                             setMobileMenuOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition-colors text-left text-sm ${
-                            location.pathname === item.path ? 'bg-primary-100 text-primary-700 font-medium' : ''
-                          }`}
+                          className={subNavButtonClass(location.pathname === item.path)}
                         >
                           <item.icon className="w-4 h-4" />
                           <span>{item.label}</span>
@@ -317,7 +325,7 @@ const AdminLayout = ({ children }) => {
               
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-red-50 hover:text-red-700 border border-transparent hover:border-red-100 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="text-sm font-medium">Logout</span>
@@ -330,10 +338,12 @@ const AdminLayout = ({ children }) => {
       {/* Main Content */}
       <div className={`flex-1 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'} transition-all duration-300`}>
         {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+        <header className="heritage-paper border-b-2 border-[rgba(184,121,44,0.35)] flex items-center justify-between sticky top-0 z-20 shadow-sm">
+          <div className="absolute inset-x-0 bottom-0 gazra-toran-stripe" />
+          <div className="relative flex w-full items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            className="lg:hidden p-2 hover:bg-primary-50 text-neutral-700 hover:text-primary-700 rounded-lg border border-transparent hover:border-primary-200"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -341,16 +351,17 @@ const AdminLayout = ({ children }) => {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm font-medium text-neutral-800">{user?.email}</p>
-              <p className="text-xs text-neutral-500">Administrator</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Administrator</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold shadow-sm border border-primary-700">
               {user?.email?.[0].toUpperCase()}
             </div>
+          </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-4 sm:p-6">
           {children}
         </main>
       </div>

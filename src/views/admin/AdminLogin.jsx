@@ -49,7 +49,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4">
+    <div className="admin-heritage min-h-screen flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -63,12 +63,14 @@ const AdminLogin = () => {
             alt="Gazra Logo" 
             className="h-20 w-auto mx-auto mb-4" 
           />
-          <h1 className="text-3xl font-bold text-neutral-800 mb-2">Admin Portal</h1>
+          <div className="gazra-folk-chain max-w-[220px] mx-auto mb-4" />
+          <h1 className="font-display text-3xl font-black text-neutral-900 mb-2">Admin Portal</h1>
           <p className="text-neutral-600">Sign in to manage Gazra content</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="heritage-paper relative overflow-hidden rounded-lg border-2 border-[rgba(184,121,44,0.5)] shadow-xl p-8">
+          <div className="heritage-rule absolute left-0 top-0 h-1.5 w-full" />
           {errorMessage && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -126,7 +128,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
             >
               {loading ? (
                 <>
@@ -144,7 +146,7 @@ const AdminLogin = () => {
         </div>
 
         {/* Footer Note */}
-        <p className="text-center text-sm text-neutral-500 mt-6">
+        <p className="text-center text-sm text-neutral-600 mt-6">
           Authorized personnel only. Contact admin@gazra.org for access.
         </p>
       </motion.div>

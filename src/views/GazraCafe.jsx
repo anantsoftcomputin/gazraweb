@@ -29,7 +29,7 @@ const DishImageCarousel = ({ images, item }) => {
   }, [imageArray.length]);
   
   return (
-    <div className="relative h-full min-h-[148px] w-28 flex-shrink-0 overflow-hidden sm:h-48 sm:w-full">
+    <div className="relative h-full min-h-[172px] w-36 flex-shrink-0 overflow-hidden bg-[#fff8ec] sm:h-56 sm:w-full">
       <AnimatePresence mode="wait">
         <motion.img
           key={`${item.id}-${currentIndex}`}
@@ -39,7 +39,7 @@ const DishImageCarousel = ({ images, item }) => {
           transition={{ duration: 0.5 }}
           src={imageArray[currentIndex]}
           alt={item.name}
-          className="w-full h-full object-cover transition-transform duration-700 transform group-hover:scale-110"
+          className="w-full h-full object-contain p-2 transition-transform duration-700 transform group-hover:scale-105"
           loading="lazy"
           onError={(e) => {
             console.error('Image failed to load:', imageArray[currentIndex]);

@@ -224,11 +224,11 @@ const MenuCard = () => {
                       className="heritage-paper group relative flex h-full cursor-pointer overflow-hidden rounded-lg border-2 border-[rgba(184,121,44,0.55)] text-left shadow-sm transition hover:-translate-y-1 hover:border-primary-400 hover:shadow-lg sm:flex-col"
                     >
                       <div className="heritage-rule absolute left-0 top-0 z-10 h-1.5 w-full" />
-                      <div className="relative h-auto w-28 shrink-0 overflow-hidden bg-primary-50 sm:h-44 sm:w-full">
+                      <div className="relative h-auto min-h-[172px] w-36 shrink-0 overflow-hidden bg-[#fff8ec] sm:h-56 sm:w-full">
                         <img
                           src={getDishImage(item)}
                           alt={item.name}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
                           onError={(event) => {
                             event.currentTarget.src = fallbackDishImage;
                           }}
@@ -301,7 +301,7 @@ const MenuCard = () => {
                 <img
                   src={getDishImage(selectedItem)}
                   alt={selectedItem.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain bg-[#fff8ec] p-3"
                   onError={(event) => {
                     event.currentTarget.src = fallbackDishImage;
                   }}
