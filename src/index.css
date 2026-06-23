@@ -173,6 +173,28 @@ body {
   background-color: rgba(241, 228, 203, 0.72) !important;
 }
 
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.skiptranslate > iframe {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+#google_translate_element,
+.goog-te-gadget,
+.goog-logo-link,
+.goog-te-gadget span {
+  display: none !important;
+}
+
+font[style*="background-color"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
 .gazra-jaali {
   background-image:
     radial-gradient(circle, rgba(159, 47, 40, 0.55) 0 3px, transparent 4px),
@@ -315,4 +337,40 @@ body {
     radial-gradient(circle at 20% 18%, rgba(217, 161, 58, 0.10), transparent 32rem),
     radial-gradient(circle at 82% 76%, rgba(0, 0, 0, 0.40), transparent 36rem);
   background-size: 3px 3px, 3px 3px, auto, auto;
+}
+
+@keyframes gazra-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.gazra-marquee {
+  animation: gazra-marquee 85s linear infinite;
+  will-change: transform;
+}
+
+.gazra-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gazra-marquee {
+    width: auto;
+    overflow-x: auto;
+    animation: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .gazra-marquee > * {
+    scroll-snap-align: start;
+  }
+
+  .gazra-marquee::-webkit-scrollbar {
+    display: none;
+  }
 }

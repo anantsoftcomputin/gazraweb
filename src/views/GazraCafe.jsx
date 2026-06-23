@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import FloatingBookingForm from '../components/cafe/FloatingBookingForm';
+import ReviewCTA from '../components/shared/ReviewCTA';
 import {
   DEFAULT_CAFE_CATEGORIES,
   normalizeCafeCategoryId,
@@ -277,7 +278,10 @@ const GazraCafe = () => {
         // Load testimonials
         const testimonialsResult = await getTestimonials();
         if (testimonialsResult.success && testimonialsResult.data.length > 0) {
-          setTestimonials(testimonialsResult.data.filter(t => t.active !== false));
+          const activeTestimonials = testimonialsResult.data
+            .filter(t => t.active !== false)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+          setTestimonials(activeTestimonials);
         }
       } catch (error) {
         console.error('Error loading cafe data:', error);
@@ -359,6 +363,8 @@ const GazraCafe = () => {
       </div>
     );
   }
+
+  const testimonialLoop = testimonials.length > 0 ? [...testimonials, ...testimonials] : [];
 
   return (
     <div className="min-h-screen bg-[var(--gazra-paper)]">
@@ -748,13 +754,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 relative overflow-hidden bg-[var(--gazra-paper)]">
-        {/* Background Blobs */}
-         <div className="absolute inset-0">
-           <div className="absolute w-[500px] h-[500px] -top-[250px] -right-[250px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-           <div className="absolute w-[500px] h-[500px] -bottom-[250px] -left-[250px] bg-secondary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-         </div>
-
+      <section className="gazra-folk-bg py-24 relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
              <motion.div
@@ -774,54 +774,63 @@ const GazraCafe = () => {
              </motion.div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative group" // Keep group for potential future hover effects on parent
-              >
-                <div className="relative overflow-hidden bg-[rgba(251,244,231,0.92)] backdrop-blur-md rounded-lg p-6 sm:p-8 shadow-lg hover:shadow-xl border border-neutral-300 hover:border-primary-500 transition-all duration-300 h-full flex flex-col">
-                  <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
-                  <div className="flex items-center mb-4 sm:mb-6">
-                    {testimonial.image ? (
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover mr-4 border-2 border-white shadow-md flex-shrink-0"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-sm font-bold text-primary-700 shadow-md sm:h-14 sm:w-14 sm:text-base">
-                        {(testimonial.name || 'G').trim().charAt(0).toUpperCase()}
+          <div className="relative -mx-4 overflow-hidden px-4">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--gazra-paper)] to-transparent sm:w-28" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--gazra-paper)] to-transparent sm:w-28" />
+
+            <div className="gazra-marquee flex w-max gap-5 py-3 sm:gap-7">
+              {testimonialLoop.map((testimonial, index) => (
+                <motion.div
+                  key={`${testimonial.id || testimonial.name}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: Math.min(index, testimonials.length - 1) * 0.03 }}
+                  className="relative group w-[82vw] max-w-[360px] flex-shrink-0 sm:w-[360px] lg:w-[390px] lg:max-w-[390px]"
+                >
+                  <div className="relative overflow-hidden bg-[rgba(251,244,231,0.94)] backdrop-blur-md rounded-lg p-6 sm:p-8 shadow-lg hover:shadow-xl border border-neutral-300 hover:border-primary-500 transition-all duration-300 min-h-[340px] h-full flex flex-col">
+                    <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
+                    <div className="flex items-center mb-4 sm:mb-6">
+                      {testimonial.image ? (
+                        <img
+                          src={testimonial.image}
+                          alt={testimonial.name}
+                          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover mr-4 border-2 border-white shadow-md flex-shrink-0"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-sm font-bold text-primary-700 shadow-md sm:h-14 sm:w-14 sm:text-base">
+                          {(testimonial.name || 'G').trim().charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="font-bold text-neutral-900">{testimonial.name}</h3>
+                        <p className="text-sm text-neutral-600">{testimonial.role}</p>
                       </div>
-                    )}
-                    <div>
-                      <h3 className="font-bold text-neutral-900">{testimonial.name}</h3>
-                      <p className="text-sm text-neutral-600">{testimonial.role}</p>
+                    </div>
+
+                    <div className="flex items-center mb-3 sm:mb-4">
+                      {[...Array(5)].map((_, i) => ( // Always show 5 stars
+                        <Star key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} />
+                      ))}
+                    </div>
+
+                    <blockquote className="text-neutral-600 mb-6 italic text-sm sm:text-base flex-grow"> {/* Added flex-grow */}
+                      "{testimonial.comment}"
+                    </blockquote>
+
+                    <div className="mt-auto flex items-center text-xs sm:text-sm text-primary-600 bg-primary-50 px-3 py-1.5 rounded self-start">
+                      <Utensils className="w-3.5 h-3.5 mr-2" />
+                      Favorite: {testimonial.dish}
                     </div>
                   </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
-                  <div className="flex items-center mb-3 sm:mb-4">
-                    {[...Array(5)].map((_, i) => ( // Always show 5 stars
-                      <Star key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} />
-                    ))}
-                  </div>
-
-                  <blockquote className="text-neutral-600 mb-6 italic text-sm sm:text-base flex-grow"> {/* Added flex-grow */}
-                    "{testimonial.comment}"
-                  </blockquote>
-
-                  <div className="mt-auto flex items-center text-xs sm:text-sm text-primary-600 bg-primary-50 px-3 py-1.5 rounded self-start"> {/* Use self-start and mt-auto */}
-                    <Utensils className="w-3.5 h-3.5 mr-2" />
-                    Favorite: {testimonial.dish}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+          <div className="mt-12 sm:mt-16 max-w-3xl mx-auto">
+            <ReviewCTA />
           </div>
         </div>
       </section>

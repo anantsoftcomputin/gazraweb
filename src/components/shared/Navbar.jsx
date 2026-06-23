@@ -4,6 +4,7 @@ import { Menu, X, ChevronDown, Home, Info, Calendar, MapPin, Heart, BookOpen, Ca
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import ToranBorder from './ToranBorder';
+import LanguageSelector from './LanguageSelector';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,6 +95,7 @@ const Navbar = () => {
               
               {/* Social Media Links */}
               <div className="flex items-center gap-4">
+                <LanguageSelector />
                 {socialLinks.map((social, index) => (
                   <a 
                     key={index}
@@ -206,6 +208,7 @@ const Navbar = () => {
 
               {/* Mobile Menu Button - Only visible on medium screens, hidden on small screens where bottom nav is used */}
               <div className="lg:hidden md:flex hidden items-center gap-2">
+                <LanguageSelector />
                 <Link
                   to="/admin/login"
                   className="p-2 rounded-lg hover:bg-primary-100/70 transition-colors duration-300 text-neutral-700"
@@ -230,6 +233,9 @@ const Navbar = () => {
           <div className="heritage-paper lg:hidden border-b border-primary-800/10 backdrop-blur-xl">
             <div className="container mx-auto px-4 py-4">
               <div className="flex flex-col space-y-2">
+                <div className="px-4 pb-2">
+                  <LanguageSelector />
+                </div>
                 {navigationItems.map((item, index) => (
                   item.submenu ? (
                     <div key={index} className="space-y-2">

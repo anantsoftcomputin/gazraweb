@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Coffee, ArrowRight, Heart, Sparkles, ChefHat, Clock, MapPin } from 'lucide-react';
 import { Link } from '../../lib/routerCompat';
 import { useFirestore } from '../../hooks/useFirestore';
+import ReviewCTA from '../shared/ReviewCTA';
 
 const CafePreview = () => {
   const [featuredDishes, setFeaturedDishes] = useState([]);
@@ -15,12 +16,10 @@ const CafePreview = () => {
         const result = await getMenuItems();
         if (result.success && result.data.length > 0) {
           const available = result.data.filter(item => item.available !== false);
-          const highlighted = available
-            .filter(item => (item.popular || item.recommended) && item.available !== false)
-            .slice(0, 3);
+          const highlighted = available.filter(item => (item.popular || item.recommended) && item.available !== false);
           const featured = highlighted.length > 0
             ? highlighted
-            : available.slice(0, 3);
+            : available.slice(0, 8);
           setFeaturedDishes(featured);
         }
       } catch (error) {
@@ -32,6 +31,8 @@ const CafePreview = () => {
 
     loadFeaturedDishes();
   }, []);
+
+  const featuredDishesLoop = featuredDishes.length > 0 ? [...featuredDishes, ...featuredDishes] : [];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -117,49 +118,61 @@ const CafePreview = () => {
           viewport={{ once: true }}
           className="mb-12"
         >
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Featured Dishes</h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            {featuredDishes.map((dish) => (
-              <motion.div
-                key={dish.id}
-                variants={itemVariants}
-                className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2"
-              >
-                <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={(dish.images && dish.images[0]) || dish.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}
-                    alt={dish.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  {dish.popular && (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs rounded-full flex items-center">
-                      <Heart className="w-3 h-3 mr-1" />
-                      Popular
-                    </div>
-                  )}
-                  {dish.recommended && (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-primary-500 text-white text-xs rounded-full flex items-center">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Chef&apos;s Pick
-                    </div>
-                  )}
-                </div>
-                <div className="p-5">
-                  <h4 className="font-display text-base font-bold text-neutral-900 mb-2">{dish.name}</h4>
-                  <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-primary-600">{dish.price}</span>
-                    {dish.spiceLevel && dish.spiceLevel !== 'none' && (
-                      <span className="text-xs text-gray-500">🌶️ {dish.spiceLevel}</span>
+          <div className="flex items-end justify-between gap-4 mb-8">
+            <h3 className="text-2xl font-bold text-gray-900">Featured Dishes</h3>
+          </div>
+          <div className="relative -mx-4 overflow-hidden px-4">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--gazra-paper)] to-transparent sm:w-20" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--gazra-paper)] to-transparent sm:w-20" />
+
+            <div className="gazra-marquee flex w-max gap-5 py-1 sm:gap-6">
+              {featuredDishesLoop.map((dish, index) => (
+                <motion.div
+                  key={`${dish.id}-${index}`}
+                  variants={itemVariants}
+                  className="group relative heritage-paper w-[280px] flex-shrink-0 overflow-hidden rounded-lg border border-neutral-300 shadow-lg transition-all duration-300 hover:border-primary-500 hover:shadow-xl hover:-translate-y-2 sm:w-[320px] md:w-[340px]"
+                >
+                  <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={(dish.images && dish.images[0]) || dish.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}
+                      alt={dish.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    {dish.popular && (
+                      <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs rounded-full flex items-center">
+                        <Heart className="w-3 h-3 mr-1" />
+                        Popular
+                      </div>
+                    )}
+                    {dish.recommended && (
+                      <div className="absolute top-3 left-3 px-3 py-1 bg-primary-500 text-white text-xs rounded-full flex items-center">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Chef&apos;s Pick
+                      </div>
                     )}
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="p-5">
+                    <h4 className="font-display text-base font-bold text-neutral-900 mb-2">{dish.name}</h4>
+                    <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xl font-bold text-primary-600">{dish.price}</span>
+                      {dish.spiceLevel && dish.spiceLevel !== 'none' && (
+                        <span className="text-xs text-gray-500">🌶️ {dish.spiceLevel}</span>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       )}
+
+      {/* Review CTA */}
+      <div className="mb-12">
+        <ReviewCTA />
+      </div>
 
       {/* Call to Action */}
       <motion.div
