@@ -419,6 +419,29 @@ const GazraCafe = () => {
     return iconMap[iconName] || Heart;
   };
 
+  const renderCategoryTabs = (mode = 'inline') => (
+    <div className={`${mode === 'fixed' ? 'flex snap-x gap-2 overflow-x-auto px-4 py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'flex snap-x gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:inline-flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:rounded-xl sm:border sm:border-[rgba(184,121,44,0.2)] sm:bg-[rgba(251,244,231,0.97)] sm:p-2 sm:shadow-lg sm:backdrop-blur-xl [&::-webkit-scrollbar]:hidden'}`}>
+      {categories.map((category) => (
+        <motion.button
+          key={`${mode}-${category.id}`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setSelectedCategory(category.id)}
+          className={`
+            flex min-w-fit snap-start items-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-300 sm:px-6 sm:py-3 sm:text-base
+            ${selectedCategory === category.id
+              ? 'bg-primary-600 text-white shadow-md'
+              : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-primary-50 sm:border-0 sm:bg-transparent'
+            }
+          `}
+        >
+          <category.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+          {category.name}
+        </motion.button>
+      ))}
+    </div>
+  );
+
    // Stats Data
    const stats = [
       { number: '4.9', label: 'Customer Rating', suffix: '/5', icon: Star },
@@ -469,6 +492,20 @@ const GazraCafe = () => {
         {cafeMusicPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         <span>{cafeMusicBlocked && !cafeMusicPlaying ? 'Tap for music' : 'Cafe music'}</span>
       </button>
+
+      <AnimatePresence>
+        {isCategoryPinned && (
+          <motion.div
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-0 right-0 top-[96px] z-40 border-y border-[rgba(184,121,44,0.22)] bg-[rgba(251,244,231,0.97)] shadow-md backdrop-blur-xl sm:hidden"
+          >
+            {renderCategoryTabs('fixed')}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modern Video Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">
@@ -665,28 +702,9 @@ const GazraCafe = () => {
           {/* Category Navigation - Sticky tabs */}
           <div ref={categorySentinelRef} className="h-px" />
           <div
-            className={`${isCategoryPinned ? 'fixed left-0 right-0 top-[96px] z-40 mx-0 border-y border-[rgba(184,121,44,0.22)]' : 'relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)]'} bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:static sm:left-auto sm:right-auto sm:top-auto sm:z-auto sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
+            className="relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)] bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
           >
-              <div className="flex snap-x gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:inline-flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:rounded-xl sm:border sm:border-[rgba(184,121,44,0.2)] sm:bg-[rgba(251,244,231,0.97)] sm:p-2 sm:shadow-lg sm:backdrop-blur-xl [&::-webkit-scrollbar]:hidden">
-                {categories.map((category) => (
-                  <motion.button
-                    key={category.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`
-                      flex min-w-fit snap-start items-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-300 sm:px-6 sm:py-3 sm:text-base
-                      ${selectedCategory === category.id
-                        ? 'bg-primary-600 text-white shadow-md'
-                        : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-primary-50 sm:border-0 sm:bg-transparent'
-                      }
-                    `}
-                  >
-                    <category.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    {category.name}
-                  </motion.button>
-                ))}
-              </div>
+            {renderCategoryTabs()}
           </div>
           {isCategoryPinned && <div className="h-[67px] sm:hidden" />}
 
