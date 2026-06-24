@@ -1,22 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '../../lib/routerCompat';
-import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper } from 'lucide-react';
 
 const Hero = () => {
-  const [muted, setMuted] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
-  const videoRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isSmallScreen = window.matchMedia('(max-width: 767px)').matches;
     const saveData = navigator.connection?.saveData;
     const slowConnection = ['slow-2g', '2g', '3g'].includes(navigator.connection?.effectiveType);
 
-    if (prefersReducedMotion || isSmallScreen || saveData || slowConnection) {
+    if (prefersReducedMotion || saveData || slowConnection) {
       return undefined;
     }
 
@@ -34,12 +30,6 @@ const Hero = () => {
     };
   }, []);
 
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    const next = !muted;
-    videoRef.current.muted = next;
-    setMuted(next);
-  };
   const serviceButtons = [
     { icon: Smartphone, title: "Gazra Mitra", url: "https://mitra.gazra.org", isExternal: true },
     { icon: Wallet, title: "Gazra Support Fund", url: "/gazra-support" },
@@ -54,32 +44,18 @@ const Hero = () => {
           src="/images/cafe1.webp"
           alt=""
           aria-hidden="true"
-          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+          className="absolute inset-0 h-full w-full object-cover object-center"
           fetchPriority="high"
         />
         {videoEnabled && (
-          <>
-            <video
-              ref={videoRef}
-              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${videoReady ? 'opacity-100' : 'opacity-0'}`}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
-              onCanPlay={() => setVideoReady(true)}
-            >
-              <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
-            </video>
-            <button
-              onClick={toggleMute}
-              aria-label={muted ? 'Unmute video' : 'Mute video'}
-              className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
-            >
-              {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-          </>
+          <iframe
+            title="Gazra Cafe hero video"
+            src="https://www.youtube-nocookie.com/embed/0Dv_G_SzTmk?autoplay=1&mute=0&controls=0&loop=1&playlist=0Dv_G_SzTmk&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-screen min-w-[177.78vh] -translate-x-1/2 -translate-y-1/2 border-0"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+            aria-hidden="true"
+          />
         )}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
