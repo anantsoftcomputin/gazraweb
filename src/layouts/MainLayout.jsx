@@ -10,7 +10,7 @@ const AmbientThreeScene = dynamic(() => import('../components/shared/AmbientThre
 
 const MainLayout = ({ children }) => {
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col">
       <AmbientThreeScene />
 
       <div className="relative z-10 flex min-h-screen flex-col">

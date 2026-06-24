@@ -169,13 +169,10 @@ const GazraCafe = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDish, setSelectedDish] = useState(null);
-  const [isCategoryPinned, setIsCategoryPinned] = useState(false);
   const [cafeMusicPlaying, setCafeMusicPlaying] = useState(false);
   const [cafeMusicBlocked, setCafeMusicBlocked] = useState(false);
   const videoRef = useRef(null);
   const cafeMusicRef = useRef(null);
-  const menuSectionRef = useRef(null);
-  const categorySentinelRef = useRef(null);
   const { scrollY } = useScroll();
   const { getDocuments: getMoments } = useFirestore('cafeMoments');
   const { getDocuments: getMenuItems } = useFirestore('menuItems');
@@ -360,37 +357,6 @@ const GazraCafe = () => {
     loadAllData();
   }, []);
 
-  useEffect(() => {
-    if (loading) return undefined;
-
-    let frameId = 0;
-    const updatePinnedState = () => {
-      window.cancelAnimationFrame(frameId);
-      frameId = window.requestAnimationFrame(() => {
-        const isMobile = window.innerWidth < 640;
-        const sentinelRect = categorySentinelRef.current?.getBoundingClientRect();
-        const menuRect = menuSectionRef.current?.getBoundingClientRect();
-
-        if (!isMobile || !sentinelRect || !menuRect) {
-          setIsCategoryPinned(false);
-          return;
-        }
-
-        setIsCategoryPinned(sentinelRect.top <= 96 && menuRect.bottom > 160);
-      });
-    };
-
-    updatePinnedState();
-    window.addEventListener('scroll', updatePinnedState, { passive: true });
-    window.addEventListener('resize', updatePinnedState);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener('scroll', updatePinnedState);
-      window.removeEventListener('resize', updatePinnedState);
-    };
-  }, [loading]);
-
   // Helper to get spice level color
   const getSpiceLevelColor = (level) => {
     const colors = {
@@ -427,11 +393,11 @@ const GazraCafe = () => {
     return iconMap[iconName] || Heart;
   };
 
-  const renderCategoryTabs = (mode = 'inline') => (
-    <div className={`${mode === 'fixed' ? 'flex snap-x gap-2 overflow-x-auto px-4 py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'flex snap-x gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:inline-flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:rounded-xl sm:border sm:border-[rgba(184,121,44,0.2)] sm:bg-[rgba(251,244,231,0.97)] sm:p-2 sm:shadow-lg sm:backdrop-blur-xl [&::-webkit-scrollbar]:hidden'}`}>
+  const renderCategoryTabs = () => (
+    <div className="flex snap-x gap-2 overflow-x-auto px-4 py-3 [-ms-overflow-style:none] [scrollbar-width:none] sm:justify-center sm:px-2 [&::-webkit-scrollbar]:hidden">
       {categories.map((category) => (
         <motion.button
-          key={`${mode}-${category.id}`}
+          key={category.id}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setSelectedCategory(category.id)}
@@ -439,7 +405,7 @@ const GazraCafe = () => {
             flex min-w-fit snap-start items-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-300 sm:px-6 sm:py-3 sm:text-base
             ${selectedCategory === category.id
               ? 'bg-primary-600 text-white shadow-md'
-              : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-primary-50 sm:border-0 sm:bg-transparent'
+              : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-primary-50'
             }
           `}
         >
@@ -500,20 +466,6 @@ const GazraCafe = () => {
         {cafeMusicPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         <span>{cafeMusicBlocked && !cafeMusicPlaying ? 'Tap for music' : 'Cafe music'}</span>
       </button>
-
-      <AnimatePresence>
-        {isCategoryPinned && (
-          <motion.div
-            initial={{ opacity: 0, y: -14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -14 }}
-            transition={{ duration: 0.2 }}
-            className="fixed left-0 right-0 top-[96px] z-40 border-y border-[rgba(184,121,44,0.22)] bg-[rgba(251,244,231,0.97)] shadow-md backdrop-blur-xl sm:hidden"
-          >
-            {renderCategoryTabs('fixed')}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Modern Video Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">
@@ -684,7 +636,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Menu Section with improved layout */}
-      <section id="menu" ref={menuSectionRef} className="py-24 mt-12 relative">
+      <section id="menu" className="py-24 mt-12 relative">
         <div className="container mx-auto px-4">
           {/* Menu Introduction */}
           <div className="text-center mb-16">
@@ -707,14 +659,12 @@ const GazraCafe = () => {
             </motion.div>
           </div>
 
-          {/* Category Navigation - Sticky tabs */}
-          <div ref={categorySentinelRef} className="h-px" />
+          {/* Category Navigation - sticks below the fixed nav on every screen size */}
           <div
-            className="relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)] bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
+            className="sticky top-[150px] z-40 -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)] bg-[rgba(251,244,231,0.97)] shadow-md backdrop-blur-xl sm:mx-0 sm:mb-16 sm:rounded-xl sm:border sm:shadow-lg"
           >
             {renderCategoryTabs()}
           </div>
-          {isCategoryPinned && <div className="h-[67px] sm:hidden" />}
 
           {/* Menu Grid - Modern cards with hover effects */}
           <div className="grid gap-3 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

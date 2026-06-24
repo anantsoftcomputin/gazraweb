@@ -225,7 +225,7 @@ const EventsPage = () => {
              style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
         <div className="container mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
           {/* Category filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          <div className="flex min-w-0 w-full items-center gap-2 overflow-x-auto pb-1 md:w-auto md:pb-0">
             {eventCategories.map((cat) => {
               const active = selectedCategory === cat.id;
               return (
