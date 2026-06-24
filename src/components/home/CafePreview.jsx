@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Coffee, ArrowRight, Heart, Sparkles, ChefHat, Clock, MapPin } from 'lucide-react';
 import { Link } from '../../lib/routerCompat';
@@ -134,10 +135,12 @@ const CafePreview = () => {
                 >
                   <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
                   <div className="relative h-48 overflow-hidden">
-                    <img
+                    <Image
                       src={(dish.images && dish.images[0]) || dish.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}
                       alt={dish.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 340px"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     {dish.popular && (
                       <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs rounded-full flex items-center">
