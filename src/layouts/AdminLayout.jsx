@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Calendar, Users, Coffee,
   Image, MessageSquare, LogOut, Menu, X,
-  Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck, Home, MapPinned, QrCode, FileText, LifeBuoy
+  Heart, Mail, BookOpen, ChevronDown, Star, Clock, GraduationCap, CalendarCheck, Home, MapPinned, QrCode, FileText, LifeBuoy, LoaderCircle
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../config/firebase';
@@ -16,6 +16,8 @@ const AdminLayout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cafeMenuOpen, setCafeMenuOpen] = useState(false);
   const [skillsMenuOpen, setSkillsMenuOpen] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeLoadingLabel, setRouteLoadingLabel] = useState('Loading page');
   const { logout, monitorAuthState, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +47,27 @@ const AdminLayout = ({ children }) => {
       setSkillsMenuOpen(true);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    setRouteLoading(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!routeLoading) return undefined;
+    const timeout = window.setTimeout(() => setRouteLoading(false), 8000);
+    return () => window.clearTimeout(timeout);
+  }, [routeLoading]);
+
+  const navigateWithLoader = (path, label = 'page', closeMobileMenu = false) => {
+    if (path !== location.pathname) {
+      setRouteLoadingLabel(label);
+      setRouteLoading(true);
+    }
+    navigate(path);
+    if (closeMobileMenu) {
+      setMobileMenuOpen(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -126,7 +149,7 @@ const AdminLayout = ({ children }) => {
 
         <div className="px-4 pt-4">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigateWithLoader('/', 'website')}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-white/70 border border-[rgba(184,121,44,0.22)] hover:bg-primary-50 hover:text-primary-700 transition-colors text-left shadow-sm"
           >
             <Home className="w-5 h-5 flex-shrink-0" />
@@ -138,7 +161,7 @@ const AdminLayout = ({ children }) => {
           {menuItems.map((item) => (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => navigateWithLoader(item.path, item.label)}
               className={navButtonClass(location.pathname === item.path)}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -173,7 +196,7 @@ const AdminLayout = ({ children }) => {
                   {cafeMenuItems.map((item) => (
                     <button
                       key={item.path}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => navigateWithLoader(item.path, item.label)}
                       className={subNavButtonClass(location.pathname === item.path)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -212,7 +235,7 @@ const AdminLayout = ({ children }) => {
                   {skillsMenuItems.map((item) => (
                     <button
                       key={item.path}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => navigateWithLoader(item.path, item.label)}
                       className={subNavButtonClass(location.pathname === item.path)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -262,8 +285,7 @@ const AdminLayout = ({ children }) => {
             <nav className="p-4 space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 140px)' }}>
               <button
                 onClick={() => {
-                  navigate('/');
-                  setMobileMenuOpen(false);
+                  navigateWithLoader('/', 'website', true);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-white/70 border border-[rgba(184,121,44,0.22)] hover:bg-primary-50 hover:text-primary-700 transition-colors"
               >
@@ -275,8 +297,7 @@ const AdminLayout = ({ children }) => {
                 <button
                   key={item.path}
                   onClick={() => {
-                    navigate(item.path);
-                    setMobileMenuOpen(false);
+                    navigateWithLoader(item.path, item.label, true);
                   }}
                   className={navButtonClass(location.pathname === item.path)}
                 >
@@ -309,8 +330,7 @@ const AdminLayout = ({ children }) => {
                         <button
                           key={item.path}
                           onClick={() => {
-                            navigate(item.path);
-                            setMobileMenuOpen(false);
+                            navigateWithLoader(item.path, item.label, true);
                           }}
                           className={subNavButtonClass(location.pathname === item.path)}
                         >
@@ -361,7 +381,31 @@ const AdminLayout = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6">
+        <main className="relative p-4 sm:p-6">
+          <AnimatePresence>
+            {routeLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/35 px-4 backdrop-blur-sm"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <motion.div
+                  initial={{ scale: 0.96, y: 8 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.96, y: 8 }}
+                  className="heritage-paper relative w-full max-w-sm overflow-hidden rounded-lg border border-[rgba(184,121,44,0.45)] p-6 text-center shadow-2xl"
+                >
+                  <div className="heritage-rule absolute left-0 top-0 h-1 w-full" />
+                  <LoaderCircle className="mx-auto mb-4 h-10 w-10 animate-spin text-primary-600" />
+                  <h2 className="font-display text-xl font-black text-neutral-900">Loading {routeLoadingLabel}</h2>
+                  <p className="mt-2 text-sm text-neutral-600">The required page is loading. Please wait.</p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {children}
         </main>
       </div>

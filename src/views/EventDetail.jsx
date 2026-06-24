@@ -8,6 +8,7 @@ import {
 import { FaFacebook, FaTwitter, FaWhatsapp } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { where } from 'firebase/firestore';
 import app from '../config/firebase';
 import { useFirestore } from '../hooks/useFirestore';
 import { EVENT_CATEGORIES, formatEventDate, getEventCategoryStyle } from '../utils/eventUtils';
@@ -35,7 +36,7 @@ const EventDetail = () => {
     verificationToken: '',
     email: ''
   });
-  const { getDocument } = useFirestore('events');
+  const { getDocument, getDocuments } = useFirestore('events');
   const { addDocument: addRsvp } = useFirestore('eventRsvps');
   const functions = getFunctions(app, 'us-central1');
 
@@ -56,6 +57,13 @@ const EventDetail = () => {
       const result = await getDocument(id);
       if (result.success) {
         setEvent(result.data);
+      } else {
+        const slugResult = await getDocuments([where('slug', '==', id)]);
+        if (slugResult.success && slugResult.data.length > 0) {
+          setEvent(slugResult.data[0]);
+        } else {
+          setEvent(null);
+        }
       }
     } catch (error) {
       console.error('Error loading event:', error);

@@ -8,7 +8,16 @@ import { where } from 'firebase/firestore';
 import { useFirestore } from '../../hooks/useFirestore';
 import { useStorage } from '../../hooks/useStorage';
 import AdminLayout from '../../layouts/AdminLayout';
-import { EVENT_CATEGORIES, formatEventDate, formatLocationSlot, getEventDateIso, getEventMonth, sortEventsByDate } from '../../utils/eventUtils';
+import {
+  EVENT_CATEGORIES,
+  formatEventDate,
+  formatLocationSlot,
+  getEventDateIso,
+  getEventMonth,
+  getEventPath,
+  getUniqueEventSlug,
+  sortEventsByDate
+} from '../../utils/eventUtils';
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([]);
@@ -284,6 +293,7 @@ const AdminEvents = () => {
 
     const payload = {
       ...formData,
+      slug: getUniqueEventSlug(formData.title, events, editingEvent?.id),
       approvalStatus: formData.status === 'approved' ? 'approved' : formData.status,
       date: formData.dateIso ? formatEventDate({ dateIso: formData.dateIso }) : formData.date,
       month: getEventMonth({ dateIso: formData.dateIso }),
@@ -510,7 +520,7 @@ const AdminEvents = () => {
                       View RSVPs
                     </button>
                     <a
-                      href={`/events/${event.id}`}
+                      href={getEventPath(event)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"

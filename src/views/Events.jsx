@@ -9,7 +9,7 @@ import {
   Filter
 } from "lucide-react";
 import { useFirestore } from "../hooks/useFirestore";
-import { formatEventDate, getEventMonth, sortEventsByDate } from "../utils/eventUtils";
+import { formatEventDate, getEventMonth, getEventPath, sortEventsByDate } from "../utils/eventUtils";
 
 const EventsPage = () => {
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ const EventsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
         className="group cursor-pointer h-full"
-        onClick={() => navigate(`/events/${event.id}`)}
+        onClick={() => navigate(getEventPath(event))}
       >
         <div className="relative h-full flex flex-col heritage-paper rounded-lg overflow-hidden
                         border border-neutral-300 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2

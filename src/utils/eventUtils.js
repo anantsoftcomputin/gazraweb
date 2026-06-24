@@ -57,6 +57,36 @@ export const getEventCategory = (categoryId) =>
 export const getEventCategoryStyle = (categoryId) =>
   EVENT_CATEGORY_STYLES[categoryId] || EVENT_CATEGORY_STYLES.default;
 
+export const createEventSlug = (title = '') =>
+  String(title || 'event')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'event';
+
+export const getUniqueEventSlug = (title, events = [], currentEventId = '') => {
+  const baseSlug = createEventSlug(title);
+  const usedSlugs = new Set(
+    events
+      .filter((event) => event.id !== currentEventId)
+      .map((event) => event.slug)
+      .filter(Boolean)
+  );
+
+  if (!usedSlugs.has(baseSlug)) return baseSlug;
+
+  let suffix = 2;
+  while (usedSlugs.has(`${baseSlug}-${suffix}`)) {
+    suffix += 1;
+  }
+
+  return `${baseSlug}-${suffix}`;
+};
+
+export const getEventPath = (event) => `/events/${event?.slug || event?.id || ''}`;
+
 export const getEventDateIso = (event) => {
   if (!event) return '';
   if (event.dateIso) return event.dateIso;

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from '../../lib/routerCompat';
 import { Calendar, Clock, MapPin, ArrowRight, Users, Tag, ExternalLink } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
-import { formatEventDate, getEventCategory, getUpcomingEvents } from '../../utils/eventUtils';
+import { formatEventDate, getEventCategory, getEventPath, getUpcomingEvents } from '../../utils/eventUtils';
 
 const EventCard = ({ event }) => (
   <div className="group relative heritage-paper overflow-hidden rounded-lg border border-neutral-300 shadow-lg hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-400">
@@ -74,7 +74,7 @@ const EventCard = ({ event }) => (
           </a>
         ) : (
           <Link
-            to={`/events/${event.id}`}
+            to={getEventPath(event)}
             className="inline-flex items-center px-4 py-2 rounded-xl text-primary-600 hover:text-primary-700 font-medium transition-colors duration-300"
           >
             Learn More

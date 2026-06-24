@@ -1,10 +1,38 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '../../lib/routerCompat';
 import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper, Volume2, VolumeX } from 'lucide-react';
 
 const Hero = () => {
   const [muted, setMuted] = useState(true);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isSmallScreen = window.matchMedia('(max-width: 767px)').matches;
+    const saveData = navigator.connection?.saveData;
+    const slowConnection = ['slow-2g', '2g', '3g'].includes(navigator.connection?.effectiveType);
+
+    if (prefersReducedMotion || isSmallScreen || saveData || slowConnection) {
+      return undefined;
+    }
+
+    const enableVideo = () => setVideoEnabled(true);
+    const idleId = window.requestIdleCallback
+      ? window.requestIdleCallback(enableVideo, { timeout: 1800 })
+      : window.setTimeout(enableVideo, 900);
+
+    return () => {
+      if (window.cancelIdleCallback && typeof idleId === 'number') {
+        window.cancelIdleCallback(idleId);
+      } else {
+        window.clearTimeout(idleId);
+      }
+    };
+  }, []);
 
   const toggleMute = () => {
     if (!videoRef.current) return;
@@ -22,25 +50,37 @@ const Hero = () => {
   return (
     <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950 -mt-[134px] lg:mt-0">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Local video for all screen sizes — must start muted for browser autoplay policy */}
-        <video
-          ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          autoPlay
-          muted
-          loop
-          playsInline
+        <img
+          src="/images/cafe1.webp"
+          alt=""
           aria-hidden="true"
-        >
-          <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
-        </video>
-        <button
-          onClick={toggleMute}
-          aria-label={muted ? 'Unmute video' : 'Mute video'}
-          className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
-        >
-          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-        </button>
+          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+          fetchPriority="high"
+        />
+        {videoEnabled && (
+          <>
+            <video
+              ref={videoRef}
+              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${videoReady ? 'opacity-100' : 'opacity-0'}`}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              onCanPlay={() => setVideoReady(true)}
+            >
+              <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
+            </video>
+            <button
+              onClick={toggleMute}
+              aria-label={muted ? 'Unmute video' : 'Mute video'}
+              className="absolute bottom-5 right-4 z-20 p-2.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/15 transition-colors"
+            >
+              {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+          </>
+        )}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>

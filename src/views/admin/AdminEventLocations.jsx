@@ -4,7 +4,14 @@ import { auth } from '../../config/firebase';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
 import { useStorage } from '../../hooks/useStorage';
-import { EVENT_CATEGORIES, formatEventDate, formatLocationSlot, formatSlotTime, getEventMonth } from '../../utils/eventUtils';
+import {
+  EVENT_CATEGORIES,
+  formatEventDate,
+  formatLocationSlot,
+  formatSlotTime,
+  getEventMonth,
+  getUniqueEventSlug
+} from '../../utils/eventUtils';
 
 const emptyForm = {
   name: '',
@@ -137,7 +144,7 @@ const AdminEventLocations = () => {
   const { getDocuments, addDocument, updateDocument, deleteDocument } = useFirestore('eventLocations');
   const { getDocuments: getBookings, addDocument: addBooking, updateDocument: updateBooking } = useFirestore('eventLocationBookings');
   const { getDocuments: getSlots, addDocument: addSlot, updateDocument: updateSlot, deleteDocument: deleteSlot } = useFirestore('eventLocationSlots');
-  const { addDocument: addEvent, updateDocument: updateEvent } = useFirestore('events');
+  const { getDocuments: getEvents, addDocument: addEvent, updateDocument: updateEvent } = useFirestore('events');
   const { uploadFile, deleteFile, uploading } = useStorage();
 
   const loadLocations = async () => {
@@ -459,8 +466,11 @@ const AdminEventLocations = () => {
     }
 
     const currentUser = auth.currentUser;
+    const existingEventsResult = await getEvents();
+    const existingEvents = existingEventsResult.success ? existingEventsResult.data : [];
     const eventPayload = {
       title: bookingForm.eventTitle,
+      slug: getUniqueEventSlug(bookingForm.eventTitle, existingEvents),
       category: bookingForm.category,
       dateIso: bookingForm.dateIso,
       date: formatEventDate({ dateIso: bookingForm.dateIso }),

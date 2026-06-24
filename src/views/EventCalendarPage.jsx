@@ -16,6 +16,7 @@ import {
   formatEventDate,
   getEventCategoryStyle,
   getEventDateIso,
+  getEventPath,
   sortEventsByDate
 } from '../utils/eventUtils';
 
@@ -416,7 +417,7 @@ const EventCalendarPage = () => {
                           Book Tickets
                         </a>
                       ) : (
-                        <Link to={`/events/${event.id}`} className="px-3 py-1 bg-primary-500 text-white text-sm rounded-lg">
+                        <Link to={getEventPath(event)} className="px-3 py-1 bg-primary-500 text-white text-sm rounded-lg">
                           View Details
                         </Link>
                       )}
