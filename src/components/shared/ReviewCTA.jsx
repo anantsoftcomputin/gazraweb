@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import QRCode from 'qrcode';
 import { Star } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -11,7 +10,10 @@ const ReviewCTA = ({ className = '' }) => {
   const [qrDataUrl, setQrDataUrl] = useState('');
 
   useEffect(() => {
-    QRCode.toDataURL(REVIEW_URL, { margin: 1, width: 160 })
+    // Loaded on demand so the qrcode library isn't part of this page's
+    // initial JS bundle — it's only needed once this component mounts.
+    import('qrcode')
+      .then(({ default: QRCode }) => QRCode.toDataURL(REVIEW_URL, { margin: 1, width: 160 }))
       .then(setQrDataUrl)
       .catch((error) => console.error('Review QR generation failed:', error));
   }, []);

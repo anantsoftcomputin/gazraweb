@@ -185,7 +185,7 @@ const EventsPage = () => {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative h-[58vh] min-h-[480px] overflow-hidden bg-neutral-950">
         <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover"
-               autoPlay muted loop playsInline>
+               autoPlay muted loop playsInline preload="metadata" poster="/images/image-four.jpg">
           <source src="/video/event.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />

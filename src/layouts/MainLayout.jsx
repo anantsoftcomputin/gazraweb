@@ -1,8 +1,12 @@
 /* eslint-disable react/prop-types */
+import dynamic from 'next/dynamic';
 import Navbar from '../components/shared/Navbar';
 import MobileBottomNav from '../components/shared/MobileBottomNav';
-import AmbientThreeScene from '../components/shared/AmbientThreeScene';
 import FooterPreview from '../components/home/FooterPreview';
+
+// Decorative only — keep the full three.js bundle out of the initial page
+// chunk and load it after the page itself is interactive.
+const AmbientThreeScene = dynamic(() => import('../components/shared/AmbientThreeScene'), { ssr: false });
 
 const MainLayout = ({ children }) => {
   return (

@@ -10,7 +10,7 @@ const SEED = [
   { id: 's2',  src: '/images/cafe1.webp',       category: 'cafe',      caption: 'The warm heart of Gazra' },
   { id: 's3',  src: '/images/image-one.jpg',    category: 'cafe',      caption: 'Behind the counter, crafted with care' },
   { id: 's4',  src: '/images/food-image.webp',  category: 'cafe',      caption: 'Nachos and dips, fresh off the pass' },
-  { id: 's5',  src: '/images/food-1.png',       category: 'cafe',      caption: 'A Gujarati thali, plated with love' },
+  { id: 's5',  src: '/images/food-1.jpg',       category: 'cafe',      caption: 'A Gujarati thali, plated with love' },
   { id: 's6',  src: '/images/image10.webp',     category: 'cafe',      caption: 'Inclusive space, authentic flavours' },
   { id: 's7',  src: '/images/image8.webp',      category: 'cafe',      caption: 'Heritage on every plate' },
   { id: 's8',  src: '/images/skill1.webp',      category: 'cafe',      caption: 'Taking orders at the counter' },
@@ -24,7 +24,7 @@ const SEED = [
   { id: 's14', src: '/images/image-four.jpg',   category: 'events',    caption: 'Raising hands, raising spirits at a community workshop', featured: true },
   { id: 's15', src: '/images/image11.jpg',      category: 'events',    caption: 'Dining with Diyas & Melodies — Diwali at Gazra Cafe' },
   { id: 's16', src: '/images/image12.jpg',      category: 'events',    caption: 'A Diwali evening, lit with diyas' },
-  { id: 's17', src: '/images/art-therapy.png',  category: 'events',    caption: 'Art as healing — a community circle' },
+  { id: 's17', src: '/images/art-therapy.jpg',  category: 'events',    caption: 'Art as healing — a community circle' },
   // Heritage
   { id: 's18', src: '/images/chimnabai2.jpg',   category: 'heritage',  caption: 'Maharani Chimnabai II, whose legacy founded MCSU in 1914', featured: true },
   { id: 's19', src: '/images/join-community.jpg', category: 'heritage', caption: 'The Gazra Cafe team, dressed in heritage attire' },
@@ -103,6 +103,8 @@ const Lightbox = ({ images, index, onClose, onPrev, onNext, onGoTo }) => {
           <img
             src={img.src}
             alt={img.caption || ''}
+            loading="lazy"
+            decoding="async"
             className="max-w-full max-h-[78vh] object-contain rounded-lg shadow-[0_24px_80px_rgba(0,0,0,0.7)]"
           />
 
@@ -319,7 +321,7 @@ const Gallery = () => {
               className="w-20 h-28 rounded-xl overflow-hidden shadow-2xl border border-white/10"
               style={{ transform: `rotate(${[-4, 2, -2][i]}deg) translateY(${[8, 0, 12][i]}px)` }}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
@@ -444,7 +446,7 @@ const Gallery = () => {
           <div className="grid grid-cols-3 gap-1.5">
             {SEED.slice(0, 9).map((s, i) => (
               <div key={i} className="w-20 h-20 rounded overflow-hidden">
-                <img src={s.src} alt="" className="w-full h-full object-cover" />
+                <img src={s.src} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
               </div>
             ))}
           </div>

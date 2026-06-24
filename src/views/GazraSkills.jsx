@@ -437,6 +437,7 @@ const GazraSkills = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-neutral-950 min-h-[70vh] flex items-center">
         <video src="/video/skill.mp4" autoPlay loop muted playsInline
+               preload="metadata" poster="/images/skill1.webp"
                className="absolute inset-0 w-full h-full object-contain" />
         {/* Darkening scrim — video alone isn't reliably dark enough for white text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/45" />
@@ -930,6 +931,8 @@ const GazraSkills = () => {
                     loop
                     muted
                     playsInline
+                    preload="none"
+                    poster="/images/skill1.webp"
                     className="w-full h-full object-cover"
                   />
                 </div>

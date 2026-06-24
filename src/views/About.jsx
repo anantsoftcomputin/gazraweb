@@ -51,7 +51,7 @@ const InitiativeCard = ({ image, title, body, link, linkLabel }) => (
                overflow-hidden hover:shadow-xl hover:border-primary-500 hover:-translate-y-2 transition-all duration-300">
     <div className="heritage-rule absolute left-0 top-0 z-10 h-1 w-full" />
     <div className="relative h-48 overflow-hidden">
-      <img src={image} alt={title}
+      <img src={image} alt={title} loading="lazy" decoding="async"
            className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-500" />
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/60 to-transparent" />
     </div>
@@ -74,7 +74,7 @@ const About = () => {
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[80vh] overflow-hidden bg-neutral-950 flex items-center">
-        <img src="/images/image13.png" alt="Maharani Chimnabai legacy"
+        <img src="/images/image13.jpg" alt="Maharani Chimnabai legacy"
              className="absolute inset-0 w-full h-full object-cover object-top" />
         {/* Darkening scrim — image is bright enough to wash out white hero text */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/40" />
@@ -128,7 +128,8 @@ const About = () => {
               <div className="relative rounded-lg overflow-hidden border-4 border-[var(--gazra-paper)] shadow-2xl">
                 <div className="absolute inset-x-0 top-0 h-[4px]"
                      style={{ background: 'linear-gradient(90deg,#9F2F28,#D9A13A,#2F6B45,#D9A13A,#9F2F28)' }} />
-                <img src="/images/image13.png" alt="Historical MCSU photograph"
+                <img src="/images/image13.jpg" alt="Historical MCSU photograph"
+                     loading="lazy" decoding="async"
                      className="w-full object-contain max-h-[520px]" />
               </div>
             </motion.div>
@@ -165,7 +166,7 @@ const About = () => {
 
       {/* ── Mission & Vision ──────────────────────────────────────── */}
       <section id="mission" className="py-20 bg-neutral-900 relative overflow-hidden">
-        <img src="/images/image7.webp" alt=""
+        <img src="/images/image7.webp" alt="" loading="lazy" decoding="async"
              className="absolute inset-0 w-full h-full object-cover opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-br from-neutral-950/90 to-neutral-900/80" />
 
@@ -234,7 +235,7 @@ const About = () => {
                 with our community.
               </p>
               <div className="mt-8">
-                <img src="/images/image9.webp" alt="Community"
+                <img src="/images/image9.webp" alt="Community" loading="lazy" decoding="async"
                      className="w-full rounded-lg object-cover h-56 shadow-lg border border-[rgba(184,121,44,0.2)]" />
               </div>
             </div>

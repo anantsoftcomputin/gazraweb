@@ -133,7 +133,7 @@ const Resources = () => {
     <div className="w-full">
       {/* Hero */}
       <section className="relative min-h-[45vh] overflow-hidden bg-neutral-950 flex items-center">
-        <img src="/images/art-therapy.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/images/art-therapy.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/45" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 

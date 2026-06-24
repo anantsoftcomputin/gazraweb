@@ -106,9 +106,15 @@ const AmbientThreeScene = () => {
     resize();
 
     let frameId = 0;
+    let tabHidden = document.hidden;
     const startedAt = performance.now();
 
     const renderFrame = () => {
+      if (tabHidden) {
+        frameId = window.requestAnimationFrame(renderFrame);
+        return;
+      }
+
       const elapsed = (performance.now() - startedAt) / 1000;
       group.rotation.y += ((pointer.x * 0.12) - group.rotation.y) * 0.025;
       group.rotation.x += ((-pointer.y * 0.08) - group.rotation.x) * 0.025;
@@ -124,12 +130,18 @@ const AmbientThreeScene = () => {
       frameId = window.requestAnimationFrame(renderFrame);
     };
 
+    const handleVisibilityChange = () => {
+      tabHidden = document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     renderFrame();
 
     return () => {
       window.cancelAnimationFrame(frameId);
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       mount.removeChild(renderer.domElement);
       pointsGeometry.dispose();
       points.material.dispose();

@@ -35,6 +35,8 @@ const DishImageCarousel = ({ images, item }) => {
         src={imageArray[currentIndex]}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover scale-125 opacity-35 blur-lg"
         onError={(e) => {
           e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
@@ -280,8 +282,18 @@ const GazraCafe = () => {
     const loadAllData = async () => {
       setLoading(true);
       try {
+        // Fire all reads concurrently — they're independent network requests,
+        // only the processing below has an ordering dependency (menu items
+        // need the resolved categories to group dishes correctly).
+        const [momentsResult, categoriesResult, menuResult, featuresResult, testimonialsResult] = await Promise.all([
+          getMoments(),
+          getCafeCategories(),
+          getMenuItems(),
+          getFeatures(),
+          getTestimonials(),
+        ]);
+
         // Load moments
-        const momentsResult = await getMoments();
         if (momentsResult.success && momentsResult.data.length > 0) {
           const sortedMoments = momentsResult.data
             .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -295,15 +307,13 @@ const GazraCafe = () => {
           setMoments(sortedMoments);
         }
 
-        // Load categories before menu items so dishes can be grouped dynamically.
-        const categoriesResult = await getCafeCategories();
+        // Categories resolve before menu items are grouped, so dishes can be grouped dynamically.
         const activeCategories = categoriesResult.success && categoriesResult.data.length > 0
           ? sortCafeCategories(categoriesResult.data)
           : DEFAULT_CAFE_CATEGORIES;
         setCafeCategories(activeCategories);
 
         // Load menu items
-        const menuResult = await getMenuItems();
         if (menuResult.success && menuResult.data.length > 0) {
           const categorizedMenu = activeCategories.reduce((acc, category) => {
             acc[category.slug] = [];
@@ -330,13 +340,11 @@ const GazraCafe = () => {
         }
 
         // Load features
-        const featuresResult = await getFeatures();
         if (featuresResult.success && featuresResult.data.length > 0) {
           setFeatures(featuresResult.data.filter(f => f.active !== false));
         }
 
         // Load testimonials
-        const testimonialsResult = await getTestimonials();
         if (testimonialsResult.success && testimonialsResult.data.length > 0) {
           const activeTestimonials = testimonialsResult.data
             .filter(t => t.active !== false)
@@ -806,7 +814,7 @@ const GazraCafe = () => {
               <div className="grid grid-cols-12 grid-rows-6 gap-3 sm:gap-4 h-full">
                 {[ // Define images and spans in an array for easier management
                    { src: "/images/image12.jpg", alt: "Cafe Ambiance", label: "Cozy Ambiance", span: "col-span-7 row-span-4" },
-                   { src: "/images/food-1.png", alt: "Coffee Service", label: "Experience Soul Food", span: "col-span-5 row-span-3" },
+                   { src: "/images/food-1.jpg", alt: "Coffee Service", label: "Experience Soul Food", span: "col-span-5 row-span-3" },
                    { src: "/images/image-two.jpg", alt: "Cafe Interior", label: "Experience Heritage", span: "col-span-5 row-span-3" },
                    { src: "/images/image10.webp", alt: "Coffee Making", label: "Experience Happiness", span: "col-span-7 row-span-2" }
                 ].map((img, idx) => (

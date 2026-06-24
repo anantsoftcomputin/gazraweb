@@ -342,7 +342,7 @@ const VolunteerPage = () => {
 
       {/* Testimonials */}
       <section className="py-14 bg-neutral-900 relative overflow-hidden">
-        <img src="/images/image9.webp" alt=""
+        <img src="/images/image9.webp" alt="" loading="lazy" decoding="async"
              className="absolute inset-0 w-full h-full object-cover opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-br from-neutral-950/80 to-neutral-900/70" />
         <div className="relative z-10 container mx-auto px-4">
