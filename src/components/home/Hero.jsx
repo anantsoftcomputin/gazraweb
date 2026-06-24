@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '../../lib/routerCompat';
-import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper } from 'lucide-react';
+import { ArrowRight, Coffee, Wallet, Smartphone, Briefcase, Newspaper, Volume2, VolumeX } from 'lucide-react';
 
 const Hero = () => {
   const [videoEnabled, setVideoEnabled] = useState(false);
+  const [mobileMuted, setMobileMuted] = useState(true);
+  const mobileVideoRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -37,6 +39,24 @@ const Hero = () => {
     { icon: Briefcase, title: "Gazra Skill Hub", url: "/gazra-skills" }
   ];
 
+  const toggleMobileSound = async () => {
+    const video = mobileVideoRef.current;
+    if (!video) return;
+
+    const nextMuted = !mobileMuted;
+    video.muted = nextMuted;
+    setMobileMuted(nextMuted);
+
+    if (!nextMuted) {
+      try {
+        await video.play();
+      } catch (error) {
+        video.muted = true;
+        setMobileMuted(true);
+      }
+    }
+  };
+
   return (
     <div className="relative min-h-[86vh] overflow-hidden bg-neutral-950 -mt-[134px] lg:mt-0">
       <div className="absolute inset-0 overflow-hidden">
@@ -47,11 +67,33 @@ const Hero = () => {
           className="absolute inset-0 h-full w-full object-cover object-center"
           fetchPriority="high"
         />
+        <video
+          ref={mobileVideoRef}
+          className="absolute inset-0 h-full w-full object-cover object-center md:hidden"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/images/cafe1.webp"
+          aria-hidden="true"
+        >
+          <source src="/video/Gazra%20Cafe.mp4" type="video/mp4" />
+        </video>
+        <button
+          type="button"
+          onClick={toggleMobileSound}
+          className="absolute bottom-5 right-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/45 px-3 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/65 md:hidden"
+          aria-label={mobileMuted ? 'Unmute hero video' : 'Mute hero video'}
+        >
+          {mobileMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          <span>{mobileMuted ? 'Sound' : 'Mute'}</span>
+        </button>
         {videoEnabled && (
           <iframe
             title="Gazra Cafe hero video"
             src="https://www.youtube-nocookie.com/embed/0Dv_G_SzTmk?autoplay=1&mute=0&controls=0&loop=1&playlist=0Dv_G_SzTmk&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0"
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-screen min-w-[177.78vh] -translate-x-1/2 -translate-y-1/2 border-0"
+            className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[56.25vw] min-h-full w-screen min-w-[177.78vh] -translate-x-1/2 -translate-y-1/2 border-0 md:block"
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             aria-hidden="true"

@@ -172,7 +172,8 @@ const GazraCafe = () => {
   const [cafeMusicBlocked, setCafeMusicBlocked] = useState(false);
   const videoRef = useRef(null);
   const cafeMusicRef = useRef(null);
-  const categoryControlsRef = useRef(null);
+  const menuSectionRef = useRef(null);
+  const categorySentinelRef = useRef(null);
   const { scrollY } = useScroll();
   const { getDocuments: getMoments } = useFirestore('cafeMoments');
   const { getDocuments: getMenuItems } = useFirestore('menuItems');
@@ -352,20 +353,35 @@ const GazraCafe = () => {
   }, []);
 
   useEffect(() => {
+    if (loading) return undefined;
+
+    let frameId = 0;
     const updatePinnedState = () => {
-      const isMobile = window.innerWidth < 640;
-      const triggerY = (categoryControlsRef.current?.offsetTop || 0) - 128;
-      setIsCategoryPinned(isMobile && window.scrollY > triggerY);
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(() => {
+        const isMobile = window.innerWidth < 640;
+        const sentinelRect = categorySentinelRef.current?.getBoundingClientRect();
+        const menuRect = menuSectionRef.current?.getBoundingClientRect();
+
+        if (!isMobile || !sentinelRect || !menuRect) {
+          setIsCategoryPinned(false);
+          return;
+        }
+
+        setIsCategoryPinned(sentinelRect.top <= 96 && menuRect.bottom > 160);
+      });
     };
 
     updatePinnedState();
     window.addEventListener('scroll', updatePinnedState, { passive: true });
     window.addEventListener('resize', updatePinnedState);
+
     return () => {
+      window.cancelAnimationFrame(frameId);
       window.removeEventListener('scroll', updatePinnedState);
       window.removeEventListener('resize', updatePinnedState);
     };
-  }, []);
+  }, [loading]);
 
   // Helper to get spice level color
   const getSpiceLevelColor = (level) => {
@@ -428,8 +444,8 @@ const GazraCafe = () => {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, filter: 'blur(10px)' }}
-        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.65, ease: 'easeOut' }}
         className="min-h-screen bg-[var(--gazra-paper)]"
       >
@@ -623,7 +639,7 @@ const GazraCafe = () => {
       </section>
 
       {/* Menu Section with improved layout */}
-      <section id="menu" className="py-24 mt-12 relative">
+      <section id="menu" ref={menuSectionRef} className="py-24 mt-12 relative">
         <div className="container mx-auto px-4">
           {/* Menu Introduction */}
           <div className="text-center mb-16">
@@ -647,9 +663,9 @@ const GazraCafe = () => {
           </div>
 
           {/* Category Navigation - Sticky tabs */}
+          <div ref={categorySentinelRef} className="h-px" />
           <div
-            ref={categoryControlsRef}
-            className={`${isCategoryPinned ? 'fixed left-0 right-0 top-[128px] z-40 mx-0 border-y border-[rgba(184,121,44,0.22)]' : 'relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)]'} bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:relative sm:left-auto sm:right-auto sm:top-auto sm:z-auto sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
+            className={`${isCategoryPinned ? 'fixed left-0 right-0 top-[96px] z-40 mx-0 border-y border-[rgba(184,121,44,0.22)]' : 'relative -mx-4 mb-8 border-y border-[rgba(184,121,44,0.18)]'} bg-[rgba(251,244,231,0.96)] px-4 py-3 shadow-sm backdrop-blur-xl sm:static sm:left-auto sm:right-auto sm:top-auto sm:z-auto sm:mx-0 sm:mb-16 sm:flex sm:justify-center sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
           >
               <div className="flex snap-x gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:inline-flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:rounded-xl sm:border sm:border-[rgba(184,121,44,0.2)] sm:bg-[rgba(251,244,231,0.97)] sm:p-2 sm:shadow-lg sm:backdrop-blur-xl [&::-webkit-scrollbar]:hidden">
                 {categories.map((category) => (
@@ -672,7 +688,7 @@ const GazraCafe = () => {
                 ))}
               </div>
           </div>
-          {isCategoryPinned && <div className="h-[64px] sm:hidden" />}
+          {isCategoryPinned && <div className="h-[67px] sm:hidden" />}
 
           {/* Menu Grid - Modern cards with hover effects */}
           <div className="grid gap-3 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
