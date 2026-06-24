@@ -7,7 +7,6 @@ import {
 import { useFirestore } from '../hooks/useFirestore';
 import FloatingBookingForm from '../components/cafe/FloatingBookingForm';
 import ReviewCTA from '../components/shared/ReviewCTA';
-import CafeSplashScreen from '../components/cafe/CafeSplashScreen';
 import {
   DEFAULT_CAFE_CATEGORIES,
   normalizeCafeCategoryId,
@@ -169,8 +168,10 @@ const GazraCafe = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDish, setSelectedDish] = useState(null);
   const [isCategoryPinned, setIsCategoryPinned] = useState(false);
-  const [splashDone, setSplashDone] = useState(false);
+  const [cafeMusicPlaying, setCafeMusicPlaying] = useState(false);
+  const [cafeMusicBlocked, setCafeMusicBlocked] = useState(false);
   const videoRef = useRef(null);
+  const cafeMusicRef = useRef(null);
   const categoryControlsRef = useRef(null);
   const { scrollY } = useScroll();
   const { getDocuments: getMoments } = useFirestore('cafeMoments');
@@ -216,6 +217,62 @@ const GazraCafe = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (loading) return undefined;
+
+    const audio = cafeMusicRef.current;
+    if (!audio) return undefined;
+
+    audio.volume = 0.08;
+    audio.loop = true;
+
+    const playCafeMusic = async () => {
+      try {
+        audio.volume = 0.08;
+        await audio.play();
+        setCafeMusicPlaying(true);
+        setCafeMusicBlocked(false);
+      } catch (error) {
+        setCafeMusicPlaying(false);
+        setCafeMusicBlocked(true);
+      }
+    };
+
+    const playAfterInteraction = () => {
+      playCafeMusic();
+    };
+
+    playCafeMusic();
+    window.addEventListener('pointerdown', playAfterInteraction, { once: true });
+    window.addEventListener('keydown', playAfterInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', playAfterInteraction);
+      window.removeEventListener('keydown', playAfterInteraction);
+    };
+  }, [loading]);
+
+  const toggleCafeMusic = async () => {
+    const audio = cafeMusicRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.08;
+
+    if (cafeMusicPlaying) {
+      audio.pause();
+      setCafeMusicPlaying(false);
+      return;
+    }
+
+    try {
+      await audio.play();
+      setCafeMusicPlaying(true);
+      setCafeMusicBlocked(false);
+    } catch (error) {
+      setCafeMusicBlocked(true);
+    }
+  };
 
   // Load all data from Firestore
   useEffect(() => {
@@ -357,15 +414,12 @@ const GazraCafe = () => {
   // Show loading state
   if (loading) {
     return (
-      <>
-        <CafeSplashScreen onComplete={() => setSplashDone(true)} />
-        <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-            <p className="text-neutral-600">Loading cafe data...</p>
-          </div>
+      <div className="min-h-screen bg-[var(--gazra-paper)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading cafe data...</p>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -373,13 +427,32 @@ const GazraCafe = () => {
 
   return (
     <>
-      <CafeSplashScreen onComplete={() => setSplashDone(true)} />
       <motion.div
-        initial={false}
-        animate={{ opacity: splashDone ? 1 : 0, y: splashDone ? 0 : 14 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
+        initial={{ opacity: 0, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.65, ease: 'easeOut' }}
         className="min-h-screen bg-[var(--gazra-paper)]"
       >
+      <audio
+        ref={cafeMusicRef}
+        src="/Audio/Gazra-cafe-background-Music.mp3"
+        preload="auto"
+        autoPlay
+        loop
+        onLoadedMetadata={(event) => {
+          event.currentTarget.volume = 0.08;
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={toggleCafeMusic}
+        className="fixed bottom-24 left-4 z-40 inline-flex items-center gap-2 rounded-full border border-white/25 bg-neutral-950/55 px-3 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:bg-neutral-950/75 sm:bottom-6 sm:left-6"
+        aria-label={cafeMusicPlaying ? 'Pause cafe background music' : 'Play cafe background music'}
+      >
+        {cafeMusicPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+        <span>{cafeMusicBlocked && !cafeMusicPlaying ? 'Tap for music' : 'Cafe music'}</span>
+      </button>
 
       {/* Modern Video Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">

@@ -17,8 +17,7 @@ const PILLARS = [
 const SplashScreen = () => {
   const [visible, setVisible] = useState(false);
   const pathname = usePathname();
-  // /cafe has its own dedicated splash (CafeSplashScreen) — skip this one there
-  // so the two full-screen overlays never stack on top of each other.
+  // /cafe uses its own soft page dissolve, so skip the global splash there.
   const skipRoute = pathname?.startsWith('/admin') || pathname?.startsWith('/cafe');
 
   useEffect(() => {
