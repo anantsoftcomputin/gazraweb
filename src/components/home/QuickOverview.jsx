@@ -11,9 +11,11 @@ const QuickOverview = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section title with animated sparkle */}
         <div className="text-center mb-12">
-          <div className="mb-4 inline-flex items-center gap-2 rounded border border-secondary-700/20 bg-secondary-700 px-4 py-2 text-white shadow-md animate-pulse-slow">
-            <Sparkles className="w-4 h-4 text-white" />
-            <span className="text-sm font-bold uppercase tracking-wide">Explore Our World</span>
+          <div className="mb-4">
+            <div className="inline-flex items-center gap-2 rounded border border-secondary-700/20 bg-secondary-700 px-4 py-2 text-white shadow-md animate-pulse-slow">
+              <Sparkles className="w-4 h-4 text-white" />
+              <span className="text-sm font-bold uppercase tracking-wide">Explore Our World</span>
+            </div>
           </div>
           <h2 className="relative inline-block font-display text-3xl font-black text-neutral-900 md:text-4xl">
             <span className="relative z-10">Discover Gazra</span>

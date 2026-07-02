@@ -184,10 +184,14 @@ const EventsPage = () => {
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative h-[58vh] min-h-[480px] overflow-hidden bg-neutral-950">
-        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover"
+        {/* Blur + dim turn the footage into an ambient backdrop — it has bright baked-in titles
+            that otherwise collide with the hero copy */}
+        <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-105 blur-sm brightness-50"
                autoPlay muted loop playsInline preload="metadata" poster="/images/image-four.jpg">
           <source src="/video/event.mp4" type="video/mp4" />
         </video>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,7,5,0.55)_0%,rgba(10,7,5,0.3)_55%,rgba(10,7,5,0.45)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--gazra-paper)] to-transparent" />
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">

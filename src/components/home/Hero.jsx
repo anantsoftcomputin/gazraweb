@@ -99,6 +99,9 @@ const Hero = () => {
             aria-hidden="true"
           />
         )}
+        {/* Scrims — the video/embed can show its own bright text, so the hero copy needs guaranteed contrast */}
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-2/3 md:hidden bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(251,244,231,0.08)_1px,transparent_1px)] bg-[length:100%_5px] opacity-30 mix-blend-soft-light" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--gazra-paper)] via-[rgba(251,244,231,0.76)] to-transparent" />
       </div>
