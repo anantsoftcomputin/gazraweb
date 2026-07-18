@@ -17,6 +17,9 @@ function firestoreFields(data) {
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'boolean') fields[key] = { booleanValue: value };
     else if (typeof value === 'number') fields[key] = { integerValue: String(value) };
+    else if (Array.isArray(value)) {
+      fields[key] = { arrayValue: { values: value.map(item => ({ stringValue: String(item) })) } };
+    }
     else fields[key] = { stringValue: String(value ?? '') };
   }
   return { fields };
@@ -62,6 +65,13 @@ async function main() {
   for (const post of vadvarsoBlogSeries) {
     const words = wordCount(post.content);
     if (words < minimumWords) throw new Error(`"${post.title}" has only ${words} words.`);
+    if (!post.seoTitle || post.seoTitle.length > 60) throw new Error(`Invalid SEO title: "${post.title}".`);
+    if (!post.seoDescription || post.seoDescription.length < 120 || post.seoDescription.length > 160) {
+      throw new Error(`SEO description must be 120–160 characters: "${post.title}".`);
+    }
+    if (!Array.isArray(post.seoKeywords) || post.seoKeywords.length < 4) {
+      throw new Error(`At least four SEO keywords are required: "${post.title}".`);
+    }
     const imagePath = `public${post.featuredImage}`;
     if (!fs.existsSync(imagePath)) throw new Error(`Missing image: ${imagePath}`);
   }

@@ -23,6 +23,7 @@ const countWords = (value) => value.trim() ? value.trim().split(/\s+/).length : 
 
 const emptyForm = {
   title: '', excerpt: '', content: '', author: '',
+  seoTitle: '', seoDescription: '', seoKeywords: '', imageAlt: '',
   category: 'news', status: 'draft', featured: false,
 };
 
@@ -91,6 +92,10 @@ const AdminBlog = () => {
       excerpt:  formData.excerpt.trim(),
       content:  formData.content.trim(),
       author:   formData.author.trim(),
+      seoTitle: formData.seoTitle.trim(),
+      seoDescription: formData.seoDescription.trim(),
+      seoKeywords: formData.seoKeywords.split(',').map(keyword => keyword.trim()).filter(Boolean),
+      imageAlt: formData.imageAlt.trim(),
       category: formData.category,
       status:   formData.status,
       featured: formData.featured,
@@ -112,6 +117,9 @@ const AdminBlog = () => {
     setFormData({
       title: post.title || '', excerpt: post.excerpt || '', content: post.content || '',
       author: post.author || '', category: post.category || 'news',
+      seoTitle: post.seoTitle || '', seoDescription: post.seoDescription || '',
+      seoKeywords: Array.isArray(post.seoKeywords) ? post.seoKeywords.join(', ') : (post.seoKeywords || ''),
+      imageAlt: post.imageAlt || '',
       status: post.status || 'draft', featured: post.featured || false,
     });
     setUploadedUrl(post.featuredImage || '');
@@ -396,6 +404,58 @@ const AdminBlog = () => {
                     <div className={`mt-1 flex justify-between text-xs ${countWords(formData.content) >= MIN_BLOG_WORDS ? 'text-green-700' : 'text-neutral-500'}`}>
                       <span>Minimum {MIN_BLOG_WORDS.toLocaleString('en-IN')} words</span>
                       <span className="font-semibold">{countWords(formData.content).toLocaleString('en-IN')} words</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 space-y-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-800">Search and sharing metadata</h3>
+                      <p className="mt-1 text-xs text-neutral-500">Used by Google, WhatsApp, Facebook, LinkedIn and other link previews.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-neutral-700 mb-2">SEO title</label>
+                      <input
+                        type="text"
+                        maxLength={60}
+                        value={formData.seoTitle}
+                        onChange={e => setFormData(p => ({ ...p, seoTitle: e.target.value }))}
+                        placeholder="Up to 60 characters"
+                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none"
+                      />
+                      <p className="mt-1 text-right text-xs text-neutral-500">{formData.seoTitle.length}/60</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-neutral-700 mb-2">Meta description</label>
+                      <textarea
+                        maxLength={160}
+                        value={formData.seoDescription}
+                        onChange={e => setFormData(p => ({ ...p, seoDescription: e.target.value }))}
+                        placeholder="A specific 120–160 character summary"
+                        rows={3}
+                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none resize-y"
+                      />
+                      <p className="mt-1 text-right text-xs text-neutral-500">{formData.seoDescription.length}/160</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-neutral-700 mb-2">SEO keywords</label>
+                      <input
+                        type="text"
+                        value={formData.seoKeywords}
+                        onChange={e => setFormData(p => ({ ...p, seoKeywords: e.target.value }))}
+                        placeholder="Vadvarso, urban trees Vadodara, inclusive public spaces"
+                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none"
+                      />
+                      <p className="mt-1 text-xs text-neutral-500">Separate focused phrases with commas.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-neutral-700 mb-2">Featured-image alt text</label>
+                      <input
+                        type="text"
+                        value={formData.imageAlt}
+                        onChange={e => setFormData(p => ({ ...p, imageAlt: e.target.value }))}
+                        placeholder="Describe what is visibly happening in the image"
+                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none"
+                      />
                     </div>
                   </div>
 
