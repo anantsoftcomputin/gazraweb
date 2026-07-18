@@ -274,6 +274,8 @@ const AdminEvents = () => {
       const result = await uploadFile(file, 'events');
       if (result.success) {
         setFormData(prev => ({ ...prev, image: result.url }));
+      } else {
+        alert(result.error || 'Unable to upload event image.');
       }
     }
   };
