@@ -131,7 +131,7 @@ const BlogDetail = () => {
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">{post.title}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3 text-white">{post.title}</h1>
                   <div className="flex flex-wrap gap-4 text-sm">
                     {post.author && (
                       <span className="flex items-center"><User className="w-4 h-4 mr-2" />{post.author}</span>

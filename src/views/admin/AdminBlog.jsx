@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Trash2, X, Save, Upload, Star, StarOff,
-  FileText, Edit2, Eye, EyeOff,
+  FileText, Edit2, Eye, EyeOff, Search,
 } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import { useStorage } from '../../hooks/useStorage';
 import AdminLayout from '../../layouts/AdminLayout';
+import AdminPager from '../../components/admin/AdminPager';
 
 const CATEGORY_OPTIONS = [
   { value: 'news',     label: 'News' },
@@ -19,7 +20,13 @@ const slugify = (title) =>
   title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
 const MIN_BLOG_WORDS = 1000;
+const PAGE_SIZE = 9;
 const countWords = (value) => value.trim() ? value.trim().split(/\s+/).length : 0;
+const dateValue = (value) => {
+  if (value?.toDate) return value.toDate().getTime();
+  if (typeof value?.seconds === 'number') return value.seconds * 1000;
+  return new Date(value || 0).getTime() || 0;
+};
 
 const emptyForm = {
   title: '', excerpt: '', content: '', author: '',
@@ -30,6 +37,10 @@ const emptyForm = {
 const AdminBlog = () => {
   const [posts, setPosts]               = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [page, setPage] = useState(1);
   const [showModal, setShowModal]       = useState(false);
   const [editingPost, setEditingPost]   = useState(null);
   const [pendingFile, setPendingFile]   = useState(null);
@@ -163,7 +174,31 @@ const AdminBlog = () => {
     setShowModal(false);
   };
 
-  const displayed = filterStatus === 'all' ? posts : posts.filter(p => p.status === filterStatus);
+  const filteredPosts = useMemo(() => {
+    const needle = searchTerm.trim().toLowerCase();
+    const matches = posts.filter((post) => {
+      if (filterStatus !== 'all' && post.status !== filterStatus) return false;
+      if (filterCategory !== 'all' && post.category !== filterCategory) return false;
+      if (!needle) return true;
+      const keywords = Array.isArray(post.seoKeywords) ? post.seoKeywords.join(' ') : (post.seoKeywords || '');
+      return [post.title, post.excerpt, post.content, post.author, post.category, post.seoTitle, post.seoDescription, keywords]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(needle);
+    });
+    return [...matches].sort((a, b) => {
+      if (sortOrder === 'title') return String(a.title || '').localeCompare(String(b.title || ''));
+      const difference = dateValue(b.publishedDate || b.createdAt) - dateValue(a.publishedDate || a.createdAt);
+      return sortOrder === 'oldest' ? -difference : difference;
+    });
+  }, [filterCategory, filterStatus, posts, searchTerm, sortOrder]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  const displayed = filteredPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [filterCategory, filterStatus, searchTerm, sortOrder]);
+  useEffect(() => { setPage(current => Math.min(current, totalPages)); }, [totalPages]);
 
   if (loading && posts.length === 0) {
     return (
@@ -194,39 +229,54 @@ const AdminBlog = () => {
           </button>
         </div>
 
-        {/* Status filter */}
-        <div className="flex gap-2 flex-wrap">
-          {[
-            { id: 'all', label: 'All' },
-            { id: 'published', label: 'Published' },
-            { id: 'draft', label: 'Draft' },
-          ].map(s => {
-            const count = s.id === 'all' ? posts.length : posts.filter(p => p.status === s.id).length;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setFilterStatus(s.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  filterStatus === s.id
-                    ? 'bg-primary-600 text-white shadow'
-                    : 'bg-white border border-neutral-200 text-neutral-600 hover:border-primary-300 hover:text-primary-700'
-                }`}
-              >
-                {s.label}
-                <span className={`text-[11px] rounded-full px-1.5 py-0.5 font-bold ${
-                  filterStatus === s.id ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500'
-                }`}>{count}</span>
-              </button>
-            );
-          })}
+        {/* Search and filters */}
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 space-y-4">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_170px]">
+            <label className="relative">
+              <span className="sr-only">Search posts</span>
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search title, content or SEO keywords…" className="w-full rounded-lg border border-neutral-300 py-2.5 pl-10 pr-10 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200" />
+              {searchTerm && <button type="button" onClick={() => setSearchTerm('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"><X className="h-4 w-4" /></button>}
+            </label>
+            <select value={filterCategory} onChange={(event) => setFilterCategory(event.target.value)} aria-label="Filter by category" className="rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+              <option value="all">All categories</option>
+              {CATEGORY_OPTIONS.map(category => <option key={category.value} value={category.value}>{category.label}</option>)}
+            </select>
+            <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} aria-label="Sort posts" className="rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="title">Title A–Z</option>
+            </select>
+          </div>
+          <div className="flex gap-2 flex-wrap items-center">
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'published', label: 'Published' },
+              { id: 'draft', label: 'Draft' },
+            ].map(s => {
+              const count = s.id === 'all' ? posts.length : posts.filter(p => p.status === s.id).length;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setFilterStatus(s.id)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === s.id ? 'bg-primary-600 text-white shadow' : 'bg-neutral-50 border border-neutral-200 text-neutral-600 hover:border-primary-300 hover:text-primary-700'}`}
+                >
+                  {s.label}
+                  <span className={`text-[11px] rounded-full px-1.5 py-0.5 font-bold ${filterStatus === s.id ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500'}`}>{count}</span>
+                </button>
+              );
+            })}
+            <span className="ml-auto text-sm text-neutral-500">{filteredPosts.length} matching</span>
+          </div>
         </div>
 
         {/* Posts list */}
         {displayed.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-neutral-100">
             <FileText className="w-14 h-14 text-neutral-200 mx-auto mb-4" />
-            <p className="text-neutral-500 font-medium">No posts yet</p>
-            <p className="text-neutral-400 text-sm mt-1">Click "New Post" to get started</p>
+            <p className="text-neutral-500 font-medium">No matching posts</p>
+            <p className="text-neutral-400 text-sm mt-1">Try changing the search or filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -240,7 +290,7 @@ const AdminBlog = () => {
               >
                 <div className="aspect-video bg-neutral-100 relative">
                   {post.featuredImage ? (
-                    <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+                    <img src={post.featuredImage} alt={post.imageAlt || post.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <FileText className="w-10 h-10 text-neutral-300" />
@@ -294,6 +344,14 @@ const AdminBlog = () => {
             ))}
           </div>
         )}
+        <AdminPager
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filteredPosts.length}
+          hasMore={page < totalPages}
+          onPrevious={() => setPage(current => Math.max(1, current - 1))}
+          onNext={() => setPage(current => Math.min(totalPages, current + 1))}
+        />
       </div>
 
       {/* Add / Edit Modal */}
