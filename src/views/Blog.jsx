@@ -116,7 +116,7 @@ const Blog = () => {
                       {post.featuredImage ? (
                         <img
                           src={post.featuredImage}
-                          alt={post.title}
+                          alt={post.imageAlt || post.title}
                           loading="lazy"
                           decoding="async"
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

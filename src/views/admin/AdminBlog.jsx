@@ -18,6 +18,9 @@ const CATEGORY_OPTIONS = [
 const slugify = (title) =>
   title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
+const MIN_BLOG_WORDS = 1000;
+const countWords = (value) => value.trim() ? value.trim().split(/\s+/).length : 0;
+
 const emptyForm = {
   title: '', excerpt: '', content: '', author: '',
   category: 'news', status: 'draft', featured: false,
@@ -72,6 +75,13 @@ const AdminBlog = () => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.content.trim()) {
       alert('Title and content are required.');
+      return;
+    }
+    const wordCount = countWords(formData.content);
+    const originalContent = editingPost?.content?.trim() || '';
+    const contentChanged = formData.content.trim() !== originalContent;
+    if (wordCount < MIN_BLOG_WORDS && (!editingPost || contentChanged)) {
+      alert(`Blog posts must contain at least ${MIN_BLOG_WORDS.toLocaleString('en-IN')} words. Current count: ${wordCount.toLocaleString('en-IN')}.`);
       return;
     }
 
@@ -383,6 +393,10 @@ const AdminBlog = () => {
                       rows={8}
                       className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none resize-y"
                     />
+                    <div className={`mt-1 flex justify-between text-xs ${countWords(formData.content) >= MIN_BLOG_WORDS ? 'text-green-700' : 'text-neutral-500'}`}>
+                      <span>Minimum {MIN_BLOG_WORDS.toLocaleString('en-IN')} words</span>
+                      <span className="font-semibold">{countWords(formData.content).toLocaleString('en-IN')} words</span>
+                    </div>
                   </div>
 
                   {/* Author */}

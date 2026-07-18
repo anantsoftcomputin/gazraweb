@@ -14,6 +14,23 @@ const formatDate = (iso) => {
   }
 };
 
+const renderContentBlock = (block, index) => {
+  if (block.startsWith('## ')) {
+    return <h2 key={index} className="mt-9 mb-4 text-2xl font-display font-bold text-neutral-800">{block.slice(3)}</h2>;
+  }
+  if (block.startsWith('### ')) {
+    return <h3 key={index} className="mt-7 mb-3 text-xl font-bold text-neutral-800">{block.slice(4)}</h3>;
+  }
+  if (block.startsWith('> ')) {
+    return (
+      <blockquote key={index} className="my-6 border-l-4 border-primary-500 bg-primary-50 px-5 py-4 text-lg italic text-neutral-700">
+        {block.slice(2)}
+      </blockquote>
+    );
+  }
+  return <p key={index} className="mb-4 text-neutral-700 leading-relaxed">{block}</p>;
+};
+
 const BlogDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -86,7 +103,7 @@ const BlogDetail = () => {
           <div className="bg-white rounded-2xl shadow-hard overflow-hidden max-w-4xl mx-auto">
             {post.featuredImage && (
               <div className="h-64 sm:h-96 relative">
-                <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+                <img src={post.featuredImage} alt={post.imageAlt || post.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute top-4 left-4">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white shadow-soft bg-primary-600 capitalize">
@@ -150,9 +167,7 @@ const BlogDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="prose prose-neutral max-w-none"
               >
-                {post.content.split('\n').filter(Boolean).map((paragraph, idx) => (
-                  <p key={idx} className="text-neutral-700 leading-relaxed mb-4">{paragraph}</p>
-                ))}
+                {post.content.split('\n').map(block => block.trim()).filter(Boolean).map(renderContentBlock)}
               </motion.div>
 
               <div className="flex justify-center pt-8 mt-8 border-t border-neutral-200">
