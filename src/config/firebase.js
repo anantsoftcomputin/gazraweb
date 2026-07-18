@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -26,6 +27,14 @@ export const auth = getAuth(app);
 
 // Force reCAPTCHA v2 (not Enterprise) for Phone Auth
 if (typeof window !== 'undefined') {
+  const appCheckSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY;
+  if (appCheckSiteKey) {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
+      isTokenAutoRefreshEnabled: true
+    });
+  }
+
   if (auth.settings) {
     auth.settings.appVerificationDisabledForTesting = false;
 

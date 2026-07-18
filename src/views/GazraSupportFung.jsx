@@ -17,7 +17,7 @@ import {
   Calendar,
   CheckCircle
 } from 'lucide-react';
-import { useFirestore } from '../hooks/useFirestore';
+import { usePublicSubmission } from '../hooks/usePublicSubmission';
 import PhoneVerification from '../components/shared/PhoneVerification';
 
 const GazraSupportFund = () => {
@@ -53,7 +53,7 @@ const GazraSupportFund = () => {
     // Step 4
     declaration: false
   });
-  const { addDocument } = useFirestore('supportRequests');
+  const { submit } = usePublicSubmission('support');
 
   const toggleSection = (section) => {
     if (openSection === section) {
@@ -72,6 +72,12 @@ const GazraSupportFund = () => {
   };
 
   const handleSubmit = async () => {
+    if (!formData.fullName.trim() || !formData.email.trim() || !formData.phoneNumber.trim() ||
+        !formData.supportType || !formData.supportDescription.trim()) {
+      alert('Please complete your contact details, assistance type, and support description.');
+      return;
+    }
+
     if (!phoneVerified) {
       alert('Please verify your phone number before submitting.');
       return;
@@ -84,7 +90,7 @@ const GazraSupportFund = () => {
 
     try {
       setSubmitting(true);
-      const result = await addDocument({
+      const result = await submit({
         ...formData,
         status: 'pending',
         submittedAt: new Date().toISOString()
@@ -879,27 +885,27 @@ const GazraSupportFund = () => {
                       <label className="block text-sm font-medium text-neutral-700">Type of Assistance Needed</label>
                       <div className="grid sm:grid-cols-2 gap-3 mt-2">
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="medical" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="medical" checked={formData.supportType === 'medical'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Medical Expenses</span>
                         </label>
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="education" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="education" checked={formData.supportType === 'education'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Educational Support</span>
                         </label>
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="gender_affirming" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="gender_affirming" checked={formData.supportType === 'gender_affirming'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Gender-Affirming Care</span>
                         </label>
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="mental_health" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="mental_health" checked={formData.supportType === 'mental_health'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Mental Health Services</span>
                         </label>
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="legal_aid" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="legal_aid" checked={formData.supportType === 'legal_aid'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Legal Aid</span>
                         </label>
                         <label className="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-primary-50 cursor-pointer">
-                          <input type="radio" name="assistance-type" value="other" className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
+                          <input type="radio" name="supportType" value="other" checked={formData.supportType === 'other'} onChange={handleInputChange} className="w-4 h-4 text-primary-600 border-neutral-300 focus:ring-primary-500" />
                           <span className="ml-3 text-neutral-700">Other (Specify below)</span>
                         </label>
                       </div>
@@ -910,6 +916,9 @@ const GazraSupportFund = () => {
                         Please provide a brief description of your situation and why you are seeking assistance:
                       </label>
                       <textarea
+                        name="supportDescription"
+                        value={formData.supportDescription}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Explain your current situation and specific needs..."
                         rows="6"
@@ -922,6 +931,9 @@ const GazraSupportFund = () => {
                       </label>
                       <input
                         type="text"
+                        name="amountRequested"
+                        value={formData.amountRequested}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Enter amount in INR"
                       />

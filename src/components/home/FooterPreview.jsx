@@ -3,7 +3,7 @@ import { Link } from '../../lib/routerCompat';
 import { ArrowRight, CheckCircle2, Heart, Mail, MapPin, Phone } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
-import { useFirestore } from '../../hooks/useFirestore';
+import { usePublicSubmission } from '../../hooks/usePublicSubmission';
 
 const footerGroups = [
   {
@@ -31,7 +31,7 @@ const Footer = () => {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // 'success' | 'error' | null
-  const { addDocument } = useFirestore('newsletter');
+  const { submit: addDocument } = usePublicSubmission('newsletter');
 
   const handleSubscribe = async (e) => {
     e.preventDefault();

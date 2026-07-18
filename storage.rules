@@ -3,53 +3,50 @@ service firebase.storage {
   match /b/{bucket}/o {
     function isAdmin() {
       return request.auth != null
-        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+        && (('admin' in request.auth.token && request.auth.token.admin == true)
+          || firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)));
     }
-    
-    // Public read access for all files
+
+    function validImage() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Public website assets. Writes remain admin-only and are also available
+    // through the uploadAdminFile callable fallback.
+    match /{folder}/{fileName} {
+      allow read: if folder == 'events'
+        || folder == 'eventLocations'
+        || folder == 'gallery'
+        || folder == 'menu'
+        || folder == 'cafeMoments'
+        || folder == 'testimonials'
+        || folder == 'instagram'
+        || folder == 'initiatives'
+        || folder == 'blogs';
+
+      allow create, update: if isAdmin()
+        && (folder == 'events'
+          || folder == 'eventLocations'
+          || folder == 'gallery'
+          || folder == 'menu'
+          || folder == 'cafeMoments'
+          || folder == 'testimonials'
+          || folder == 'instagram'
+          || folder == 'initiatives'
+          || folder == 'blogs')
+        && validImage();
+      allow delete: if isAdmin();
+    }
+
+    // Resumes are written by Cloud Functions and accessed by administrators
+    // through short-lived signed URLs. They are never public Firebase objects.
+    match /private/volunteer-resumes/{fileName} {
+      allow read, write: if false;
+    }
+
     match /{allPaths=**} {
-      allow read: if true;
-    }
-    
-    // Authenticated users can upload to specific folders
-    match /events/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-
-    match /eventLocations/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-    
-    match /gallery/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-    
-    match /menu/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-
-    match /cafeMoments/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-
-    match /testimonials/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-
-    match /instagram/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
-    }
-    
-    match /initiatives/{fileName} {
-      allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024;
+      allow read, write: if false;
     }
   }
 }

@@ -1,8 +1,9 @@
 # SMS Service Setup Guide
 
 ## Current Status
-- Phone verification is implemented using Firebase Phone Authentication ✅
-- SMS confirmation is mocked (console.log) - needs real SMS service
+- Phone verification is implemented using Firebase Phone Authentication.
+- Booking confirmation SMS remains a development fallback and logs locally if delivery is unavailable.
+- Form submissions themselves are protected by callable validation, rate limits, and optional Firebase App Check.
 
 ## Option 1: Twilio (Recommended)
 
@@ -10,12 +11,17 @@
 1. Sign up at https://www.twilio.com/
 2. Get your Account SID and Auth Token
 3. Purchase a phone number
-4. Add to `.env`:
+4. Store provider credentials as Firebase Functions secrets; never expose them in `NEXT_PUBLIC_` or legacy `VITE_` variables.
+
+Legacy examples below are retained as provider reference only. Do not put Twilio auth tokens in a browser environment file.
+
+<!--
 ```env
 VITE_TWILIO_ACCOUNT_SID=your_account_sid
 VITE_TWILIO_AUTH_TOKEN=your_auth_token
 VITE_TWILIO_PHONE_NUMBER=+1234567890
 ```
+-->
 
 5. Install Twilio SDK:
 ```bash

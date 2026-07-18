@@ -7,8 +7,7 @@ import {
   CheckCircle, MapPin,
   MessageSquare, Send, Upload, FileText, Briefcase, X
 } from 'lucide-react';
-import { useFirestore } from '../hooks/useFirestore';
-import { useStorage } from '../hooks/useStorage';
+import { fileToBase64, usePublicSubmission } from '../hooks/usePublicSubmission';
 import PhoneVerification from '../components/shared/PhoneVerification';
 
 const VolunteerPage = () => {
@@ -18,8 +17,7 @@ const VolunteerPage = () => {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeUploading, setResumeUploading] = useState(false);
-  const { addDocument } = useFirestore('volunteers');
-  const { uploadFile } = useStorage();
+  const { submit } = usePublicSubmission('volunteer');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -168,22 +166,18 @@ const VolunteerPage = () => {
     setSubmitting(true);
     
     try {
-      let resumeUrl = '';
-      if (resumeFile) {
-        setResumeUploading(true);
-        const uploadResult = await uploadFile(resumeFile, 'volunteer-resumes');
-        setResumeUploading(false);
-        if (uploadResult.success) {
-          resumeUrl = uploadResult.url;
-        }
-      }
-
-      await addDocument({
+      setResumeUploading(Boolean(resumeFile));
+      const resume = resumeFile ? {
+        name: resumeFile.name,
+        contentType: resumeFile.type,
+        base64: await fileToBase64(resumeFile)
+      } : undefined;
+      const result = await submit({
         ...formData,
-        resumeUrl,
         selectedRole: selectedRole || 'Not specified',
         status: 'pending'
-      });
+      }, resume ? { resume } : {});
+      if (!result.success) throw new Error(result.error);
       
       setSubmitted(true);
       setFormData({

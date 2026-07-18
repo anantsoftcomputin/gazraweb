@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import AdminLayout from '../../layouts/AdminLayout';
+import { limit, orderBy } from 'firebase/firestore';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -34,30 +35,32 @@ const AdminDashboard = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     
-    // Fetch counts from all collections
-    const [events, volunteers, messages, newsletter, support, menu] = await Promise.all([
-      eventsHook.getDocuments(),
-      volunteersHook.getDocuments(),
-      messagesHook.getDocuments(),
-      newsletterHook.getDocuments(),
-      supportHook.getDocuments(),
-      menuHook.getDocuments()
+    // Firestore aggregate queries avoid downloading entire collections.
+    const [events, volunteers, messages, newsletter, support, menu, recentMessages, recentVolunteers] = await Promise.all([
+      eventsHook.getCount(),
+      volunteersHook.getCount(),
+      messagesHook.getCount(),
+      newsletterHook.getCount(),
+      supportHook.getCount(),
+      menuHook.getCount(),
+      messagesHook.getDocuments([orderBy('createdAt', 'desc'), limit(3)]),
+      volunteersHook.getDocuments([orderBy('createdAt', 'desc'), limit(2)])
     ]);
 
     setStats({
-      totalEvents: events.data?.length || 0,
-      totalVolunteers: volunteers.data?.length || 0,
-      totalMessages: messages.data?.length || 0,
-      totalNewsletterSubscribers: newsletter.data?.length || 0,
-      totalSupportRequests: support.data?.length || 0,
-      totalMenuItems: menu.data?.length || 0
+      totalEvents: events.count || 0,
+      totalVolunteers: volunteers.count || 0,
+      totalMessages: messages.count || 0,
+      totalNewsletterSubscribers: newsletter.count || 0,
+      totalSupportRequests: support.count || 0,
+      totalMenuItems: menu.count || 0
     });
 
     // Combine recent activity
     const activities = [];
     
-    if (messages.data) {
-      messages.data.slice(0, 3).forEach(msg => {
+    if (recentMessages.data) {
+      recentMessages.data.forEach(msg => {
         activities.push({
           type: 'message',
           title: `New message from ${msg.name}`,
@@ -67,8 +70,8 @@ const AdminDashboard = () => {
       });
     }
 
-    if (volunteers.data) {
-      volunteers.data.slice(0, 2).forEach(vol => {
+    if (recentVolunteers.data) {
+      recentVolunteers.data.forEach(vol => {
         activities.push({
           type: 'volunteer',
           title: `New volunteer application: ${vol.name}`,

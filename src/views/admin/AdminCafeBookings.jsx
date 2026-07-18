@@ -3,11 +3,12 @@ import { Calendar, Users, Clock, Phone, Mail, Filter, Check, X, MessageSquare, S
 import { useFirestore } from '../../hooks/useFirestore';
 import { sendBookingConfirmationMessage } from '../../utils/smsService';
 import AdminLayout from '../../layouts/AdminLayout';
+import { useAdminCollectionPage } from '../../hooks/useAdminCollectionPage';
+import AdminPager from '../../components/admin/AdminPager';
 
 const AdminCafeBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     date: '',
     partySize: '',
@@ -15,7 +16,9 @@ const AdminCafeBookings = () => {
     search: ''
   });
 
-  const { getDocuments, updateDocument, deleteDocument } = useFirestore('cafeBookings');
+  const { updateDocument, deleteDocument } = useFirestore('cafeBookings');
+  const pager = useAdminCollectionPage('cafeBookings');
+  const { loading } = pager;
 
   const getBookingDate = (booking) => booking.bookingDate || booking.date || '';
   const getBookingTime = (booking) => booking.bookingTime || booking.time || '';
@@ -27,30 +30,13 @@ const AdminCafeBookings = () => {
   };
 
   useEffect(() => {
-    loadBookings();
-  }, []);
+    const sorted = [...pager.items].sort((a, b) => getCreatedAtDate(b.createdAt) - getCreatedAtDate(a.createdAt));
+    setBookings(sorted);
+  }, [pager.items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     applyFilters();
   }, [bookings, filters]);
-
-  const loadBookings = async () => {
-    setLoading(true);
-    try {
-      const result = await getDocuments();
-      if (result.success) {
-        // Sort by creation date, newest first
-        const sorted = result.data.sort((a, b) =>
-          getCreatedAtDate(b.createdAt) - getCreatedAtDate(a.createdAt)
-        );
-        setBookings(sorted);
-      }
-    } catch (error) {
-      console.error('Error loading bookings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const applyFilters = () => {
     let filtered = [...bookings];
@@ -424,6 +410,7 @@ const AdminCafeBookings = () => {
               ))}
             </div>
           )}
+          <AdminPager {...pager} onPrevious={pager.previousPage} onNext={pager.nextPage} />
         </div>
       </div>
     </div>

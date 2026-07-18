@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Users, Eye, Trash2, Filter, Search, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import AdminLayout from '../../layouts/AdminLayout';
+import { useAdminCollectionPage } from '../../hooks/useAdminCollectionPage';
+import AdminPager from '../../components/admin/AdminPager';
 
 const AdminSkillsEnrollments = () => {
   const [enrollments, setEnrollments] = useState([]);
@@ -11,25 +13,19 @@ const AdminSkillsEnrollments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEnrollment, setSelectedEnrollment] = useState(null);
 
-  const { getDocuments, updateDocument, deleteDocument, loading } = useFirestore('skillsEnrollments');
+  const { updateDocument, deleteDocument } = useFirestore('skillsEnrollments');
+  const pager = useAdminCollectionPage('skillsEnrollments');
+  const { loading } = pager;
 
   useEffect(() => {
-    loadEnrollments();
-  }, []);
+    setEnrollments([...pager.items].sort((a, b) =>
+      (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+    ));
+  }, [pager.items]);
 
   useEffect(() => {
     filterEnrollments();
   }, [enrollments, statusFilter, searchTerm]);
-
-  const loadEnrollments = async () => {
-    const result = await getDocuments();
-    if (result.success) {
-      const sorted = result.data.sort((a, b) => 
-        new Date(b.submittedAt) - new Date(a.submittedAt)
-      );
-      setEnrollments(sorted);
-    }
-  };
 
   const filterEnrollments = () => {
     let filtered = [...enrollments];
@@ -56,7 +52,7 @@ const AdminSkillsEnrollments = () => {
     });
     if (result.success) {
       alert(`Status updated to ${newStatus}`);
-      loadEnrollments();
+      pager.refresh();
     }
   };
 
@@ -65,7 +61,7 @@ const AdminSkillsEnrollments = () => {
       const result = await deleteDocument(id);
       if (result.success) {
         alert('Enrollment deleted successfully!');
-        loadEnrollments();
+        pager.refresh();
         setSelectedEnrollment(null);
       }
     }
@@ -229,7 +225,7 @@ const AdminSkillsEnrollments = () => {
         </div>
 
         {/* Detail Modal */}
-        {selectedEnrollment && (
+      {selectedEnrollment && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -332,7 +328,8 @@ const AdminSkillsEnrollments = () => {
               </div>
             </motion.div>
           </div>
-        )}
+      )}
+      <AdminPager {...pager} onPrevious={pager.previousPage} onNext={pager.nextPage} />
       </div>
     </AdminLayout>
   );

@@ -3,7 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+        && (('admin' in request.auth.token && request.auth.token.admin == true)
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
     
     // Public read access for events, menu items, and initiatives
@@ -64,7 +65,7 @@ service cloud.firestore {
     
     // Cafe bookings - allow create for anyone, read/update/delete for authenticated users
     match /cafeBookings/{bookingId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     
@@ -100,27 +101,27 @@ service cloud.firestore {
 
     // Form submissions - allow create for anyone, read/update/delete for authenticated users
     match /contactMessages/{messageId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     
     match /volunteers/{volunteerId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     
     match /supportRequests/{requestId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     
     match /newsletter/{subscriberId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
 
     match /eventRsvps/{rsvpId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
 
@@ -136,7 +137,7 @@ service cloud.firestore {
     
     // Skills enrollments - allow create for anyone, read/update/delete for authenticated users
     match /skillsEnrollments/{enrollmentId} {
-      allow create: if true;
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     
@@ -144,6 +145,14 @@ service cloud.firestore {
     match /admins/{adminId} {
       allow get: if request.auth != null && request.auth.uid == adminId;
       allow list, write: if isAdmin();
+    }
+
+    match /emailOtpVerifications/{verificationId} {
+      allow read, write: if false;
+    }
+
+    match /_rateLimits/{limitId} {
+      allow read, write: if false;
     }
   }
 }

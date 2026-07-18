@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Mail, Phone, Clock, Send, MessageSquare, ArrowRight } from 'lucide-react';
 import PhoneVerification from '../components/shared/PhoneVerification';
-import { useFirestore } from '../hooks/useFirestore';
+import { usePublicSubmission } from '../hooks/usePublicSubmission';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5 } };
 
@@ -38,12 +38,12 @@ const Field = ({ id, label, type = 'text', placeholder, value, onChange, textare
   <div>
     <label htmlFor={id} className="block text-sm font-semibold text-neutral-700 mb-1.5">{label}</label>
     {textarea ? (
-      <textarea id={id} name={id} value={value} onChange={onChange} rows={4} placeholder={placeholder}
+      <textarea id={id} name={id} value={value} onChange={onChange} rows={4} placeholder={placeholder} required
         className="w-full px-4 py-3 rounded-lg border border-[rgba(184,121,44,0.3)]
                    bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100
                    transition-all duration-200 text-sm placeholder-neutral-400 outline-none resize-none" />
     ) : (
-      <input type={type} id={id} name={id} value={value} onChange={onChange} placeholder={placeholder}
+      <input type={type} id={id} name={id} value={value} onChange={onChange} placeholder={placeholder} required
         className="w-full px-4 py-3 rounded-lg border border-[rgba(184,121,44,0.3)]
                    bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100
                    transition-all duration-200 text-sm placeholder-neutral-400 outline-none" />
@@ -57,7 +57,7 @@ const ContactPage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
-  const { addDocument } = useFirestore('contactMessages');
+  const { submit } = usePublicSubmission('contact');
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -66,7 +66,7 @@ const ContactPage = () => {
     if (!phoneVerified) { alert('Please verify your phone number before submitting.'); return; }
 
     setSubmitting(true);
-    const result = await addDocument({
+    const result = await submit({
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),

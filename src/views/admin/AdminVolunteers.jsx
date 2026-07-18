@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import app from '../../config/firebase';
 
 /* ─── Label maps ─────────────────────────────────────────────────────────── */
 const CONTRIBUTION_LABELS = {
@@ -146,7 +148,7 @@ const SortIcon = ({ field, sortField, sortDir }) => {
 };
 
 /* ─── Detail Drawer ──────────────────────────────────────────────────────── */
-const DetailDrawer = ({ volunteer, onClose, onStatusChange, onDelete }) => {
+const DetailDrawer = ({ volunteer, onClose, onStatusChange, onDelete, onOpenResume }) => {
   if (!volunteer) return null;
   const status = volunteer.status || 'pending';
   return (
@@ -269,13 +271,13 @@ const DetailDrawer = ({ volunteer, onClose, onStatusChange, onDelete }) => {
           )}
 
           {/* Resume */}
-          {volunteer.resumeUrl && (
+          {(volunteer.resumeUrl || volunteer.resumePath) && (
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Resume</p>
-              <a href={volunteer.resumeUrl} target="_blank" rel="noopener noreferrer"
+              <button type="button" onClick={() => onOpenResume(volunteer)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-sm font-semibold rounded-lg border border-primary-200 transition-colors">
                 <FileText className="w-4 h-4" />Open Resume<ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              </button>
             </div>
           )}
         </div>
@@ -423,6 +425,27 @@ const AdminVolunteers = () => {
   const [showImport, setShowImport] = useState(false);
 
   const { getDocuments, deleteDocument, updateDocument, addDocument } = useFirestore('volunteers');
+
+  const openResume = async (volunteer) => {
+    if (volunteer.resumePath) {
+      const pendingWindow = window.open('', '_blank');
+      try {
+        const getResume = httpsCallable(getFunctions(app, 'us-central1'), 'getPrivateResume');
+        const response = await getResume({ volunteerId: volunteer.id });
+        const binary = atob(response.data.base64);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        const objectUrl = URL.createObjectURL(new Blob([bytes], { type: response.data.contentType }));
+        if (pendingWindow) pendingWindow.location.href = objectUrl;
+        else window.open(objectUrl, '_blank', 'noopener,noreferrer');
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      } catch (error) {
+        pendingWindow?.close();
+        alert(error.message || 'Unable to open this resume.');
+      }
+      return;
+    }
+    if (volunteer.resumeUrl) window.open(volunteer.resumeUrl, '_blank', 'noopener,noreferrer');
+  };
 
   /* ── Load ── */
   const loadVolunteers = async () => {
@@ -751,11 +774,11 @@ const AdminVolunteers = () => {
                         <td className="px-4 py-3.5 whitespace-nowrap text-sm text-gray-400">{formatDate(v.createdAt)}</td>
                         <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {v.resumeUrl && (
-                              <a href={v.resumeUrl} target="_blank" rel="noopener noreferrer"
+                            {(v.resumeUrl || v.resumePath) && (
+                              <button type="button" onClick={() => openResume(v)}
                                 className="p-1.5 hover:bg-primary-50 text-primary-400 hover:text-primary-600 rounded-lg transition-colors" title="View Resume">
                                 <FileText className="w-4 h-4" />
-                              </a>
+                              </button>
                             )}
                             <button onClick={() => setDrawerVolunteer(v)}
                               className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-lg transition-colors" title="View Details">
@@ -818,7 +841,7 @@ const AdminVolunteers = () => {
 
       {drawerVolunteer && (
         <DetailDrawer volunteer={drawerVolunteer} onClose={() => setDrawerVolunteer(null)}
-          onStatusChange={handleStatusChange} onDelete={handleDelete} />
+          onStatusChange={handleStatusChange} onDelete={handleDelete} onOpenResume={openResume} />
       )}
       {showImport && <ImportModal onClose={() => setShowImport(false)} onImport={handleImport} />}
     </AdminLayout>

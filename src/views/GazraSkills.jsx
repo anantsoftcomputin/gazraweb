@@ -5,6 +5,7 @@ import {
   CheckCircle, ArrowRight, Mail, Phone, MapPin
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
+import { usePublicSubmission } from '../hooks/usePublicSubmission';
 
 // --- Helper Components ---
 
@@ -320,7 +321,7 @@ const GazraSkills = () => {
   });
 
   const { getDocuments: getCourses } = useFirestore('skillsCourses');
-  const { addDocument: addEnrollment } = useFirestore('skillsEnrollments');
+  const { submit: addEnrollment } = usePublicSubmission('skillsEnrollment');
 
   useEffect(() => {
     loadCourses();

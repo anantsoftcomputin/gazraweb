@@ -40,7 +40,7 @@ cd new-gazra
 ### 2. Install Dependencies
 
 ```bash
-npm install --legacy-peer-deps
+npm ci
 ```
 
 ### 3. Environment Setup
@@ -73,20 +73,25 @@ Select:
 - Realtime Database
 - Functions
 
-#### Deploy Firestore Rules and Indexes
+#### Deploy backend changes safely
 
 ```bash
-firebase deploy --only firestore:rules
-firebase deploy --only firestore:indexes
-firebase deploy --only storage:rules
+firebase deploy --only functions
+firebase deploy --only firestore:rules,firestore:indexes,storage
 ```
+
+Deploy Functions before the restrictive rules and frontend. This keeps public forms available throughout the rollout.
+
+For App Check, create a reCAPTCHA Enterprise web key in Firebase, set
+`NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` in Netlify, deploy the frontend,
+verify App Check metrics, then deploy Functions with `ENFORCE_APP_CHECK=true`.
 
 ### 5. Create Admin User
 
 In Firebase Console:
 1. Go to Authentication > Users
 2. Add a user with email and password
-3. This user will have admin access to the portal
+3. Create `admins/{USER_UID}` in Firestore. Authentication alone does not grant admin access.
 
 ### 6. Run Development Server
 
@@ -166,9 +171,27 @@ Access the admin portal at `/admin/login`
 
 The project includes predefined security rules:
 
-- **Firestore**: Public read for content, authenticated write
-- **Storage**: Public read, authenticated write with file size limits
+- **Firestore**: Public content is readable; all public submissions go through validated, rate-limited callable Functions
+- **Storage**: Website images are public and admin-managed; volunteer resumes are private and streamed only to authorized admins
 - **Authentication**: Email/password for admin access
+- **App Check**: reCAPTCHA Enterprise tokens can be enforced on every callable Function
+
+RSVP creation is transactional. The backend consumes a verified email OTP once,
+checks event status and capacity, prevents duplicate email registrations, creates
+the QR token, and increments the event count atomically.
+
+## Testing
+
+```bash
+npm run lint
+npm run test:rules
+npm run test:e2e
+npm run build
+```
+
+`test:rules` starts the Firestore emulator automatically. Playwright starts the
+Next.js development server and exercises public navigation, verification gates,
+admin route protection, and legal pages.
 
 ## 📱 Responsive Design
 
@@ -203,6 +226,10 @@ The frontend is a Next.js app intended for Netlify. Netlify supports modern Next
 ### Firebase Backend
 
 Firebase remains responsible for Authentication, Firestore, Storage, Realtime Database, and Functions.
+
+Event, venue, blog, gallery, and cafe image uploads try Firebase Storage first
+and automatically use an authenticated callable upload if Storage rules reject
+the direct request. Deploy both Functions and Storage rules when changing uploads.
 
 ## 📧 Contact
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, Users, MessageSquare, User, Mail, CheckCircle, AlertCircle, X, CalendarCheck } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
+import { usePublicSubmission } from '../../hooks/usePublicSubmission';
 import PhoneVerification from '../shared/PhoneVerification';
 
 const FloatingBookingForm = () => {
@@ -22,7 +23,7 @@ const FloatingBookingForm = () => {
   const [closedDates, setClosedDates] = useState([]);
   const [dateWarning, setDateWarning] = useState('');
 
-  const { addDocument } = useFirestore('cafeBookings');
+  const { submit: addDocument } = usePublicSubmission('cafeBooking');
   const { getDocuments: getClosedDates } = useFirestore('cafeClosedDates');
 
   // Load closed dates

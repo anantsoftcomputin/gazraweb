@@ -37,7 +37,6 @@ const EventDetail = () => {
     email: ''
   });
   const { getDocument, getDocuments } = useFirestore('events');
-  const { addDocument: addRsvp } = useFirestore('eventRsvps');
   const functions = getFunctions(app, 'us-central1');
 
   useEffect(() => {
@@ -118,7 +117,7 @@ const EventDetail = () => {
       const response = await sendOtp({
         email: normalizedEmail,
         name: name.trim(),
-        eventId: id,
+        eventId: event?.id || id,
         eventTitle: event?.title || ''
       });
 
@@ -209,7 +208,8 @@ const EventDetail = () => {
       return;
     }
 
-    const duplicateKey = `eventRsvp:${id}:${email.trim().toLowerCase()}`;
+    const canonicalEventId = event.id || id;
+    const duplicateKey = `eventRsvp:${canonicalEventId}:${email.trim().toLowerCase()}`;
     if (window.localStorage.getItem(duplicateKey)) {
       setRsvpSubmitted(true);
       setFormMessage('You have already RSVPed for this event from this browser.');
@@ -218,55 +218,38 @@ const EventDetail = () => {
     }
 
     try {
-      const rsvpId = crypto.randomUUID();
-      const qrToken = crypto.randomUUID();
+      const createRsvp = httpsCallable(functions, 'createEventRsvp');
+      const response = await createRsvp({
+        eventId: canonicalEventId,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: formatIndianPhone(phone),
+        verificationId: emailVerification.verificationId,
+        verificationToken: emailVerification.verificationToken
+      });
+      const { id: rsvpDocumentId, rsvpId, qrToken } = response.data;
       const qrPayload = JSON.stringify({
         type: 'gazra-event-rsvp',
-        eventId: id,
+        eventId: canonicalEventId,
         rsvpId,
         qrToken
       });
       const qrCodeDataUrl = await QRCode.toDataURL(qrPayload, { margin: 1, width: 260 });
-      const result = await addRsvp({
+      setEvent((prev) => prev ? {
+        ...prev,
+        registrationCount: Number(prev.registrationCount || 0) + 1
+      } : prev);
+      window.localStorage.setItem(duplicateKey, 'true');
+      setRsvpTicket({
+        id: rsvpDocumentId,
         rsvpId,
         qrToken,
-        eventId: id,
-        eventTitle: event.title,
-        eventDate: event.dateIso || event.date || '',
-        eventTime: event.time || '',
-        location: event.location || '',
-        locationId: event.locationId || '',
+        qrCodeDataUrl,
         name: name.trim(),
-        email: email.trim(),
-        phone: formatIndianPhone(phone),
-        emailVerified: true,
-        emailVerifiedAt: new Date().toISOString(),
-        emailVerificationId: emailVerification.verificationId,
-        emailVerificationToken: emailVerification.verificationToken,
-        status: 'confirmed',
-        attendanceStatus: 'not_checked_in',
-        checkedIn: false,
-        reminderStatus: 'pending'
+        email: email.trim()
       });
-      if (result.success) {
-        setEvent((prev) => prev ? {
-          ...prev,
-          registrationCount: Number(prev.registrationCount || 0) + 1
-        } : prev);
-        window.localStorage.setItem(duplicateKey, 'true');
-        setRsvpTicket({
-          id: result.id,
-          rsvpId,
-          qrToken,
-          qrCodeDataUrl,
-          name: name.trim(),
-          email: email.trim()
-        });
-        setRsvpSubmitted(true);
-        setFormMessage('RSVP confirmed! Save this QR code for event check-in.');
-      } else {
-        setFormMessage('Unable to save RSVP. Please try again.');
-      }
+      setRsvpSubmitted(true);
+      setFormMessage('RSVP confirmed! Save this QR code for event check-in.');
     } catch (error) {
       console.error('RSVP submission failed:', error);
       setFormMessage('Unable to save RSVP. Please try again later.');

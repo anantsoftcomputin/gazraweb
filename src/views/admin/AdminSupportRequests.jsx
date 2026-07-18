@@ -3,32 +3,17 @@ import { motion } from 'framer-motion';
 import { Heart, Search, Trash2, Mail, Phone, Calendar, DollarSign } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
+import { useAdminCollectionPage } from '../../hooks/useAdminCollectionPage';
+import AdminPager from '../../components/admin/AdminPager';
 
 const AdminSupportRequests = () => {
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  
-  const { getDocuments, deleteDocument } = useFirestore('supportRequests');
-
-  const loadRequests = async () => {
-    try {
-      setLoading(true);
-      const result = await getDocuments();
-      const items = result.success ? result.data : [];
-      setRequests(items);
-      setFilteredRequests(items);
-    } catch (error) {
-      console.error('Error loading support requests:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRequests();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const { deleteDocument } = useFirestore('supportRequests');
+  const pager = useAdminCollectionPage('supportRequests');
+  const { loading } = pager;
+  useEffect(() => { setRequests(pager.items); }, [pager.items]);
 
   useEffect(() => {
     if (!Array.isArray(requests)) return;
@@ -48,7 +33,7 @@ const AdminSupportRequests = () => {
     if (window.confirm(`Are you sure you want to delete this support request from ${request.name}?`)) {
       try {
         await deleteDocument(request.id);
-        await loadRequests();
+        await pager.refresh();
       } catch (error) {
         console.error('Error deleting support request:', error);
         alert('Failed to delete support request.');
@@ -162,6 +147,7 @@ const AdminSupportRequests = () => {
             ))}
           </div>
         )}
+        <AdminPager {...pager} onPrevious={pager.previousPage} onNext={pager.nextPage} />
       </div>
     </AdminLayout>
   );

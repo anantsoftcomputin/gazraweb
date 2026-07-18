@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, getDoc, query, where, orderBy, Timestamp } from 'firebase/firestore';
+import {
+  collection, addDoc, doc, updateDoc, deleteDoc, getDocs, getDoc, query,
+  orderBy, limit, startAfter, getCountFromServer, Timestamp
+} from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 /**
@@ -111,12 +114,50 @@ export const useFirestore = (collectionName) => {
     }
   };
 
+  // Cursor-based pagination for larger admin collections.
+  const getDocumentsPage = async ({ pageSize = 25, orderField = 'createdAt', direction = 'desc', cursor = null, conditions = [] } = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const constraints = [...conditions, orderBy(orderField, direction), limit(pageSize)];
+      if (cursor) constraints.splice(constraints.length - 1, 0, startAfter(cursor));
+      const snapshot = await getDocs(query(collection(db, collectionName), ...constraints));
+      const data = snapshot.docs.map((snapshotDoc) => ({ id: snapshotDoc.id, ...snapshotDoc.data() }));
+      return {
+        success: true,
+        data,
+        cursor: snapshot.docs.at(-1) || null,
+        hasMore: snapshot.size === pageSize
+      };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message, data: [] };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCount = async (conditions = []) => {
+    try {
+      const source = conditions.length
+        ? query(collection(db, collectionName), ...conditions)
+        : collection(db, collectionName);
+      const snapshot = await getCountFromServer(source);
+      return { success: true, count: snapshot.data().count };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message, count: 0 };
+    }
+  };
+
   return {
     addDocument,
     updateDocument,
     deleteDocument,
     getDocuments,
     getDocument,
+    getDocumentsPage,
+    getCount,
     loading,
     error
   };

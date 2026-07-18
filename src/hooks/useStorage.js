@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { storage } from '../config/firebase';
+import app from '../config/firebase';
+
+async function encodeFile(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
 
 /**
  * Custom hook for Firebase Storage operations
@@ -30,6 +41,26 @@ export const useStorage = () => {
         path: snapshot.ref.fullPath 
       };
     } catch (err) {
+      // A callable fallback avoids breaking uploads when deployed Storage rules
+      // lag behind the frontend or cross-service admin checks are unavailable.
+      if (err.code === 'storage/unauthorized' || err.code === 'storage/unknown') {
+        try {
+          const uploadAdminFile = httpsCallable(getFunctions(app, 'us-central1'), 'uploadAdminFile');
+          const response = await uploadAdminFile({
+            folder: path,
+            name: file.name,
+            contentType: file.type,
+            base64: await encodeFile(file)
+          });
+          setUploading(false);
+          setProgress(100);
+          return { success: true, ...response.data };
+        } catch (fallbackError) {
+          setError(fallbackError.message);
+          setUploading(false);
+          return { success: false, error: fallbackError.message };
+        }
+      }
       setError(err.message);
       setUploading(false);
       return { success: false, error: err.message };
@@ -64,6 +95,16 @@ export const useStorage = () => {
       
       return { success: true };
     } catch (err) {
+      if (err.code === 'storage/unauthorized' || err.code === 'storage/unknown') {
+        try {
+          const deleteAdminFile = httpsCallable(getFunctions(app, 'us-central1'), 'deleteAdminFile');
+          await deleteAdminFile({ path: filePath });
+          return { success: true };
+        } catch (fallbackError) {
+          setError(fallbackError.message);
+          return { success: false, error: fallbackError.message };
+        }
+      }
       setError(err.message);
       return { success: false, error: err.message };
     }

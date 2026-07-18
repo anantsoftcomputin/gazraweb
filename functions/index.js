@@ -1,5 +1,5 @@
 const { onRequest, onCall, HttpsError } = require('firebase-functions/v2/https');
-const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
@@ -16,6 +16,150 @@ const smtpPassword = defineSecret('SMTP_PASS');
 
 const emailSecrets = [smtpPassword];
 const otpTtlMs = 10 * 60 * 1000;
+const enforceAppCheck = process.env.ENFORCE_APP_CHECK === 'true';
+const callableOptions = { region, enforceAppCheck };
+const callableEmailOptions = { region, secrets: emailSecrets, enforceAppCheck };
+const publicSubmissionCollections = {
+  contact: 'contactMessages',
+  volunteer: 'volunteers',
+  support: 'supportRequests',
+  newsletter: 'newsletter',
+  cafeBooking: 'cafeBookings',
+  skillsEnrollment: 'skillsEnrollments'
+};
+
+function cleanString(value, maxLength = 500) {
+  return String(value ?? '').trim().slice(0, maxLength);
+}
+
+function cleanStringArray(value, maxItems = 20, maxLength = 120) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, maxItems).map((item) => cleanString(item, maxLength)).filter(Boolean);
+}
+
+function validEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function required(value, field) {
+  if (!value) throw new HttpsError('invalid-argument', `${field} is required.`);
+  return value;
+}
+
+function sanitizePublicSubmission(type, input = {}) {
+  const email = cleanString(input.email, 254).toLowerCase();
+
+  if (type === 'newsletter') {
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    return { email, source: cleanString(input.source, 80) || 'website' };
+  }
+
+  if (type === 'contact') {
+    required(cleanString(input.name, 120), 'Name');
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    return {
+      name: cleanString(input.name, 120), email, phone: cleanString(input.phone, 30),
+      subject: required(cleanString(input.subject, 180), 'Subject'),
+      message: required(cleanString(input.message, 4000), 'Message'), status: 'new'
+    };
+  }
+
+  if (type === 'cafeBooking') {
+    const date = required(cleanString(input.date, 10), 'Date');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new HttpsError('invalid-argument', 'Enter a valid booking date.');
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    const partySize = Math.min(Math.max(Number.parseInt(input.partySize, 10) || 1, 1), 30);
+    return {
+      name: required(cleanString(input.name, 120), 'Name'), email,
+      phone: required(cleanString(input.phone, 30), 'Phone'), date,
+      time: required(cleanString(input.time, 20), 'Time'), partySize: String(partySize),
+      specialRequests: cleanString(input.specialRequests, 1000), status: 'pending',
+      phoneVerified: input.phoneVerified === true
+    };
+  }
+
+  if (type === 'skillsEnrollment') {
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    return {
+      fullName: required(cleanString(input.fullName, 120), 'Full name'), email,
+      phoneNumber: required(cleanString(input.phoneNumber, 30), 'Phone'),
+      dateOfBirth: cleanString(input.dateOfBirth, 20), address: cleanString(input.address, 500),
+      education: cleanString(input.education, 160), gender: cleanString(input.gender, 80),
+      courseSelected: required(cleanString(input.courseSelected, 180), 'Course'),
+      batchTiming: cleanString(input.batchTiming, 120), priorExperience: cleanString(input.priorExperience, 120),
+      experienceDetails: cleanString(input.experienceDetails, 1000), employmentStatus: cleanString(input.employmentStatus, 120),
+      motivation: cleanString(input.motivation, 2000), heardFrom: cleanString(input.heardFrom, 160),
+      accommodations: cleanString(input.accommodations, 1000), commitment: cleanString(input.commitment, 120),
+      commitmentDetails: cleanString(input.commitmentDetails, 1000), status: 'pending'
+    };
+  }
+
+  if (type === 'volunteer') {
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    return {
+      name: required(cleanString(input.name, 120), 'Name'), email,
+      phone: required(cleanString(input.phone, 30), 'Phone'),
+      contributions: cleanStringArray(input.contributions), otherContribution: cleanString(input.otherContribution, 500),
+      availability: cleanStringArray(input.availability), experienceLevel: cleanString(input.experienceLevel, 120),
+      message: cleanString(input.message, 3000), selectedRole: cleanString(input.selectedRole, 160) || 'Not specified',
+      status: 'pending'
+    };
+  }
+
+  if (type === 'support') {
+    if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+    return {
+      fullName: required(cleanString(input.fullName, 120), 'Full name'), email,
+      age: cleanString(input.age, 3), gender: cleanString(input.gender, 80),
+      phoneNumber: required(cleanString(input.phoneNumber, 30), 'Phone'), address: cleanString(input.address, 500),
+      city: cleanString(input.city, 120), state: cleanString(input.state, 120), pincode: cleanString(input.pincode, 10),
+      supportType: required(cleanString(input.supportType, 160), 'Support type'),
+      supportDescription: required(cleanString(input.supportDescription, 4000), 'Support description'),
+      amountRequested: cleanString(input.amountRequested, 40), urgencyLevel: cleanString(input.urgencyLevel, 80),
+      previousAssistance: cleanString(input.previousAssistance, 1000), employmentStatus: cleanString(input.employmentStatus, 120),
+      monthlyIncome: cleanString(input.monthlyIncome, 40), dependents: cleanString(input.dependents, 20),
+      householdSize: cleanString(input.householdSize, 20), medicalConditions: cleanString(input.medicalConditions, 2000),
+      currentChallenges: cleanString(input.currentChallenges, 3000), declaration: input.declaration === true,
+      status: 'pending'
+    };
+  }
+
+  throw new HttpsError('invalid-argument', 'Unsupported submission type.');
+}
+
+async function enforceRateLimit(request, action, limit = 8, windowMs = 60 * 60 * 1000) {
+  const ip = request.rawRequest?.ip || request.rawRequest?.headers?.['x-forwarded-for'] || 'unknown';
+  const identity = request.auth?.uid || String(ip).split(',')[0].trim();
+  const key = crypto.createHash('sha256').update(`${action}:${identity}`).digest('hex');
+  const ref = db.collection('_rateLimits').doc(key);
+  const now = Date.now();
+
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    const data = snapshot.data() || {};
+    const windowStartedAt = data.windowStartedAt?.toMillis?.() || 0;
+    const activeWindow = now - windowStartedAt < windowMs;
+    const count = activeWindow ? Number(data.count || 0) : 0;
+    if (count >= limit) throw new HttpsError('resource-exhausted', 'Too many requests. Please try again later.');
+    transaction.set(ref, {
+      action, count: count + 1,
+      windowStartedAt: activeWindow ? data.windowStartedAt : admin.firestore.Timestamp.fromMillis(now),
+      expiresAt: admin.firestore.Timestamp.fromMillis(now + windowMs * 2),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  });
+}
+
+async function requireAdmin(request) {
+  if (!request.auth?.uid) throw new HttpsError('unauthenticated', 'Sign in is required.');
+  const adminDoc = await db.collection('admins').doc(request.auth.uid).get();
+  if (!adminDoc.exists) throw new HttpsError('permission-denied', 'Admin access is required.');
+  return request.auth.uid;
+}
+
+function publicDownloadUrl(bucketName, objectPath, token) {
+  return `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(objectPath)}?alt=media&token=${token}`;
+}
 
 function getSmtpConfig() {
   // Rebind point: bump this comment to force Cloud Functions to re-resolve SMTP_PASS to its latest secret version.
@@ -681,6 +825,16 @@ registerSubmissionNotifications({
   confirmationIntro: 'Thank you for offering to volunteer with Project Gazra. Our team will review your application and reach out soon.'
 });
 
+exports.onVolunteerApplicationDeleted = onDocumentDeleted(
+  { region, document: 'volunteers/{docId}' },
+  async (event) => {
+    const resumePath = cleanString(event.data?.data()?.resumePath, 500);
+    if (resumePath.startsWith('private/volunteer-resumes/')) {
+      await admin.storage().bucket().file(resumePath).delete({ ignoreNotFound: true });
+    }
+  }
+);
+
 registerSubmissionNotifications({
   exportName: 'onSupportRequestCreated',
   collectionPath: 'supportRequests/{docId}',
@@ -776,8 +930,167 @@ exports.health = onRequest({ region }, (request, response) => {
   });
 });
 
+exports.submitPublicForm = onCall(callableOptions, async (request) => {
+  const type = cleanString(request.data?.type, 40);
+  const collectionName = publicSubmissionCollections[type];
+  if (!collectionName) throw new HttpsError('invalid-argument', 'Unsupported submission type.');
+
+  await enforceRateLimit(request, `public:${type}`, type === 'newsletter' ? 5 : 8);
+  const data = sanitizePublicSubmission(type, request.data?.data || {});
+
+  if (type === 'volunteer' && request.data?.resume) {
+    const resume = request.data.resume;
+    const allowedTypes = new Set([
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]);
+    const contentType = cleanString(resume.contentType, 120);
+    if (!allowedTypes.has(contentType)) throw new HttpsError('invalid-argument', 'Resume must be a PDF or Word document.');
+
+    let buffer;
+    try {
+      buffer = Buffer.from(String(resume.base64 || ''), 'base64');
+    } catch {
+      throw new HttpsError('invalid-argument', 'Resume file is invalid.');
+    }
+    if (!buffer.length || buffer.length > 5 * 1024 * 1024) {
+      throw new HttpsError('invalid-argument', 'Resume must be smaller than 5 MB.');
+    }
+
+    const extension = contentType === 'application/pdf' ? 'pdf'
+      : contentType === 'application/msword' ? 'doc' : 'docx';
+    const objectPath = `private/volunteer-resumes/${crypto.randomUUID()}.${extension}`;
+    await admin.storage().bucket().file(objectPath).save(buffer, {
+      resumable: false,
+      metadata: { contentType, cacheControl: 'private, max-age=0, no-store' }
+    });
+    data.resumePath = objectPath;
+    data.resumeName = cleanString(resume.name, 180) || `resume.${extension}`;
+  }
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const docRef = await db.collection(collectionName).add({ ...data, createdAt: now, updatedAt: now });
+  return { success: true, id: docRef.id };
+});
+
+exports.createEventRsvp = onCall(callableEmailOptions, async (request) => {
+  await enforceRateLimit(request, 'event:rsvp', 10);
+  const input = request.data || {};
+  const eventId = required(cleanString(input.eventId, 180), 'Event');
+  const email = cleanString(input.email, 254).toLowerCase();
+  const verificationId = required(cleanString(input.verificationId, 180), 'Verification');
+  const verificationToken = required(cleanString(input.verificationToken, 180), 'Verification token');
+  const name = required(cleanString(input.name, 120), 'Name');
+  const phone = required(cleanString(input.phone, 30), 'Phone');
+  if (!validEmail(email)) throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+
+  const eventRef = db.collection('events').doc(eventId);
+  const verificationRef = db.collection('emailOtpVerifications').doc(verificationId);
+  const rsvpDocId = crypto.createHash('sha256').update(`${eventId}:${email}`).digest('hex');
+  const rsvpRef = db.collection('eventRsvps').doc(rsvpDocId);
+  const rsvpId = crypto.randomUUID();
+  const qrToken = crypto.randomUUID();
+
+  await db.runTransaction(async (transaction) => {
+    const [eventDoc, verificationDoc, existingRsvp] = await Promise.all([
+      transaction.get(eventRef), transaction.get(verificationRef), transaction.get(rsvpRef)
+    ]);
+    if (!eventDoc.exists) throw new HttpsError('not-found', 'Event not found.');
+    if (existingRsvp.exists && isActiveRsvp(existingRsvp.data())) {
+      throw new HttpsError('already-exists', 'This email is already registered for the event.');
+    }
+
+    const eventData = eventDoc.data();
+    if (!verificationDoc.exists) throw new HttpsError('permission-denied', 'Email verification is invalid or has already been used.');
+    const verification = verificationDoc.data();
+    if (verification.status !== 'verified' || verification.email !== email ||
+        verification.verificationToken !== verificationToken || verification.eventId !== eventId) {
+      throw new HttpsError('permission-denied', 'Email verification is invalid or has already been used.');
+    }
+    const verifiedAt = verification.verifiedAt?.toMillis?.() || 0;
+    if (!verifiedAt || Date.now() - verifiedAt > otpTtlMs) {
+      throw new HttpsError('deadline-exceeded', 'Email verification has expired. Request a new code.');
+    }
+    if ((eventData.status || 'approved') !== 'approved') {
+      throw new HttpsError('failed-precondition', 'RSVPs are not open for this event.');
+    }
+
+    const capacity = Number(String(eventData.capacity || '').match(/\d+/)?.[0] || 0);
+    const registrationCount = Number(eventData.registrationCount || 0);
+    if (capacity > 0 && registrationCount >= capacity) {
+      throw new HttpsError('resource-exhausted', 'This event is fully booked.');
+    }
+
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    transaction.set(rsvpRef, {
+      rsvpId, qrToken, eventId, eventTitle: cleanString(eventData.title, 180),
+      eventDate: cleanString(eventData.dateIso || eventData.date, 80), eventTime: cleanString(eventData.time, 80),
+      location: cleanString(eventData.location, 300), locationId: cleanString(eventData.locationId, 180),
+      name, email, phone, emailVerified: true, emailVerificationId: verificationId,
+      status: 'confirmed', attendanceStatus: 'not_checked_in', checkedIn: false,
+      reminderStatus: 'pending', countedAtCreation: true, createdAt: now, updatedAt: now
+    });
+    transaction.update(eventRef, {
+      registrationCount: admin.firestore.FieldValue.increment(1), updatedAt: now
+    });
+    transaction.update(verificationRef, {
+      status: 'consumed', consumedAt: now, rsvpDocId, updatedAt: now
+    });
+  });
+
+  return { success: true, id: rsvpDocId, rsvpId, qrToken };
+});
+
+exports.uploadAdminFile = onCall(callableOptions, async (request) => {
+  await requireAdmin(request);
+  await enforceRateLimit(request, 'admin:upload', 200);
+  const folder = cleanString(request.data?.folder, 80);
+  const allowedFolders = new Set(['events', 'eventLocations', 'gallery', 'menu', 'cafeMoments', 'testimonials', 'instagram', 'initiatives', 'blogs']);
+  if (!allowedFolders.has(folder)) throw new HttpsError('invalid-argument', 'Upload folder is not allowed.');
+
+  const contentType = cleanString(request.data?.contentType, 120);
+  if (!contentType.startsWith('image/')) throw new HttpsError('invalid-argument', 'Only image uploads are allowed.');
+  const buffer = Buffer.from(String(request.data?.base64 || ''), 'base64');
+  if (!buffer.length || buffer.length > 5 * 1024 * 1024) throw new HttpsError('invalid-argument', 'Image must be smaller than 5 MB.');
+
+  const safeName = cleanString(request.data?.name, 160).replace(/[^a-zA-Z0-9._-]/g, '_') || 'image';
+  const objectPath = `${folder}/${Date.now()}_${safeName}`;
+  const token = crypto.randomUUID();
+  const bucket = admin.storage().bucket();
+  await bucket.file(objectPath).save(buffer, {
+    resumable: false,
+    metadata: { contentType, cacheControl: 'public, max-age=31536000, immutable', metadata: { firebaseStorageDownloadTokens: token } }
+  });
+  return { success: true, path: objectPath, url: publicDownloadUrl(bucket.name, objectPath, token) };
+});
+
+exports.deleteAdminFile = onCall(callableOptions, async (request) => {
+  await requireAdmin(request);
+  const objectPath = cleanString(request.data?.path, 500);
+  if (!objectPath || objectPath.startsWith('private/')) throw new HttpsError('invalid-argument', 'File path is not allowed.');
+  await admin.storage().bucket().file(objectPath).delete({ ignoreNotFound: true });
+  return { success: true };
+});
+
+exports.getPrivateResume = onCall(callableOptions, async (request) => {
+  await requireAdmin(request);
+  const volunteerId = required(cleanString(request.data?.volunteerId, 180), 'Volunteer');
+  const volunteerDoc = await db.collection('volunteers').doc(volunteerId).get();
+  if (!volunteerDoc.exists) throw new HttpsError('not-found', 'Volunteer application not found.');
+  const resumePath = cleanString(volunteerDoc.data().resumePath, 500);
+  if (!resumePath.startsWith('private/volunteer-resumes/')) throw new HttpsError('not-found', 'Resume not found.');
+  const file = admin.storage().bucket().file(resumePath);
+  const [[buffer], [metadata]] = await Promise.all([file.download(), file.getMetadata()]);
+  return {
+    base64: buffer.toString('base64'),
+    contentType: cleanString(metadata.contentType, 120) || 'application/octet-stream',
+    name: cleanString(volunteerDoc.data().resumeName, 180) || 'resume'
+  };
+});
+
 exports.sendRsvpEmailOtp = onCall(
-  { region, secrets: emailSecrets },
+  callableEmailOptions,
   async (request) => {
     const email = normalizeEmail(request.data?.email);
     const name = String(request.data?.name || '').trim().slice(0, 120);
@@ -847,7 +1160,7 @@ exports.sendRsvpEmailOtp = onCall(
 );
 
 exports.verifyRsvpEmailOtp = onCall(
-  { region },
+  callableOptions,
   async (request) => {
     const email = normalizeEmail(request.data?.email);
     const code = String(request.data?.code || '').trim();
@@ -928,7 +1241,7 @@ exports.onEventRsvpCreated = onDocumentCreated(
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
-    if (isActiveRsvp(rsvp) && rsvp.eventId) {
+    if (isActiveRsvp(rsvp) && rsvp.eventId && rsvp.countedAtCreation !== true) {
       await db.collection('events').doc(rsvp.eventId).set({
         registrationCount: admin.firestore.FieldValue.increment(1),
         updatedAt: admin.firestore.FieldValue.serverTimestamp()

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Link } from '../lib/routerCompat';
 import { useFirestore } from '../hooks/useFirestore';
+import { usePublicSubmission } from '../hooks/usePublicSubmission';
 import {
   EVENT_CATEGORIES,
   formatEventDate,
@@ -29,7 +30,7 @@ const EventCalendarPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { getDocuments } = useFirestore('events');
-  const { addDocument: addNewsletterSubscriber } = useFirestore('newsletter');
+  const { submit: addNewsletterSubscriber } = usePublicSubmission('newsletter');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [newsletterStatus, setNewsletterStatus] = useState(null); // 'success' | 'error' | null

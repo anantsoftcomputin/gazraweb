@@ -3,32 +3,17 @@ import { motion } from 'framer-motion';
 import { Mail, Search, Trash2, Calendar, Download } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
+import { useAdminCollectionPage } from '../../hooks/useAdminCollectionPage';
+import AdminPager from '../../components/admin/AdminPager';
 
 const AdminNewsletter = () => {
   const [subscribers, setSubscribers] = useState([]);
   const [filteredSubscribers, setFilteredSubscribers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  
-  const { getDocuments, deleteDocument } = useFirestore('newsletter');
-
-  const loadSubscribers = async () => {
-    try {
-      setLoading(true);
-      const result = await getDocuments();
-      const items = result.success ? result.data : [];
-      setSubscribers(items);
-      setFilteredSubscribers(items);
-    } catch (error) {
-      console.error('Error loading subscribers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadSubscribers();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const { deleteDocument } = useFirestore('newsletter');
+  const pager = useAdminCollectionPage('newsletter');
+  const { loading } = pager;
+  useEffect(() => { setSubscribers(pager.items); }, [pager.items]);
 
   useEffect(() => {
     if (!Array.isArray(subscribers)) return;
@@ -47,7 +32,7 @@ const AdminNewsletter = () => {
     if (window.confirm(`Are you sure you want to unsubscribe ${subscriber.email}?`)) {
       try {
         await deleteDocument(subscriber.id);
-        await loadSubscribers();
+        await pager.refresh();
       } catch (error) {
         console.error('Error deleting subscriber:', error);
         alert('Failed to remove subscriber.');
@@ -180,6 +165,7 @@ const AdminNewsletter = () => {
             </table>
           </div>
         )}
+        <AdminPager {...pager} onPrevious={pager.previousPage} onNext={pager.nextPage} />
       </div>
     </AdminLayout>
   );

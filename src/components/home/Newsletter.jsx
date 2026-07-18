@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Send, Mail, CheckCircle2 } from 'lucide-react';
-import { useFirestore } from '../../hooks/useFirestore';
+import { usePublicSubmission } from '../../hooks/usePublicSubmission';
 
 const Newsletter = () => {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // 'success' | 'error' | null
-  const { addDocument } = useFirestore('newsletter');
+  const { submit: addDocument } = usePublicSubmission('newsletter');
 
   const handleSubmit = async (e) => {
     e.preventDefault();

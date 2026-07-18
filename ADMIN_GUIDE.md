@@ -2,7 +2,7 @@
 
 ## Accessing the Admin Portal
 
-**URL:** `https://gazraweb-33d32.web.app/admin/login` (or your custom domain)
+**URL:** `https://gazra.org/admin/login`
 
 **Login Credentials:**
 - Email: [Your admin email]
@@ -64,7 +64,7 @@ After login, you'll see the main dashboard with:
 
 ---
 
-## Managing Menu Items (Coming Soon)
+## Managing Menu Items
 
 Navigate to "Menu Items" to:
 - Add dishes to Gazra Cafe menu
@@ -102,7 +102,7 @@ Navigate to "Menu Items" to:
 
 ---
 
-## Managing Gallery (Coming Soon)
+## Managing Gallery
 
 Upload and organize photos:
 1. Click "Gallery" in sidebar
@@ -113,7 +113,7 @@ Upload and organize photos:
 
 ---
 
-## Managing Initiatives (Coming Soon)
+## Managing Initiatives
 
 Add/edit program information:
 - Gazra Mitra details
@@ -203,6 +203,18 @@ Add/edit program information:
 - Note what you were doing
 - Try again after refreshing
 - Contact technical support if persists
+
+### Event or Location Image Says “Missing or insufficient permissions”
+- Confirm the user has an `admins/{USER_UID}` Firestore document
+- Deploy both Functions and Storage rules from the same revision
+- Refresh the browser so Firebase refreshes the authentication token
+- The admin uploader automatically retries through the authenticated
+  `uploadAdminFile` Function when a direct Storage upload is denied
+
+### Private Resumes
+- New volunteer resumes are not public Storage objects
+- Use “Open Resume” in Volunteers; the admin-only Function streams it into a temporary browser object URL
+- The object URL is revoked automatically and is not a public Firebase download link
 
 ---
 

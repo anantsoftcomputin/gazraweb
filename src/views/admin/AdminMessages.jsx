@@ -3,32 +3,18 @@ import { motion } from 'framer-motion';
 import { MessageSquare, Search, Trash2, Mail, Phone, Calendar } from 'lucide-react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useFirestore } from '../../hooks/useFirestore';
+import { useAdminCollectionPage } from '../../hooks/useAdminCollectionPage';
+import AdminPager from '../../components/admin/AdminPager';
 
 const AdminMessages = () => {
   const [messages, setMessages] = useState([]);
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  
-  const { getDocuments, deleteDocument } = useFirestore('contactMessages');
+  const { deleteDocument } = useFirestore('contactMessages');
+  const pager = useAdminCollectionPage('contactMessages');
+  const { loading } = pager;
 
-  const loadMessages = async () => {
-    try {
-      setLoading(true);
-      const result = await getDocuments();
-      const items = result.success ? result.data : [];
-      setMessages(items);
-      setFilteredMessages(items);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadMessages();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setMessages(pager.items); }, [pager.items]);
 
   useEffect(() => {
     if (!Array.isArray(messages)) return;
@@ -49,7 +35,7 @@ const AdminMessages = () => {
     if (window.confirm(`Are you sure you want to delete this message from ${message.name}?`)) {
       try {
         await deleteDocument(message.id);
-        await loadMessages();
+        await pager.refresh();
       } catch (error) {
         console.error('Error deleting message:', error);
         alert('Failed to delete message.');
@@ -155,6 +141,7 @@ const AdminMessages = () => {
             ))}
           </div>
         )}
+        <AdminPager {...pager} onPrevious={pager.previousPage} onNext={pager.nextPage} />
       </div>
     </AdminLayout>
   );
